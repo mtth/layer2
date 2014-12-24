@@ -39,6 +39,11 @@
     opts = opts || {};
     var batchSize = opts.batchSize || 1000;
 
+    if (pcap.getSnapLen() > buffer.length) {
+      throw new Error('Buffer size should be greater than snapshot length.');
+      // Otherwise the internal buffer might not fit even a single packet.
+    }
+
     stream.Readable.call(this, {objectMode: true, highWaterMark: 1});
     // The high watermark parameter doesn't make as much sense when run on
     // object mode streams. 1 is sufficient to have each read trigger the next
@@ -65,6 +70,12 @@
     *
     */
     this.getDatalink = function () { return pcap.getDatalink(); };
+
+    /**
+     * Get underlying snapshot length.
+     *
+     */
+    this.getSnapLen = function () { return pcap.getSnapLen(); };
 
     /**
     * Terminate the stream.

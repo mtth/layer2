@@ -23,6 +23,7 @@ private:
     static v8::Handle<v8::Value> fromDevice(const v8::Arguments& args);
     static v8::Handle<v8::Value> fromSavefile(const v8::Arguments& args);
     static v8::Handle<v8::Value> getDatalink(const v8::Arguments& args);
+    static v8::Handle<v8::Value> getSnapLen(const v8::Arguments& args);
     static v8::Handle<v8::Value> inject(const v8::Arguments& args);
     static v8::Handle<v8::Value> setBufferSize(const v8::Arguments& args);
     static v8::Handle<v8::Value> setFilter(const v8::Arguments& args);

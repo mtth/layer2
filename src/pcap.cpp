@@ -151,11 +151,23 @@ Handle<Value> Pcap::setFilter(const Arguments& args) {
 
 // Helpers.
 
+Handle<Value> Pcap::getSnapLen(const Arguments& args) {
+
+  precondition(args.Length() == 0);
+  HandleScope scope;
+  Pcap* pcap = ObjectWrap::Unwrap<Pcap>(args.This());
+
+  int snaplen = pcap_snapshot(pcap->handle);
+  Local<Value> wrapped = Integer::New(snaplen);
+  return scope.Close(wrapped);
+}
+
 Handle<Value> Pcap::getDatalink(const Arguments& args) {
 
   precondition(args.Length() == 0);
   HandleScope scope;
   Pcap* pcap = ObjectWrap::Unwrap<Pcap>(args.This());
+
   int link = pcap_datalink(pcap->handle);
   const char *name = pcap_datalink_val_to_name(link);
   Local<Value> wrapped = String::New(name == NULL ? "UNKNOWN" : name);
@@ -167,7 +179,6 @@ Handle<Value> Pcap::stats(const Arguments& args) {
 
   HandleScope scope;
   struct pcap_stat ps;
-
   Pcap* pcap = ObjectWrap::Unwrap<Pcap>(args.This());
 
   if (pcap_stats(pcap->handle, &ps) == -1) {
@@ -326,6 +337,7 @@ void Pcap::init(Handle<Object> exports) {
   add_to_prototype(tpl, fromDevice);
   add_to_prototype(tpl, fromSavefile);
   add_to_prototype(tpl, getDatalink);
+  add_to_prototype(tpl, getSnapLen);
   add_to_prototype(tpl, setBufferSize);
   add_to_prototype(tpl, setFilter);
   add_to_prototype(tpl, setPromisc);
