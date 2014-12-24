@@ -239,7 +239,7 @@
     */
     this.getStats = function () { return pcap.stats(); };
 
-    // TODO: Implement inject.
+    // TODO: Implement inject (as a writable part of this stream?).
 
   }
   util.inherits(Live, Capture);
@@ -310,6 +310,8 @@
     }
 
   };
+
+  // TODO: Implement Save writable stream (dumping input to a save file).
 
   // Export things.
 

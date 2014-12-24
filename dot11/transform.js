@@ -14,12 +14,19 @@
    * Decoder stream class.
    *
    * @param datalink The type of link to decode.
+   * @param opts The following options:
+   *
+   *             + stringify: transform the parse packet to a string (useful if
+   *               piping to stdout directly afterwards). [default: false]
    *
    * All decoding functions are available directly on this class as well
    * (a.k.a. "static" methods).
    *
    */
-  function Decoder(datalink) {
+  function Decoder(datalink, opts) {
+
+    opts = opts || {};
+    this._stringify = opts.stringify || false;
 
     stream.Transform.call(this, {objectMode: true});
 
@@ -35,7 +42,9 @@
     var packet;
     try {
       packet = this._packetDecoder(data);
-      packet = JSON.stringify(packet);
+      if (this._stringify) {
+        packet = JSON.stringify(packet);
+      }
     } catch (err) {
       callback(err);
     }
@@ -53,7 +62,7 @@
    *               slicing).
    *
    */
-  Decoder.IEEE802_11_RADIO = function (buf, offset) {
+  Decoder.IEEE802_11_RADIO = function (buf, offset, shallow) {
 
     offset = offset || 0;
 
@@ -63,13 +72,17 @@
     frame.headerPad = buf[offset + 1];
     frame.headerLength = unpack.uint16_be(buf, offset + 2);
     // TODO: Decode radiotap fields (cf. http://www.radiotap.org/).
-    frame.data = Decoder.IEEE802_11_FRAME(buf, offset + frame.headerLength);
+    frame.body = shallow ?
+      buf.slice(offset + frame.headerLength).toString('hex') :
+      Decoder.IEEE802_11_FRAME(buf, offset + frame.headerLength);
 
     return frame;
 
   };
 
   Decoder.IEEE802_11_FRAME = function (buf, offset) {
+
+    offset = offset || 0;
 
     var frame = {};
 
@@ -270,8 +283,8 @@
     // Addresses.
     switch (frame.type) {
     case 'mgmt':
-      frame.ra = unpack.macAddr(buf, offset + 4); // Also da.
-      frame.ta = unpack.macAddr(buf, offset + 10); // Also sa.
+      frame.da = frame.ra = unpack.macAddr(buf, offset + 4);
+      frame.sa = frame.ta = unpack.macAddr(buf, offset + 10);
       frame.bssid = unpack.macAddr(buf, offset + 16);
       break;
     case 'ctrl':
@@ -311,20 +324,21 @@
     case 'data':
       frame.ra = unpack.macAddr(buf, offset + 4);
       frame.ta = unpack.macAddr(buf, offset + 10);
-      switch (flags & 0x03) { // fromDs toDs
+      switch (flags & 0x03) {
         case 0:
           frame.da = frame.ra;
           frame.sa = frame.ta;
           frame.bssid = unpack.macAddr(buf, offset + 16);
           break;
-        case 1:
+        case 1: // toDs
+          frame.bssid = frame.ra;
+          frame.sa = frame.ra;
+          break;
+        case 2: // fromDs
           frame.da = frame.ra;
           frame.bssid = frame.ta;
           break;
-        case 2:
-          frame.bssid = frame.ra;
-          break;
-        default: // 3
+        default: // fromDs toDs
       }
       // TODO: figure out MSDU v.s. A-MSDU case to fill out all addresses here.
       break;
