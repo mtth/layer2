@@ -26,11 +26,14 @@
   function Decoder(datalink, opts) {
 
     opts = opts || {};
-    this._stringify = opts.stringify || false;
+    var stringify = opts.stringify || false;
 
     stream.Transform.call(this, {objectMode: true});
 
-    if (!(this._packetDecoder = Decoder[datalink])) {
+    this._packetDecoder = Decoder[datalink];
+    this._stringify = stringify;
+
+    if (!this._packetDecoder) {
       throw new Error('Unsupported data link: ' + datalink);
     }
 
@@ -67,11 +70,10 @@
     offset = offset || 0;
 
     var frame = {};
-
     frame.headerRevision = buf[offset];
     frame.headerPad = buf[offset + 1];
     frame.headerLength = unpack.uint16_be(buf, offset + 2);
-    // TODO: Decode radiotap fields (cf. http://www.radiotap.org/).
+    // TODO: Decode other radiotap fields (cf. http://www.radiotap.org/).
     frame.body = shallow ?
       buf.slice(offset + frame.headerLength).toString('hex') :
       Decoder.IEEE802_11_FRAME(buf, offset + frame.headerLength);
@@ -332,7 +334,7 @@
           break;
         case 1: // toDs
           frame.bssid = frame.ra;
-          frame.sa = frame.ra;
+          frame.sa = frame.ta;
           break;
         case 2: // fromDs
           frame.da = frame.ra;
