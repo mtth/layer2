@@ -1,0 +1,21 @@
+{
+  "name": "dot11",
+  "version": "0.0.4",
+  "description": "Wi-Fi packet analysis.",
+  "main": "./dot11",
+  "scripts": {
+    "clean": "rm -rf build node_modules",
+    "perf": "node perf",
+    "test": "$(npm bin)/mocha"
+  },
+  "engine": "node >= 0.10.33",
+  "devDependencies": {
+    "cap": "0.0.10",
+    "mocha": "^2.0.1",
+    "pcap": "^1.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtth/dot11.git"
+  }
+}
