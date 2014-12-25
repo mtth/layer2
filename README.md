@@ -49,7 +49,9 @@ Api
 
 ##### new dot11.capture.Live(dev, [opts])
 
-+ `dev` String The device to listen to (e.g. `en0`).
+Create a new readable stream from a network interface.
+
++ `dev` String The device to listen to (e.g. `'en0'`).
 + `options` Object Various options:
 
   + `monitor` Boolean: Capture in monitor mode. [default: `false`]
@@ -65,8 +67,6 @@ Api
     internal buffers (especially in the case of replay streams, which can't
     rely on the PCAP dispatch call returning in time). [default: `1000`]
 
-Create a new readable stream from a network interface.
-
 ##### live.close()
 
 Terminate the stream.
@@ -77,15 +77,15 @@ the capture's batch size).
 
 ##### live.isClosed()
 
-+ return Boolean
-
 Check if the capture is still running.
+
++ return Boolean
 
 ##### live.getStats()
 
-+ return Object
-
 Get PCAP statistics for stream.
+
++ return Object
 
 This includes total packets received, dropped because of buffer overflow, and
 dropped by the interface (e.g. because of filters). See `man pcap_stats` for
@@ -94,9 +94,9 @@ mean different things depending on the platform.
 
 ##### live.getDatalink()
 
-+ return String
+Get output data link type. E.g. `'IEEE802_11_RADIO'`.
 
-Get output data link type. E.g. `IEEE802_11_RADIO`.
++ return String
 
 This is useful in particular for creating `Save` streams (see below).
 
@@ -111,19 +111,19 @@ Also useful for saves.
 
 ##### new dot11.capture.Replay(path, [opts])
 
-+ `path` String Path to a saved `.pcap` file.
+Readable packet stream from saved file.
+
++ `path` String Path to a saved capture file (pcap format).
 + `options` Object Various options:
 
   + `bufferSize` Number: Size of temporary buffer used by PCAP to hold packets.
     Larger means more packets can be gathered in fewer dispatch calls (this
     will effectively cap the batchSize option). [default: `1024 * 1024` (1MB)]
 
-Readable packet stream from saved file.
-
 Note that unlike the live capture stream, this stream will automatically
 close once the end of the file read is reached.
 
-##### live.close()
+##### replay.close()
 
 Terminate the stream.
 
@@ -131,30 +131,33 @@ Note that depending on when this is called, a few more packets might be emitted
 before the stream actually closes (this number is guaranteed to be lower than
 the capture's batch size).
 
-##### live.isClosed()
-
-+ return Boolean
+##### replay.isClosed()
 
 Check if the capture is still running.
 
-##### live.getDatalink()
++ return Boolean
 
-+ return String
+##### replay.getDatalink()
 
 Get output data link type. E.g. `IEEE802_11_RADIO`.
 
++ return String
+
 This is useful in particular for creating `Save` streams (see below).
 
-##### live.getSnapLen()
-
-+ return Number
+##### replay.getSnapLen()
 
 Also useful for saves.
+
++ return Number
 
 
 #### Class: dot11.capture.Save
 
 ##### new dot11.capture.Save(path, datalink, [opts])
+
+Writable stream to save packets to the `.pcap` format (compatible with
+Wireshark and Tcpdump).
 
 + `path` String: The path where the capture will be stored.
 + `datalink` String: The type of link that will be saved.
@@ -162,9 +165,6 @@ Also useful for saves.
 
   +`snapLen` Number: The maximum packet capture length to store in the
     file's global header. [default: `65535`]
-
-Writable stream to save packets to the `.pcap` format (compatible with
-Wireshark and Tcpdump).
 
 Note that the total length parameter in each packet header will be
 assigned to the packet's captured length (and not the original packet
