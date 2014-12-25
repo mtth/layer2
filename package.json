@@ -1,7 +1,7 @@
 {
   "name": "dot11",
-  "version": "0.0.5",
-  "description": "Wi-Fi packet analysis.",
+  "version": "0.1.0",
+  "description": "Wi-Fi packets streams!",
   "main": "./lib",
   "scripts": {
     "clean": "rm -rf build node_modules",

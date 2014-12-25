@@ -49,7 +49,7 @@ live
   .on('end', function () {
     console.log('Read ' + nPackets + ' packets!');
   })
-  .pipe(save); // Save them to a file to be read later.
+  .pipe(save);
 ```
 
 A `Replay` stream is also available to stream packets from a saved capture
@@ -60,4 +60,4 @@ Documentation
 -------------
 
 You can find the API docs
-[here](https://github.com/mtth/dot11/blob/master/doc/api/api.md).
+[here](https://github.com/mtth/dot11/blob/master/doc/api.md).
