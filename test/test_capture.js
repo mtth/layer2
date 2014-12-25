@@ -4,19 +4,20 @@
   'use strict';
 
   var dot11 = require('../dot11'),
-      assert = require('assert');
+      assert = require('assert'),
+      fs = require('fs');
+
+  var smallCapture = {
+    path: './test/dat/mesh3.pcap',
+    length: 3
+  };
+
+  var largeCapture = {
+    path: './test/dat/mesh780.pcap',
+    length: 780
+  };
 
   describe('Replay capture', function () {
-
-    var smallCapture = {
-      path: './test/dat/mesh3.pcap',
-      length: 3
-    };
-
-    var largeCapture = {
-      path: './test/dat/mesh780.pcap',
-      length: 780
-    };
 
     // Test reading an entire file.
 
@@ -228,6 +229,65 @@
 
         var capture = new dot11.capture.Replay(largeCapture.path);
         assert.equal(capture.getSnapLen(), 65535);
+
+    });
+
+  });
+
+  describe('Save capture', function () {
+
+    function checkEqual(pathA, pathB) {
+
+      var replayA = new dot11.capture.Replay(pathA);
+      var replayB = new dot11.capture.Replay(pathB);
+
+      var a, b;
+      while ((a = replayA.read()) !== null || (b = replayB.read()) !== null) {
+        assert.deepEqual(a, b);
+      }
+
+    }
+
+    it('throws an error when using an empty or invalid datalink', function () {
+
+      var savePath = './test/empty.pcap';
+      assert.throws(function () { new dot11.capture.Save(savePath); });
+      assert.throws(function () { new dot11.capture.Save(savePath, 'FOO'); });
+
+    });
+
+    it('can be written to', function (done) {
+
+      var savePath = './test/write.pcap';
+      var replay = new dot11.capture.Replay(smallCapture.path);
+      var save = new dot11.capture.Save(savePath, replay.getDatalink());
+
+      replay
+        .on('data', function (buf) { save.write(buf); })
+        .on('end', function () {
+          save.end();
+          checkEqual(savePath, smallCapture.path);
+          done();
+        });
+
+      after(function () { fs.unlink(savePath); });
+
+    });
+
+    it('can be piped to', function (done) {
+
+      var savePath = './test/pipe.pcap';
+      var replay = new dot11.capture.Replay(smallCapture.path);
+      var save = new dot11.capture.Save(savePath, replay.getDatalink());
+
+      replay
+        .pipe(save)
+        .on('finish', function () {
+          checkEqual(savePath, smallCapture.path);
+          done();
+        });
+
+      after(function () { fs.unlink(savePath); });
 
     });
 

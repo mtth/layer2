@@ -1,10 +1,11 @@
 {
   "targets": [
     {
-      "target_name": "dot11",
+      "target_name": "pcap",
       "sources": [
-        "src/dot11.cpp",
-        "src/pcap.cpp"
+        "src/pcap.cpp",
+        "src/pcap_reader.cpp",
+        "src/pcap_writer.cpp"
       ],
       "link_settings": {
         "libraries": [

@@ -13,7 +13,7 @@
   'use strict';
 
   var util = require('util'),
-      binding = require('../build/Release/dot11'),
+      pcap = require('../build/Release/pcap'),
       stream = require('stream');
 
   /**
@@ -34,12 +34,12 @@
    *               returning in time). [default: 1000]
    *
    */
-  function Capture(pcap, buffer, opts) {
+  function Capture(reader, buffer, opts) {
 
     opts = opts || {};
     var batchSize = opts.batchSize || 1000;
 
-    if (pcap.getSnapLen() > buffer.length) {
+    if (reader.getSnapLen() > buffer.length) {
       throw new Error('Buffer size should be greater than snapshot length.');
       // Otherwise the internal buffer might not fit even a single packet.
     }
@@ -56,7 +56,7 @@
     this.on('end', function () {
 
       closed = true; // In case this wasn't caused by a call to `close`.
-      pcap.close(); // Free PCAP resources.
+      reader.close(); // Free PCAP resources.
 
     });
 
@@ -69,13 +69,13 @@
     * E.g. IEEE802_11_RADIO.
     *
     */
-    this.getDatalink = function () { return pcap.getDatalink(); };
+    this.getDatalink = function () { return reader.getDatalink(); };
 
     /**
      * Get underlying snapshot length.
      *
      */
-    this.getSnapLen = function () { return pcap.getSnapLen(); };
+    this.getSnapLen = function () { return reader.getSnapLen(); };
 
     /**
     * Terminate the stream.
@@ -141,7 +141,7 @@
         } else {
           offset = 0;
           offsets = [0];
-          pcap.dispatch(batchSize, packetHandler);
+          reader.dispatch(batchSize, packetHandler);
           // When reading a file, we can't rely on the output value of the
           // dispatch call so we rely on our offsets array instead.
           var nPackets = offsets.length - 1;
@@ -170,8 +170,7 @@
           // length as PCAP's buffer, we are guaranteed that this won't
           // happen). Note that to have this work correctly in all cases, we
           // probably then also must require the snapshot length to be smaller
-          // than the buffer size. Packet overflow could simply emit a warning
-          // event.
+          // than the buffer size.
           self.emit('error', new Error('Buffer overflow.'));
         }
         offsets.push(packetOffset);
@@ -215,7 +214,7 @@
     var bufferSize = opts.bufferSize || 1024 * 1024; // 1 MB
 
     var buffer = new Buffer(bufferSize);
-    var pcap = new binding.Pcap(buffer)
+    var reader = new pcap.Reader(buffer)
       .fromDevice(dev)
       .setRfMon(monitor)
       .setPromisc(promisc)
@@ -224,7 +223,7 @@
       .setBufferSize(bufferSize)
       .activate();
 
-    Capture.call(this, pcap, buffer, opts);
+    Capture.call(this, reader, buffer, opts);
 
     // Live capture specific methods.
 
@@ -237,7 +236,7 @@
     * exact and can even mean different things depending on the platform.
     *
     */
-    this.getStats = function () { return pcap.stats(); };
+    this.getStats = function () { return reader.stats(); };
 
     // TODO: Implement inject (as a writable part of this stream?).
 
@@ -287,9 +286,9 @@
     var bufferSize = opts.bufferSize || 1024 * 1024; // 1 MB
 
     var buffer = new Buffer(bufferSize);
-    var pcap = new binding.Pcap(buffer).fromSavefile(path);
+    var reader = new pcap.Reader(buffer).fromSavefile(path);
 
-    Capture.call(this, pcap, buffer, opts);
+    Capture.call(this, reader, buffer, opts);
 
   }
   util.inherits(Replay, Capture);
@@ -311,13 +310,54 @@
 
   };
 
-  // TODO: Implement Save writable stream (dumping input to a save file).
+  /**
+   * Save capture to file.
+   *
+   * @param path The path where the capture will be stored.
+   * @param datalink The type of link that will be saved.
+   * @param opts Optional parameters:
+   *
+   *             + snapLen: The maximum packet capture length to store in the
+   *               file's global header. [default: 65535]
+   *
+   * Note that the total length parameter in each packet header will be
+   * assigned to the packet's captured length (and not the original packet
+   * length as it isn't available anymore). This shouldn't be a problem as long
+   * as this class is only used to store the output of a Capture class here
+   * defined (as truncated packets do not get carried over).
+   *
+   */
+  function Save(path, datalink, opts) {
+
+    opts = {};
+    var snapLen = opts.snapLen || 65535;
+
+    stream.Writable.call(this, {objectMode: true});
+
+    var writer = new pcap.Writer(path)
+      .fromOptions(datalink, snapLen);
+
+    this.on('finish', function () { writer.close(); });
+    // Close (and flush to) the underlying file when the stream ends (this can
+    // be triggered by calling the built-in `end` stream method (also called
+    // automatically when calling `pipe`, unless disabled via options).
+
+    this._write = function (chunk, encoding, callback) {
+
+      writer.writePacket(chunk);
+      callback();
+
+    };
+
+  }
+  util.inherits(Save, stream.Writable);
 
   // Export things.
 
   root.exports = {
     Live: Live,
-    Replay: Replay
+    Replay: Replay,
+    Save: Save
   };
 
 })(module);
