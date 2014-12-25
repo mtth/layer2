@@ -12,7 +12,8 @@ Installation
 $ npm install dot11
 ```
 
-`dot11` requires `libpcap`.
+In order for packet capture to work, `dot11` requires `libpcap`. Note that you
+might also need to execute live captures as root.
 
 
 Quickstart
@@ -52,7 +53,7 @@ Api
 Create a new readable stream from a network interface.
 
 + `dev` String The device to listen to (e.g. `'en0'`).
-+ `options` Object Various options:
++ `opts` Object Various options:
 
   + `monitor` Boolean: Capture in monitor mode. [default: `false`]
   + `promisc` Boolean: Capture in promiscuous mode. [default: `false`]
@@ -114,7 +115,7 @@ Also useful for saves.
 Readable packet stream from saved file.
 
 + `path` String Path to a saved capture file (pcap format).
-+ `options` Object Various options:
++ `opts` Object Various options:
 
   + `bufferSize` Number: Size of temporary buffer used by PCAP to hold packets.
     Larger means more packets can be gathered in fewer dispatch calls (this
