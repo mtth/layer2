@@ -64,7 +64,7 @@
     // have to expose the PCAP handle).
 
     /**
-    * Get underlying data link type.
+    * Get output data link type.
     *
     * E.g. IEEE802_11_RADIO.
     *

@@ -20,7 +20,7 @@
     function validate(datalink, hexBytes, expectedObject) {
 
       var buf = new Buffer(hexBytes, 'hex');
-      var actualObject = Decoder[datalink](buf, 0, true);
+      var actualObject = Decoder[datalink](buf);
       assert.deepEqual(
         actualObject,
         expectedObject,
@@ -38,7 +38,7 @@
           'headerRevision': 0,
           'headerPad': 0,
           'headerLength': 32,
-          'body': 'aa'
+          'body': new Buffer('aa', 'hex')
         }
       );
 
@@ -139,7 +139,7 @@
           'ra': '16:ab:f0:a5:84:60',
           'ta': 'fc:4d:d4:2b:ab:28',
           'sa': 'fc:4d:d4:2b:ab:28',
-          'bssid': '16:ab:f0:a5:84:60'
+          'bssid': '16:ab:f0:a5:84:60' // No DA.
         }
       );
 
@@ -196,19 +196,7 @@
             'headerRevision': 0,
             'headerPad': 0,
             'headerLength': 32,
-            'body': {
-              'version': 0,
-              'type': 'mgmt',
-              'subType': 'beacon',
-              'toDs': 0,
-              'fromDs': 0,
-              'duration': 0,
-              'ra': 'ff:ff:ff:ff:ff:ff',
-              'ta': '06:03:7f:07:a0:16',
-              'da': 'ff:ff:ff:ff:ff:ff',
-              'sa': '06:03:7f:07:a0:16',
-              'bssid': '06:03:7f:07:a0:16'
-            }
+            'body': new Buffer('80000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex')
           });
           done();
         });

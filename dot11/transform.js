@@ -37,6 +37,12 @@
       throw new Error('Unsupported data link: ' + datalink);
     }
 
+    /**
+     * Output data link type.
+     *
+     */
+    this.getDatalink = function () { return datalink; };
+
   }
   util.inherits(Decoder, stream.Transform);
 
@@ -65,7 +71,7 @@
    *               slicing).
    *
    */
-  Decoder.IEEE802_11_RADIO = function (buf, offset, shallow) {
+  Decoder.IEEE802_11_RADIO = function (buf, offset) {
 
     offset = offset || 0;
 
@@ -74,10 +80,14 @@
     frame.headerPad = buf[offset + 1];
     frame.headerLength = unpack.uint16_be(buf, offset + 2);
     // TODO: Decode other radiotap fields (cf. http://www.radiotap.org/).
-    frame.body = shallow ?
-      buf.slice(offset + frame.headerLength).toString('hex') :
-      Decoder.IEEE802_11_FRAME(buf, offset + frame.headerLength);
-
+    var bodyOffset = offset + frame.headerLength;
+    frame.body = new Buffer(buf.length - bodyOffset);
+    buf.copy(frame.body, 0, bodyOffset);
+    // TODO: Try slicing instead of copying? The issue with slicing is that we
+    // might end up keeping many buffers around even though we are only using a
+    // small part of their memory which would also lead to very fragmented
+    // memory. By copying we use more memory in the short term but allow the
+    // previous buffers to be reclaimed.
     return frame;
 
   };
@@ -348,6 +358,39 @@
     }
 
     return frame;
+
+  };
+
+  /**
+   * Extractor stream classes.
+   *
+   */
+  function Extractor(datalink) {
+
+    stream.Transform.call(this, {objectMode: true});
+
+    var extractor = Extractor[datalink];
+
+    if (!extractor) {
+      throw new Error('Unsupported data link: ' + datalink);
+    }
+
+  }
+  util.inherits(Extractor, stream.Transform);
+
+  Extractor.IEEE802_11_RADIO = function () {
+
+    this._extract = function (data, encoding, callback) {
+
+      var packet;
+      try {
+        packet = this._packetDecoder(data);
+      } catch (err) {
+        callback(err);
+      }
+      callback(null, packet);
+
+    };
 
   };
 
