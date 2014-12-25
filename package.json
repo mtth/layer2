@@ -1,11 +1,10 @@
 {
   "name": "dot11",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Wi-Fi packet analysis.",
-  "main": "./dot11",
+  "main": "./lib",
   "scripts": {
     "clean": "rm -rf build node_modules",
-    "perf": "node perf",
     "test": "$(npm bin)/mocha"
   },
   "engine": "node >= 0.10.33",

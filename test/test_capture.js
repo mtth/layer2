@@ -3,9 +3,10 @@
 (function () {
   'use strict';
 
-  var dot11 = require('../dot11'),
+  var dot11 = require('../lib'),
       assert = require('assert'),
-      fs = require('fs');
+      fs = require('fs'),
+      path = require('path');
 
   var smallCapture = {
     path: './test/dat/mesh3.pcap',
@@ -248,9 +249,19 @@
 
     }
 
+    // Create path.
+    function fromName(fname) {
+
+      var savePath = path.join(__dirname, fname);
+      after(function () { fs.unlink(savePath); });
+      return savePath;
+
+    }
+
     it('throws an error when using an empty or invalid datalink', function () {
 
-      var savePath = './test/empty.pcap';
+      var savePath = fromName('empty.pcap');
+
       assert.throws(function () { new dot11.capture.Save(savePath); });
       assert.throws(function () { new dot11.capture.Save(savePath, 'FOO'); });
 
@@ -258,7 +269,7 @@
 
     it('can be written to', function (done) {
 
-      var savePath = './test/write.pcap';
+      var savePath = fromName('write.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
       var save = new dot11.capture.Save(savePath, replay.getDatalink());
 
@@ -270,13 +281,12 @@
           done();
         });
 
-      after(function () { fs.unlink(savePath); });
 
     });
 
     it('can be piped to', function (done) {
 
-      var savePath = './test/pipe.pcap';
+      var savePath = fromName('pipe.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
       var save = new dot11.capture.Save(savePath, replay.getDatalink());
 
@@ -286,8 +296,6 @@
           checkEqual(savePath, smallCapture.path);
           done();
         });
-
-      after(function () { fs.unlink(savePath); });
 
     });
 

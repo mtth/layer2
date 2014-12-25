@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var dot11 = require('../dot11'),
+  var dot11 = require('../lib'),
       pcap = require('pcap'),
       cap = require('cap');
 
