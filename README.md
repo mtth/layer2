@@ -7,9 +7,10 @@ Wi-Fi packets streams!
 Motivation
 ----------
 
-`dot11` means to provide a simple but powerful stream interfaces to Wi-Fi
-(802.11) packets, both for capturing and emitting. It is originally inspired by
-[node_pcap](https://github.com/mranney/node_pcap).
+`dot11` aims to provide an efficient and powerful yet simple interface to Wi-Fi
+(802.11) transmissions, both for capturing and emitting. Its API is similar to
+the built-in `Socket`, but for lower network layers. It is originally inspired
+by [node_pcap](https://github.com/mranney/node_pcap).
 
 
 Installation

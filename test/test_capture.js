@@ -229,7 +229,7 @@
     it('returns the correct snapshot length', function () {
 
         var capture = new dot11.capture.Replay(largeCapture.path);
-        assert.equal(capture.getSnapLen(), 65535);
+        assert.equal(capture.getMaxPacketSize(), 65535);
 
     });
 

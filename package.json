@@ -1,6 +1,6 @@
 {
   "name": "dot11",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Wi-Fi packets streams!",
   "main": "./lib",
   "scripts": {

@@ -26,9 +26,9 @@ private:
 
   static v8::Handle<v8::Value> init(const v8::Arguments& args);
   static v8::Handle<v8::Value> close(const v8::Arguments& args);
-  static v8::Handle<v8::Value> fromOptions(const v8::Arguments& args);
-  static v8::Handle<v8::Value> fromReader(const v8::Arguments& args);
-  static v8::Handle<v8::Value> writePacket(const v8::Arguments& args);
+  static v8::Handle<v8::Value> from_options(const v8::Arguments& args);
+  static v8::Handle<v8::Value> from_reader(const v8::Arguments& args);
+  static v8::Handle<v8::Value> write_packet(const v8::Arguments& args);
 
   FILE *file_p;
   pcap_dumper_t *dump_handle;

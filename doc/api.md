@@ -17,8 +17,8 @@ Create a new readable stream from a network interface.
   + `monitor` {Boolean} Capture in monitor mode. [default: `false`]
   + `promisc` {Boolean} Capture in promiscuous mode. [default: `false`]
   + `filter` {String} BPF packet filter. [default: `''`]
-  + `snapLen` {Number} Snapshot length (i.e. how much of each packet is
-    retained). [default: `65535`]
+  + `maxPacketSize` {Number} Packet snapshot length (i.e. how much of each
+    packet is retained). [default: `65535`]
   + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold packets.
     Larger means more packets can be gathered in fewer dispatch calls (this
     will effectively cap the batchSize option). [default: `1024 * 1024`]
@@ -123,7 +123,7 @@ Wireshark and Tcpdump).
 + `path` {String} The path where the capture will be stored.
 + `datalink` {String} The type of link that will be saved.
 + `opts` {Object} Optional parameters:
-  + `snapLen` {Number} The maximum packet capture length to store in the
+  + `maxPacketSize` {Number} The maximum packet capture length to store in the
     file's global header. [default: `65535`]
 
 Note that the total length parameter in each packet header will be

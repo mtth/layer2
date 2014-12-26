@@ -10,9 +10,9 @@
 #define precondition(b) \
   if (!(b)) \
   return ThrowException(Exception::TypeError(String::New("Illegal arguments.")))
-#define add_to_prototype(tpl, s) \
+#define add_to_prototype(tpl, s, t) \
   (tpl)->PrototypeTemplate()->Set( \
-    String::NewSymbol(#s), \
+    String::NewSymbol(t), \
     FunctionTemplate::New(s)->GetFunction() \
   )
 
@@ -41,7 +41,7 @@ Handle<Value> PcapWriter::init(const Arguments& args) {
 
 // Copy settings from reader.
 
-Handle<Value> PcapWriter::fromReader(const Arguments& args) {
+Handle<Value> PcapWriter::from_reader(const Arguments& args) {
 
   precondition(args.Length() == 1);
   // TODO: check here that argument is of Reader type.
@@ -58,7 +58,7 @@ Handle<Value> PcapWriter::fromReader(const Arguments& args) {
 
 }
 
-Handle<Value> PcapWriter::fromOptions(const Arguments& args) {
+Handle<Value> PcapWriter::from_options(const Arguments& args) {
 
   precondition(args.Length() == 2 && args[0]->IsString() && args[1]->IsInt32());
   HandleScope scope;
@@ -95,7 +95,7 @@ Handle<Value> PcapWriter::close(const Arguments& args) {
 
 }
 
-Handle<Value> PcapWriter::writePacket(const Arguments& args) {
+Handle<Value> PcapWriter::write_packet(const Arguments& args) {
 
   precondition(args.Length() == 1 && node::Buffer::HasInstance(args[0]));
   HandleScope scope;
@@ -132,10 +132,10 @@ void PcapWriter::expose(Handle<Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype
-  add_to_prototype(tpl, close);
-  add_to_prototype(tpl, fromOptions);
-  add_to_prototype(tpl, fromReader);
-  add_to_prototype(tpl, writePacket);
+  add_to_prototype(tpl, close, "close");
+  add_to_prototype(tpl, from_options, "fromOptions");
+  add_to_prototype(tpl, from_reader, "fromReader");
+  add_to_prototype(tpl, write_packet, "writePacket");
 
   exports->Set(
     String::NewSymbol(className),

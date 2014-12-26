@@ -8,9 +8,9 @@
 #define precondition(b) \
   if (!(b)) \
   return ThrowException(Exception::TypeError(String::New("Illegal arguments.")))
-#define add_to_prototype(tpl, s) \
+#define add_to_prototype(tpl, s, t) \
   (tpl)->PrototypeTemplate()->Set( \
-    String::NewSymbol(#s), \
+    String::NewSymbol(t), \
     FunctionTemplate::New(s)->GetFunction() \
   )
 
@@ -41,7 +41,7 @@ Handle<Value> PcapReader::init(const Arguments& args) {
 
 // Handle types.
 
-Handle<Value> PcapReader::fromDevice(const Arguments& args) {
+Handle<Value> PcapReader::from_device(const Arguments& args) {
 
   precondition(args.Length() == 1 && args[0]->IsString());
   HandleScope scope;
@@ -58,7 +58,7 @@ Handle<Value> PcapReader::fromDevice(const Arguments& args) {
 
 }
 
-Handle<Value> PcapReader::fromSavefile(const Arguments& args) {
+Handle<Value> PcapReader::from_savefile(const Arguments& args) {
 
   precondition(args.Length() == 1 && args[0]->IsString());
   HandleScope scope;
@@ -77,7 +77,7 @@ Handle<Value> PcapReader::fromSavefile(const Arguments& args) {
 
 // Configuration (for live captures).
 
-Handle<Value> PcapReader::setSnapLen(const Arguments& args) {
+Handle<Value> PcapReader::set_snaplen(const Arguments& args) {
 
   precondition(args.Length() == 1 && args[0]->IsInt32());
   HandleScope scope;
@@ -90,7 +90,7 @@ Handle<Value> PcapReader::setSnapLen(const Arguments& args) {
 
 }
 
-Handle<Value> PcapReader::setRfMon(const Arguments& args) {
+Handle<Value> PcapReader::set_rfmon(const Arguments& args) {
 
   precondition(args.Length() == 1 && args[0]->IsBoolean());
   HandleScope scope;
@@ -103,7 +103,7 @@ Handle<Value> PcapReader::setRfMon(const Arguments& args) {
 
 }
 
-Handle<Value> PcapReader::setPromisc(const Arguments& args) {
+Handle<Value> PcapReader::set_promisc(const Arguments& args) {
 
   precondition(args.Length() == 1 && args[0]->IsBoolean());
   HandleScope scope;
@@ -116,7 +116,7 @@ Handle<Value> PcapReader::setPromisc(const Arguments& args) {
 
 }
 
-Handle<Value> PcapReader::setBufferSize(const Arguments& args) {
+Handle<Value> PcapReader::set_buffersize(const Arguments& args) {
 
   precondition(args.Length() == 1 && args[0]->IsInt32());
   HandleScope scope;
@@ -129,7 +129,7 @@ Handle<Value> PcapReader::setBufferSize(const Arguments& args) {
 
 }
 
-Handle<Value> PcapReader::setFilter(const Arguments& args) {
+Handle<Value> PcapReader::set_filter(const Arguments& args) {
 
   precondition(args.Length() == 1 && args[0]->IsString());
   HandleScope scope;
@@ -151,7 +151,7 @@ Handle<Value> PcapReader::setFilter(const Arguments& args) {
 
 // Helpers.
 
-Handle<Value> PcapReader::getSnapLen(const Arguments& args) {
+Handle<Value> PcapReader::get_snaplen(const Arguments& args) {
 
   precondition(args.Length() == 0);
   HandleScope scope;
@@ -162,7 +162,7 @@ Handle<Value> PcapReader::getSnapLen(const Arguments& args) {
   return scope.Close(wrapped);
 }
 
-Handle<Value> PcapReader::getDatalink(const Arguments& args) {
+Handle<Value> PcapReader::get_datalink(const Arguments& args) {
 
   precondition(args.Length() == 0);
   HandleScope scope;
@@ -175,7 +175,7 @@ Handle<Value> PcapReader::getDatalink(const Arguments& args) {
 
 }
 
-Handle<Value> PcapReader::stats(const Arguments& args) {
+Handle<Value> PcapReader::get_stats(const Arguments& args) {
 
   HandleScope scope;
   struct pcap_stat ps;
@@ -228,10 +228,10 @@ Handle<Value> PcapReader::dispatch(const Arguments& args) {
   precondition(args.Length() == 2 && args[0]->IsInt32() && args[1]->IsFunction());
   HandleScope scope;
   PcapReader *pcap = ObjectWrap::Unwrap<PcapReader>(args.This());
-  pcap->packet_ready_cb = Persistent<Function>::New(Handle<Function>::Cast(args[1]));
+  pcap->on_packet_callback = Persistent<Function>::New(Handle<Function>::Cast(args[1]));
 
   pcap->buffer_offset = 0;
-  int n = pcap_dispatch(pcap->handle, args[0]->Int32Value(), onPacket, (u_char *) pcap);
+  int n = pcap_dispatch(pcap->handle, args[0]->Int32Value(), on_packet, (u_char *) pcap);
   if (n == -1) {
     return ThrowException(Exception::Error(String::New(pcap_geterr(pcap->handle))));
   }
@@ -239,7 +239,7 @@ Handle<Value> PcapReader::dispatch(const Arguments& args) {
 
 }
 
-Handle<Value> PcapReader::breakLoop(const Arguments& args) {
+Handle<Value> PcapReader::break_loop(const Arguments& args) {
 
   precondition(args.Length() == 0);
   HandleScope scope;
@@ -257,7 +257,7 @@ Handle<Value> PcapReader::close(const Arguments& args) {
   PcapReader* pcap = ObjectWrap::Unwrap<PcapReader>(args.This());
 
   pcap_close(pcap->handle);
-  pcap->packet_ready_cb.Dispose();
+  pcap->on_packet_callback.Dispose();
   return Undefined();
 
 }
@@ -287,7 +287,7 @@ Handle<Value> PcapReader::inject(const Arguments& args) {
 
 }
 
-void PcapReader::onPacket(
+void PcapReader::on_packet(
   u_char *reader_p,
   const struct pcap_pkthdr* pkthdr,
   const u_char* packet
@@ -310,7 +310,7 @@ void PcapReader::onPacket(
     Integer::New(overflow), // Buffer overflow.
     Integer::New(packetOverflow) // Packet overflow.
   };
-  pcap->packet_ready_cb->Call(Context::GetCurrent()->Global(), 3, argv);
+  pcap->on_packet_callback->Call(Context::GetCurrent()->Global(), 3, argv);
 
   if (try_catch.HasCaught())  {
     node::FatalException(try_catch);
@@ -330,20 +330,20 @@ void PcapReader::expose(Handle<Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype
-  add_to_prototype(tpl, activate);
-  add_to_prototype(tpl, breakLoop);
-  add_to_prototype(tpl, close);
-  add_to_prototype(tpl, dispatch);
-  add_to_prototype(tpl, fromDevice);
-  add_to_prototype(tpl, fromSavefile);
-  add_to_prototype(tpl, getDatalink);
-  add_to_prototype(tpl, getSnapLen);
-  add_to_prototype(tpl, setBufferSize);
-  add_to_prototype(tpl, setFilter);
-  add_to_prototype(tpl, setPromisc);
-  add_to_prototype(tpl, setRfMon);
-  add_to_prototype(tpl, setSnapLen);
-  add_to_prototype(tpl, stats);
+  add_to_prototype(tpl, activate, "activate");
+  add_to_prototype(tpl, break_loop, "breakLoop");
+  add_to_prototype(tpl, close, "close");
+  add_to_prototype(tpl, dispatch, "dispatch");
+  add_to_prototype(tpl, from_device, "fromDevice");
+  add_to_prototype(tpl, from_savefile, "fromSavefile");
+  add_to_prototype(tpl, get_datalink, "getDatalink");
+  add_to_prototype(tpl, get_snaplen, "getMaxPacketSize");
+  add_to_prototype(tpl, set_buffersize, "setBufferSize");
+  add_to_prototype(tpl, set_filter, "setFilter");
+  add_to_prototype(tpl, set_promisc, "setPromisc");
+  add_to_prototype(tpl, set_rfmon, "setMonitor");
+  add_to_prototype(tpl, set_snaplen, "setSnapLen");
+  add_to_prototype(tpl, get_stats, "getStats");
 
   exports->Set(
     String::NewSymbol(className),
