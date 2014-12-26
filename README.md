@@ -31,21 +31,20 @@ Quickstart
 ----------
 
 In the example below, we create a readable stream from default network
-interface and store 5 seconds' worth of packets. We also print each packet's
-length and the total number of packets processed.
+interface and store 5 seconds' worth of packets to `log.pcap`. We also print
+each packet's length and the total number of packets processed.
 
 ```javascript
 var dot11 = require('dot11');
 
-new dot11.capture.Live()
+var liveStream = new dot11.capture.Live(); // Readable stream.
+var saveStream = new dot11.capture.Save('log.pcap'); // Writable stream.
+
+liveStream
   .close(5000)
-  .on('data', function (buf) {
-    console.log('Read packet of length: ' + buf.length);
-  })
-  .on('end', function () {
-    console.log('Read ' + this.getStats().psRecv + ' packets!');
-  })
-  .pipe(new dot11.capture.Save('log.pcap'));
+  .on('data', function (buf) { console.log('Read packet of length: ' + buf.length); })
+  .on('end', function () { console.log('Read ' + this.getStats().psRecv + ' packets!'); })
+  .pipe(saveStream);
 ```
 
 The above example is only using the default options, it is possible to specify
@@ -68,4 +67,4 @@ Tests
 $ npm test
 ```
 
-Some tests currently require an active internet connection.
+Some tests require an active internet connection.
