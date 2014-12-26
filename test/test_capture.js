@@ -327,6 +327,25 @@
 
     });
 
+    it('truncates packets if necessary', function (done) {
+
+      var savePath = fromName('truncate.pcap');
+      var replay = new dot11.capture.Replay(smallCapture.path);
+      var save = new dot11.capture.Save(savePath, {
+        maxPacketSize: 50
+      });
+
+      replay
+        .pipe(save)
+        .on('close', function () {
+          new dot11.capture.Replay(savePath)
+            .on('data', function (buf) { assert.ok(buf.length <= 50); })
+            .on('error', function () {}) // Skip buffer overflow errors.
+            .on('end', function () { done(); });
+        });
+
+    });
+
   });
 
 })();
