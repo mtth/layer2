@@ -103,13 +103,14 @@ Emitted each time a batch of packets is fetched from the underlying resource.
 Note that unlike the live capture stream, this stream will automatically
 close once the end of the file read is reached.
 
-#### replay.close()
+#### replay.close(timeout)
 
 Terminate the stream.
 
-Note that depending on when this is called, a few more packets might be emitted
-before the stream actually closes (this number is guaranteed to be lower than
-the capture's batch size).
++ `timeout` {Number} Timeout in milliseconds after which to close the stream.
+
+Note that even if timeout is set to 0, a few more packets might be emitted
+before the stream actually closes.
 
 #### replay.getLinkType()
 

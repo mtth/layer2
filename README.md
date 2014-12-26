@@ -40,9 +40,7 @@ var save = new dot11.capture.Save('log.pcap');
 // Read and store 5 seconds' worth of packets from our live stream.
 var nPackets = 0;
 live
-  .once('readable', function () {
-    setTimeout(function () { live.close(); }, 5000);
-  })
+  .close(5000)
   .on('data', function (buf) {
     nPackets++;
     console.log('Read packet of length: ' + buf.length);

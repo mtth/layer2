@@ -33,7 +33,7 @@ private:
   static v8::Handle<v8::Value> break_loop(const v8::Arguments& args);
   static v8::Handle<v8::Value> close(const v8::Arguments& args);
   static v8::Handle<v8::Value> dispatch(const v8::Arguments& args);
-  static v8::Handle<v8::Value> dump_packet(const v8::Arguments& args);
+  static v8::Handle<v8::Value> dump(const v8::Arguments& args);
   static v8::Handle<v8::Value> from_dead(const v8::Arguments& args);
   static v8::Handle<v8::Value> from_device(const v8::Arguments& args);
   static v8::Handle<v8::Value> from_savefile(const v8::Arguments& args);

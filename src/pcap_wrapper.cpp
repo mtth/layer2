@@ -323,30 +323,26 @@ Handle<Value> PcapWrapper::close(const Arguments& args) {
 
 Handle<Value> PcapWrapper::inject(const Arguments& args) {
 
+  precondition(args.Length() == 1 && node::Buffer::HasInstance(args[0]));
   HandleScope scope;
-  if (args.Length() != 1) {
-      return ThrowException(Exception::TypeError(String::New("Inject takes exactly one argument")));
-  }
-  if (!node::Buffer::HasInstance(args[0])) {
-      return ThrowException(Exception::TypeError(String::New("First argument must be a buffer")));
-  }
-
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
-  char * bufferData = NULL;
-  size_t bufferLength = 0;
-  Local<Object> buffer_obj = args[0]->ToObject();
-  bufferData = node::Buffer::Data(buffer_obj);
-  bufferLength = node::Buffer::Length(buffer_obj);
 
-  if (pcap_inject(wrapper->handle, bufferData, bufferLength) != (int)bufferLength) {
-      return ThrowException(Exception::Error(String::New("PcapWrapper inject failed.")));
+  Local<Object> packet = args[0]->ToObject();
+  char *packet_data = node::Buffer::Data(packet);
+  int packet_length = node::Buffer::Length(packet);
+
+  int n = pcap_inject(wrapper->handle, packet_data, packet_length);
+  if (n == -1) {
+    return ThrowException(Exception::Error(String::New(pcap_geterr(wrapper->handle))));
+  } else if (n != packet_length) {
+    return ThrowException(Exception::Error(String::New("Packet injection truncated.")));
   }
 
   return args.This();
 
 }
 
-Handle<Value> PcapWrapper::dump_packet(const Arguments& args) {
+Handle<Value> PcapWrapper::dump(const Arguments& args) {
 
   precondition(args.Length() == 1 && node::Buffer::HasInstance(args[0]));
   HandleScope scope;
@@ -425,13 +421,14 @@ void PcapWrapper::expose(Handle<Object> exports) {
   add_to_prototype(tpl, break_loop, "breakLoop");
   add_to_prototype(tpl, close, "close");
   add_to_prototype(tpl, dispatch, "dispatch");
-  add_to_prototype(tpl, dump_packet, "dumpPacket");
+  add_to_prototype(tpl, dump, "dumpPacket");
   add_to_prototype(tpl, from_dead, "fromDead");
   add_to_prototype(tpl, from_device, "fromDevice");
   add_to_prototype(tpl, from_savefile, "fromSavefile");
   add_to_prototype(tpl, get_datalink, "getLinkType");
   add_to_prototype(tpl, get_snaplen, "getMaxPacketSize");
   add_to_prototype(tpl, get_stats, "getStats");
+  add_to_prototype(tpl, inject, "injectPacket");
   add_to_prototype(tpl, set_buffersize, "setBufferSize");
   add_to_prototype(tpl, set_filter, "setFilter");
   add_to_prototype(tpl, set_promisc, "setPromisc");

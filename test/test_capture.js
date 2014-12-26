@@ -72,20 +72,39 @@
     it('supports closing after a few packets', function (done) {
 
       var nPackets = 0;
-      var readPackets = 10;
 
-      new dot11.capture.Replay(largeCapture.path)
+      new dot11.capture.Replay(largeCapture.path, {batchSize: 1})
         .on('data', function () {
-          if (nPackets++ == readPackets) this.close();
+          if (nPackets++ === 10) this.close();
         })
         .on('end', function () {
-          assert.ok(nPackets < readPackets + 5); // Small margin.
+          console.log(nPackets);
+          assert.ok(nPackets < 100); // Small margin.
           done();
         });
 
     });
 
     it('supports closing after a timeout', function (done) {
+
+      var capture = new dot11.capture.Replay(largeCapture.path, {
+        batchSize: 2 // Small enough to guarantee it won't be read in one go.
+      });
+      var nPackets = 0;
+
+      capture
+        .close(1)
+        .on('data', function () { nPackets++; })
+        .on('end', function () {
+          assert.ok(nPackets > 0);
+          assert.ok(nPackets < largeCapture.length);
+          done();
+        });
+
+    });
+
+    it('supports closing after a built-in timeout', function (done) {
+      // I.e. lets the event loop run after a while.
 
       var capture = new dot11.capture.Replay(largeCapture.path, {
         batchSize: 2 // Small enough to guarantee it won't be read in one go.
@@ -343,6 +362,89 @@
             .on('error', function () {}) // Skip buffer overflow errors.
             .on('end', function () { done(); });
         });
+
+    });
+
+  });
+
+  describe('Live capture', function () {
+
+    var device = 'en0';
+    var opts = {monitor: true, promisc: true}; // Speed up.
+
+    it('reads a single packet', function (done) {
+
+      new dot11.capture.Live(device, opts)
+        .once('readable', function () {
+          var data = this.read();
+          var stats = this.getStats();
+          this.close();
+          assert.ok(data !== null);
+          assert.ok(stats.psRecv > 0);
+          done();
+        });
+
+    });
+
+    it('emits events and closes', function (done) {
+
+      var totalPackets = 10;
+      var nPackets = 0;
+      var stats;
+
+      new dot11.capture.Live(device, opts)
+        .on('data', function (data) {
+          assert.ok(data !== null);
+          if (++nPackets === totalPackets) {
+            stats = this.getStats();
+            this.close();
+          }
+        })
+        .on('end', function () {
+          assert.ok(nPackets >= totalPackets);
+          assert.ok(stats && stats.psRecv >= 10);
+          done();
+        });
+
+    });
+
+    it('supports closing after a timeout', function (done) {
+
+      var capture = new dot11.capture.Live(device, opts);
+      var nPackets = 0;
+
+      capture
+        .on('data', function () { nPackets++; })
+        .on('end', function () {
+          assert.ok(nPackets > 0);
+          assert.ok(nPackets < largeCapture.length);
+          done();
+        });
+      setTimeout(function () { capture.close(); }, 1);
+
+    });
+
+    it('can inject a packet', function (done) {
+      // TODO: fix this test.
+
+      var capture = new dot11.capture.Live(device, {promisc: true, monitor: true});
+
+      var packet = '000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b';
+      var found = false;
+
+      capture
+        .once('readable', function () {
+          this.write(new Buffer(packet, 'hex'));
+        })
+        .on('data', function (buf) {
+          found = found || buf.toString('hex') === packet;
+          // console.log(buf.toString('hex'));
+         })
+        .on('end', function () {
+          assert.ok(found);
+          done();
+        });
+      setTimeout(function () { capture.close(); }, 2000);
 
     });
 
