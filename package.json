@@ -1,6 +1,6 @@
 {
   "name": "dot11",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Wi-Fi packets streams!",
   "main": "./lib",
   "scripts": {
@@ -17,5 +17,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/mtth/dot11.git"
-  }
+  },
+  "author": {
+    "name": "Matthieu Monsch",
+    "email": "monsch@alum.mit.edu"
+  },
+  "license": "MIT"
 }
