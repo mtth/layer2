@@ -5,6 +5,7 @@
   "main": "./lib",
   "scripts": {
     "clean": "rm -rf build node_modules",
+    "debug": "node-gyp configure && node-gyp build --debug",
     "test": "$(npm bin)/mocha"
   },
   "engine": "node >= 0.10.33",

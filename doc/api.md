@@ -53,9 +53,12 @@ temporary buffer to protect from overflows. This way, the internal mechanism
 that fetches packets by batch (for performance), has enough time to stop
 without losing any packets.
 
-#### live.close()
+#### live.close([timeout])
 
 Terminate the stream and close underlying resources.
+
++ `timeout` {Number} Timeout in milliseconds after which to close the stream.
+  [default: `0`]
 
 Note that depending on when this is called, a few more packets might be emitted
 before the stream actually closes (this number is guaranteed to be lower than
@@ -66,6 +69,16 @@ the capture's batch size).
 Get PCAP statistics for stream.
 
 + return {Object}
+
+Sample result:
+
+```javascript
+{
+  psRecv: 87,
+  psDrop: 0,
+  psIfDrop: 0
+}
+```
 
 This includes total packets received, dropped because of buffer overflow, and
 dropped by the interface (e.g. because of filters). See `man pcap_stats` for
@@ -122,11 +135,12 @@ This event is guaranteed to be emitted after the `'end'` event.
 Note that unlike the live capture stream, this stream will automatically
 close once the end of the file read is reached.
 
-#### replay.close(timeout)
+#### replay.close([timeout])
 
 Terminate the stream.
 
 + `timeout` {Number} Timeout in milliseconds after which to close the stream.
+  [default: `0`]
 
 Note that even if timeout is set to 0, a few more packets might be emitted
 before the stream actually closes.

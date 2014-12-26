@@ -8,9 +8,11 @@ Motivation
 ----------
 
 `dot11` aims to provide an efficient and powerful yet simple interface to Wi-Fi
-(802.11) transmissions, both for capturing and emitting. Its API is similar to
-the built-in `Socket`, but for lower network layers. It is originally inspired
-by [node_pcap](https://github.com/mranney/node_pcap).
+(802.11) transmissions, both for capturing and emitting. If you know how to use
+streams, you know how to use `dot11` (and event if not, it's not hard)!
+
+Its API is similar to the built-in `Socket`, but for lower network layers. It
+is originally inspired by [node_pcap](https://github.com/mranney/node_pcap).
 
 
 Installation
@@ -21,8 +23,8 @@ $ npm install dot11
 ```
 
 `dot11` depends on [libpcap](http://www.tcpdump.org/) (available by default on
-OS X). In order to be able to capture packets, you might also need to execute
-live captures as root.
+OS X). In order to be able to capture packets, you might also need to run live
+captures as root.
 
 
 Quickstart
@@ -55,3 +57,13 @@ Documentation
 
 You can find the API docs
 [here](https://github.com/mtth/dot11/blob/master/doc/api.md).
+
+
+Tests
+-----
+
+```bash
+$ npm test
+```
+
+Some tests currently require an active internet connection.
