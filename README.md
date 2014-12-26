@@ -1,11 +1,10 @@
-Dot11
-=====
+# Dot11 [![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
+
 
 Wi-Fi packets streams!
 
 
-Motivation
-----------
+## Motivation
 
 `dot11` aims to provide an efficient and powerful yet simple interface to Wi-Fi
 (802.11) transmissions, both for capturing and emitting. If you know how to use
@@ -15,8 +14,7 @@ Its API is similar to the built-in `Socket`, but for lower network layers. It
 is originally inspired by [node_pcap](https://github.com/mranney/node_pcap).
 
 
-Installation
-------------
+## Installation
 
 ```bash
 $ npm install dot11
@@ -27,8 +25,7 @@ OS X). In order to be able to capture packets, you might also need to run live
 captures as root.
 
 
-Quickstart
-----------
+## Quickstart
 
 In the example below, we create a readable stream from default network
 interface and store 5 seconds' worth of packets to `log.pcap`. We also print
@@ -53,15 +50,13 @@ monitor). A `Replay` stream is also available to stream packets from a saved
 capture file.
 
 
-Documentation
--------------
+## Documentation
 
 You can find the API docs
 [here](https://github.com/mtth/dot11/blob/master/doc/api.md).
 
 
-Tests
------
+## Tests
 
 ```bash
 $ npm test

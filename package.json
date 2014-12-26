@@ -10,9 +10,7 @@
   },
   "engine": "node >= 0.10.33",
   "devDependencies": {
-    "cap": "0.0.10",
-    "mocha": "^2.0.1",
-    "pcap": "^1.2.0"
+    "mocha": "^2.0.1"
   },
   "repository": {
     "type": "git",
