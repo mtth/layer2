@@ -10,7 +10,7 @@ This module contains different packet streams.
 
 On top of the usual stream events, the following are available:
 
-### Event: 'fetch'
+#### Event: 'fetch'
 
 Emitted each time a batch of packets is fetched from the underlying resource.
 
@@ -81,7 +81,7 @@ Also useful for saves.
 
 Readable packet stream from a saved file.
 
-### Event: 'fetch'
+#### Event: 'fetch'
 
 Emitted each time a batch of packets is fetched from the underlying resource.
 

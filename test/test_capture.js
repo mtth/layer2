@@ -263,7 +263,7 @@
 
     }
 
-    it('throws an error when using an empty or invalid datalink', function () {
+    it('throws an error when using an empty/invalid link type', function () {
 
       var savePath = fromName('empty.pcap');
 
@@ -271,7 +271,7 @@
         new dot11.capture.Save(savePath).write('');
       });
       assert.throws(function () {
-        new dot11.capture.Save(savePath, 'FOO').write('');
+        new dot11.capture.Save(savePath, {linkType: 'FOO'}).write('');
       });
 
     });
@@ -299,7 +299,9 @@
 
       var savePath = fromName('pipe.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath, replay.getLinkType());
+      var save = new dot11.capture.Save(savePath, {
+        linkType: replay.getLinkType()
+      });
 
       replay
         .pipe(save)

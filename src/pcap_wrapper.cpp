@@ -95,9 +95,9 @@ Handle<Value> PcapWrapper::from_dead(const Arguments& args) {
     return ThrowException(Exception::Error(String::New("Invalid link type.")));
   }
 
-  int snaplen = args[0]->Int32Value();
-
+  int snaplen = args[1]->Int32Value();
   wrapper->handle = pcap_open_dead(linktype, snaplen);
+
   return args.This();
 
 }
@@ -352,20 +352,27 @@ Handle<Value> PcapWrapper::dump_packet(const Arguments& args) {
   HandleScope scope;
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
 
+  if (wrapper->dump_handle == NULL) {
+      return ThrowException(Exception::Error(String::New("No writable savefile active.")));
+  }
+
   struct timeval tv;
   gettimeofday(&tv, NULL);
 
-  Local<Object> buffer_obj = args[0]->ToObject();
-  char *buffer_data = node::Buffer::Data(buffer_obj);
-  size_t buffer_length = node::Buffer::Length(buffer_obj);
+  Local<Object> packet = args[0]->ToObject();
+  char *packet_data = node::Buffer::Data(packet);
+  int packet_length = node::Buffer::Length(packet);
 
   // Create fake packet header.
+  int snaplen = pcap_snapshot(wrapper->handle);
   struct pcap_pkthdr pktheader = {};
   pktheader.ts = tv;
-  pktheader.caplen = buffer_length;
-  pktheader.len = buffer_length; // WARNING: this is obviously faked.
+  pktheader.caplen = packet_length > snaplen ? snaplen : packet_length;
+  pktheader.len = packet_length; // WARNING: this might be wrong.
 
-  pcap_dump((u_char *) wrapper->dump_handle, &pktheader, (u_char *) buffer_data);
+  pcap_dump((u_char *) wrapper->dump_handle, &pktheader, (u_char *) packet_data);
+  // TODO: check that we don't need to truncate the packet to the new snapshot
+  // length (if it is smaller than the current buffer length).
 
   return args.This();
 
