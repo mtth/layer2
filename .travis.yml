@@ -3,5 +3,4 @@ install:
   - sudo apt-get install libpcap-dev
   - npm install
 node_js:
-  - "0.11"
   - "0.10"
