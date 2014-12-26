@@ -10,7 +10,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
 
 install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libpcap-dev
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libpcap-dev; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install pcap; fi
   - npm install
 
