@@ -367,8 +367,6 @@ Handle<Value> PcapWrapper::dump(const Arguments& args) {
   pktheader.len = packet_length; // WARNING: this might be wrong.
 
   pcap_dump((u_char *) wrapper->dump_handle, &pktheader, (u_char *) packet_data);
-  // TODO: check that we don't need to truncate the packet to the new snapshot
-  // length (if it is smaller than the current buffer length).
 
   return args.This();
 
