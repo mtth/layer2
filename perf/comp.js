@@ -22,7 +22,7 @@
     var label = '[dot11] ' + name;
     console.time(label);
     var capture = new dot11.capture.Replay(sampleCapturePath, {
-      // bufferSize: 10000,
+      bufferSize: 65000 * 100,
       batchSize: 1000,
       highWaterMark: null
     });

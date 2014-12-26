@@ -35,6 +35,44 @@
 
     });
 
+    it('can read an entire file and breaks if necessary', function (done) {
+
+      var nPackets = 0;
+      var nBreaks = 0;
+
+      new dot11.capture.Replay(largeCapture.path, {
+        bufferSize: 100000 // Not big enough for an entire batch.
+      })
+        .on('break', function () { nBreaks++; })
+        .on('data', function () { nPackets++; })
+        .on('end', function () {
+          assert.equal(nPackets, largeCapture.length);
+          assert.ok(nBreaks > 0);
+          done();
+        });
+
+    });
+
+    it('breaks each time if the buffer size is small', function (done) {
+      // I.e. equal to the max packet size.
+
+      var nPackets = 0;
+      var nBreaks = 0;
+
+      new dot11.capture.Replay(largeCapture.path, {
+        bufferSize: 65535, // Not big enough for an entire batch.
+        maxPacketSize: 65535
+      })
+        .on('break', function () { nBreaks++; })
+        .on('data', function () { nPackets++; })
+        .on('end', function () {
+          assert.equal(nPackets, largeCapture.length);
+          assert.equal(nBreaks, nPackets);
+          done();
+        });
+
+    });
+
     it('can be read by several handlers', function (done) {
 
       var nPackets1 = 0;
@@ -385,6 +423,21 @@
 
     });
 
+    it('throws an error on packet truncation by default', function (done) {
+
+      var nErrors = 0;
+
+      new dot11.capture.Live(device, {maxPacketSize: 10})
+        .close(500)
+        .on('error', function () { nErrors++; })
+        .on('data', function () {})
+        .on('end', function () {
+          assert.ok(nErrors > 0);
+          done();
+        });
+
+    });
+
     it('emits events and closes', function (done) {
 
       var totalPackets = 10;
@@ -407,16 +460,36 @@
 
     });
 
-    it('supports closing after a timeout', function (done) {
+    it('closes after a given timeout', function (done) {
 
       var capture = new dot11.capture.Live(device, opts);
       var nPackets = 0;
 
       capture
+        .close(10)
         .on('data', function () { nPackets++; })
         .on('end', function () {
           assert.ok(nPackets > 0);
-          assert.ok(nPackets < largeCapture.length);
+          done();
+        });
+
+    });
+
+    it('closes from outside', function (done) {
+
+      var capture = new dot11.capture.Live(device, opts);
+      var nPackets = 0;
+      var ended = false;
+      var finished = false;
+
+      capture
+        .on('data', function () { nPackets++; })
+        .on('finish', function () { finished = true; })
+        .on('end', function () { ended = true; })
+        .on('close', function () {
+          assert.ok(nPackets > 0);
+          assert.ok(finished);
+          assert.ok(ended);
           done();
         });
       setTimeout(function () { capture.close(); }, 1);
@@ -426,22 +499,38 @@
     it('closes after the writable side finishes', function (done) {
 
       var capture = new dot11.capture.Live(device, opts);
+      var ended = false;
+      var finished = false;
 
       capture
         .on('data', function () {})
-        .on('close', function () { done(); });
+        .on('finish', function () { finished = true; })
+        .on('end', function () { ended = true; })
+        .on('close', function () {
+          assert.ok(ended);
+          assert.ok(finished);
+          done();
+        });
 
       setTimeout(function () { capture.end(); }, 500);
 
     });
 
-    it('finishes after the readable side ends', function (done) {
+    it('closes after the readable side ends', function (done) {
 
       var capture = new dot11.capture.Live(device, opts);
+      var ended = false;
+      var finished = false;
 
       capture
         .on('data', function () {})
-        .on('close', function () { done(); });
+        .on('finish', function () { finished = true; })
+        .on('end', function () { ended = true; })
+        .on('close', function () {
+          assert.ok(ended);
+          assert.ok(finished);
+          done();
+        });
 
       setTimeout(function () { capture.push(null); }, 500);
 

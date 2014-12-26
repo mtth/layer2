@@ -383,10 +383,9 @@ void PcapWrapper::on_packet(
   HandleScope scope;
   PcapWrapper *wrapper = (PcapWrapper *) reader_p;
 
-  int packetOverflow = pkthdr->len - pkthdr->caplen;
+  int packet_overflow = pkthdr->len - pkthdr->caplen;
   int overflow = wrapper->buffer_offset + pkthdr->caplen - wrapper->buffer_length;
-  overflow = overflow > 0 ? overflow : 0;
-  size_t copy_length = pkthdr->caplen - overflow;
+  size_t copy_length = pkthdr->caplen - (overflow > 0 ? overflow : 0);
   memcpy(wrapper->buffer_data + wrapper->buffer_offset, packet, copy_length);
   wrapper->buffer_offset += copy_length;
 
@@ -395,7 +394,7 @@ void PcapWrapper::on_packet(
   Local<Value> argv[3] = {
     Integer::New(wrapper->buffer_offset), // New offset.
     Integer::New(overflow), // Buffer overflow.
-    Integer::New(packetOverflow) // Packet overflow.
+    Integer::New(packet_overflow) // Packet overflow.
   };
   wrapper->on_packet_callback->Call(Context::GetCurrent()->Global(), 3, argv);
 

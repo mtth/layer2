@@ -21,6 +21,14 @@ Emitted each time a batch of packets is fetched from the underlying resource.
   replay mode, as in live mode we are guaranteed (if the buffer sizes between
   here and PCAP as equal) that this will never overflow.
 
+#### Event: 'close'
+
+Emitted when the underlying device is closed.
+
+This event is guaranteed to be emitted after both `'end'` and `'finish'`
+events. This is useful as it lets us use methods such as `getStats` from these
+events' handlers.
+
 #### new dot11.capture.Live(dev, [opts])
 
 Create a new readable stream from a network interface.
@@ -39,6 +47,11 @@ Create a new readable stream from a network interface.
     higher number here is more efficient but runs the risk of overflowing
     internal buffers (especially in the case of replay streams, which can't
     rely on the PCAP dispatch call returning in time). [default: `1000`]
+
+Note that a section of length `maxPacketSize` is reserved at the end of the
+temporary buffer to protect from overflows. This way, the internal mechanism
+that fetches packets by batch (for performance), has enough time to stop
+without losing any packets.
 
 #### live.close()
 
@@ -91,6 +104,12 @@ Emitted each time a batch of packets is fetched from the underlying resource.
 + `bufferUsage` {Number} Fraction of the buffer used. This is mostly useful in
   replay mode, as in live mode we are guaranteed (if the buffer sizes between
   here and PCAP as equal) that this will never overflow.
+
+#### Event: 'close'
+
+Emitted when the underlying device is closed.
+
+This event is guaranteed to be emitted after the `'end'` event.
 
 #### new dot11.capture.Replay(path, [opts])
 
