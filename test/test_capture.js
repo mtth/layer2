@@ -8,36 +8,33 @@
       fs = require('fs'),
       path = require('path');
 
-  var smallCapture = {
-    path: './test/dat/mesh3.pcap',
-    length: 3
+  // Sample captures used in most test cases.
+
+  var captures = {
+    small: {
+      path: './test/dat/mesh3.pcap',
+      length: 3
+    },
+    large: {
+      path: './test/dat/mesh780.pcap',
+      length: 780
+    }
   };
 
-  var largeCapture = {
-    path: './test/dat/mesh780.pcap',
-    length: 780
-  };
-
-  function maybe(fn, predicate) {
-
-    return predicate ? fn : fn.skip;
-
-  }
+  // Replays.
 
   describe('Replay capture', function () {
 
     var Replay = dot11.capture.Replay;
 
-    // Test reading an entire file.
-
     it('can read an entire file', function (done) {
 
       var nPackets = 0;
 
-      new Replay(largeCapture.path)
+      new Replay(captures.large.path)
         .on('data', function () { nPackets++; })
         .on('end', function () {
-          assert.equal(nPackets, largeCapture.length);
+          assert.equal(nPackets, captures.large.length);
           done();
         });
 
@@ -48,13 +45,13 @@
       var nPackets = 0;
       var nBreaks = 0;
 
-      new Replay(largeCapture.path, {
+      new Replay(captures.large.path, {
         bufferSize: 100000 // Not big enough for an entire batch.
       })
         .on('break', function () { nBreaks++; })
         .on('data', function () { nPackets++; })
         .on('end', function () {
-          assert.equal(nPackets, largeCapture.length);
+          assert.equal(nPackets, captures.large.length);
           assert.ok(nBreaks > 0);
           done();
         });
@@ -67,14 +64,14 @@
       var nPackets = 0;
       var nBreaks = 0;
 
-      new Replay(largeCapture.path, {
+      new Replay(captures.large.path, {
         bufferSize: 65535, // Not big enough for an entire batch.
         maxPacketSize: 65535
       })
         .on('break', function () { nBreaks++; })
         .on('data', function () { nPackets++; })
         .on('end', function () {
-          assert.equal(nPackets, largeCapture.length);
+          assert.equal(nPackets, captures.large.length);
           assert.equal(nBreaks, nPackets);
           done();
         });
@@ -87,14 +84,14 @@
       var nPackets2 = 0;
       var nPackets3 = 0;
 
-      new Replay(largeCapture.path)
+      new Replay(captures.large.path)
         .on('data', function () { nPackets1++; })
         .on('data', function () { nPackets2++; })
         .on('data', function () { nPackets3++; })
         .on('end', function () {
-          assert.equal(nPackets1, largeCapture.length);
-          assert.equal(nPackets2, largeCapture.length);
-          assert.equal(nPackets3, largeCapture.length);
+          assert.equal(nPackets1, captures.large.length);
+          assert.equal(nPackets2, captures.large.length);
+          assert.equal(nPackets3, captures.large.length);
           done();
         });
 
@@ -104,7 +101,7 @@
 
       var isClosed = false;
 
-      new Replay(largeCapture.path)
+      new Replay(captures.large.path)
         .on('data', function () { assert.ok(!isClosed); })
         .on('close', function () { isClosed = true; })
         .on('end', function () {
@@ -119,12 +116,12 @@
 
       var nPackets = 0;
 
-      new Replay(largeCapture.path, {batchSize: 1})
+      new Replay(captures.large.path, {batchSize: 1})
         .on('data', function () {
           if (nPackets++ === 10) this.close();
         })
         .on('end', function () {
-          assert.ok(nPackets < largeCapture.length); // Small margin.
+          assert.ok(nPackets < captures.large.length); // Small margin.
           done();
         });
 
@@ -132,7 +129,7 @@
 
     it('supports closing after a timeout', function (done) {
 
-      var capture = new Replay(largeCapture.path, {
+      var capture = new Replay(captures.large.path, {
         batchSize: 2 // Small enough to guarantee it won't be read in one go.
       });
       var nPackets = 0;
@@ -142,7 +139,7 @@
         .on('data', function () { nPackets++; })
         .on('end', function () {
           assert.ok(nPackets > 0);
-          assert.ok(nPackets < largeCapture.length);
+          assert.ok(nPackets < captures.large.length);
           done();
         });
 
@@ -151,7 +148,7 @@
     it('supports closing after a built-in timeout', function (done) {
       // I.e. lets the event loop run after a while.
 
-      var capture = new Replay(largeCapture.path, {
+      var capture = new Replay(captures.large.path, {
         batchSize: 2 // Small enough to guarantee it won't be read in one go.
       });
       var nPackets = 0;
@@ -160,25 +157,12 @@
         .on('data', function () { nPackets++; })
         .on('end', function () {
           assert.ok(nPackets > 0);
-          assert.ok(nPackets < largeCapture.length);
+          assert.ok(nPackets < captures.large.length);
           done();
         });
       setTimeout(function () { capture.close(); }, 1);
 
     });
-
-    // Test direct calls to read.
-
-    function testReadSinglePacket(batchSize, callback) {
-
-      new Replay(smallCapture.path, {batchSize: batchSize })
-        .once('readable', function () {
-          assert.ok(this.read() !== null);
-          this.close();
-          callback();
-        });
-
-    }
 
     it('can read a packet when the batch size is 1', function (done) {
 
@@ -207,30 +191,6 @@
 
     });
 
-    // Test when attaching a data handler.
-
-    function testDispatching(batchSize, callback) {
-
-      var totalPackets = largeCapture.length;
-      var totalFetches = Math.ceil(totalPackets / batchSize) + 1;
-      var nPackets = 0;
-      var nFetches = 0;
-
-      new Replay(largeCapture.path, {batchSize: batchSize})
-        .on('data', function () { nPackets++; })
-        .on('fetch', function (ratio) {
-          nFetches++;
-          if (nFetches < totalFetches - 1) assert.equal(ratio, 1);
-          if (nFetches === totalFetches) assert.equal(ratio, 0);
-        })
-        .on('end', function () {
-          assert.equal(nPackets, totalPackets);
-          assert.equal(nFetches, totalFetches);
-          callback();
-        });
-
-    }
-
     it('dispatches with a batch size of 1', function (done) {
 
       testDispatching(1, done);
@@ -255,25 +215,6 @@
 
     });
 
-    // Test that the packets are correct.
-
-    function bufferEquals(a, b) {
-
-      if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
-        return undefined;
-      }
-      if (a.length !== b.length) {
-        return false;
-      }
-      for (var i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
-          return false;
-        }
-      }
-      return true;
-
-    }
-
     it('yields correct packets', function (done) {
 
       var index = 0;
@@ -284,7 +225,7 @@
         491: new Buffer('000020006708040059b76f2500000000220cd8a001000000400100003c14241188020000ffffffffffff00037f07a0160019e3d35352208f00002001011f540500000019e3d35352aaaa03000000080600010800060400010019e3d35352a9fef7000000000000004f673238', 'hex')
       };
 
-      new dot11.capture.Replay(largeCapture.path)
+      new dot11.capture.Replay(captures.large.path)
         .on('data', function (data) {
           var original = packets[index++];
           if (original) {
@@ -297,37 +238,51 @@
 
     it('returns the correct snapshot length', function () {
 
-        var capture = new dot11.capture.Replay(largeCapture.path);
+        var capture = new dot11.capture.Replay(captures.large.path);
         assert.equal(capture.getMaxPacketSize(), 65535);
 
     });
 
+    function testDispatching(batchSize, callback) {
+
+      var totalPackets = captures.large.length;
+      var totalFetches = Math.ceil(totalPackets / batchSize) + 1;
+      var nPackets = 0;
+      var nFetches = 0;
+
+      new Replay(captures.large.path, {batchSize: batchSize})
+        .on('data', function () { nPackets++; })
+        .on('fetch', function (ratio) {
+          nFetches++;
+          if (nFetches < totalFetches - 1) assert.equal(ratio, 1);
+          if (nFetches === totalFetches) assert.equal(ratio, 0);
+        })
+        .on('end', function () {
+          assert.equal(nPackets, totalPackets);
+          assert.equal(nFetches, totalFetches);
+          callback();
+        });
+
+    }
+
+    function testReadSinglePacket(batchSize, callback) {
+
+      new Replay(captures.small.path, {batchSize: batchSize })
+        .once('readable', function () {
+          assert.ok(this.read() !== null);
+          this.close();
+          callback();
+        });
+
+    }
+
   });
+
+  // Saves.
 
   describe('Save capture', function () {
 
     var Save = dot11.capture.Save;
-
-    function checkEqual(pathA, pathB) {
-
-      var replayA = new dot11.capture.Replay(pathA);
-      var replayB = new dot11.capture.Replay(pathB);
-
-      var a, b;
-      while ((a = replayA.read()) !== null || (b = replayB.read()) !== null) {
-        assert.deepEqual(a, b);
-      }
-
-    }
-
-    // Create path.
-    function fromName(fname) {
-
-      var savePath = path.join(__dirname, fname);
-      after(function () { fs.unlink(savePath); });
-      return savePath;
-
-    }
 
     it('throws an error when using an empty/invalid link type', function () {
 
@@ -345,7 +300,7 @@
     it('can be written to', function (done) {
 
       var savePath = fromName('write.pcap');
-      var replay = new dot11.capture.Replay(smallCapture.path);
+      var replay = new dot11.capture.Replay(captures.small.path);
       var save = new Save(savePath, {
         linkType: replay.getLinkType()
       });
@@ -354,7 +309,7 @@
         .on('data', function (buf) { save.write(buf); })
         .on('end', function () {
           save.end();
-          checkEqual(savePath, smallCapture.path);
+          checkEqual(savePath, captures.small.path);
           done();
         });
 
@@ -364,7 +319,7 @@
     it('can be piped to', function (done) {
 
       var savePath = fromName('pipe.pcap');
-      var replay = new dot11.capture.Replay(smallCapture.path);
+      var replay = new dot11.capture.Replay(captures.small.path);
       var save = new Save(savePath, {
         linkType: replay.getLinkType()
       });
@@ -372,7 +327,7 @@
       replay
         .pipe(save)
         .on('finish', function () {
-          checkEqual(savePath, smallCapture.path);
+          checkEqual(savePath, captures.small.path);
           done();
         });
 
@@ -381,13 +336,13 @@
     it('can be piped to and infer the link type', function (done) {
 
       var savePath = fromName('pipe_infer.pcap');
-      var replay = new dot11.capture.Replay(smallCapture.path);
+      var replay = new dot11.capture.Replay(captures.small.path);
       var save = new Save(savePath);
 
       replay
         .pipe(save)
         .on('finish', function () {
-          checkEqual(savePath, smallCapture.path);
+          checkEqual(savePath, captures.small.path);
           done();
         });
 
@@ -396,7 +351,7 @@
     it('truncates packets if necessary', function (done) {
 
       var savePath = fromName('truncate.pcap');
-      var replay = new dot11.capture.Replay(smallCapture.path);
+      var replay = new dot11.capture.Replay(captures.small.path);
       var save = new Save(savePath, {
         maxPacketSize: 50
       });
@@ -415,7 +370,7 @@
     it('closes on finish', function (done) {
 
       var savePath = fromName('close.pcap');
-      var replay = new dot11.capture.Replay(smallCapture.path);
+      var replay = new dot11.capture.Replay(captures.small.path);
       var save = new Save(savePath, {
         linkType: replay.getLinkType()
       });
@@ -425,6 +380,30 @@
         .end(replay.read());
 
     });
+
+    // Helpers.
+
+    // Name and delete file after test.
+    function fromName(fname) {
+
+      var savePath = path.join(__dirname, fname);
+      after(function () { fs.unlink(savePath); });
+      return savePath;
+
+    }
+
+    // Check that two replay files are equal.
+    function checkEqual(pathA, pathB) {
+
+      var replayA = new dot11.capture.Replay(pathA);
+      var replayB = new dot11.capture.Replay(pathB);
+
+      var a, b;
+      while ((a = replayA.read()) !== null || (b = replayB.read()) !== null) {
+        assert.deepEqual(a, b);
+      }
+
+    }
 
   });
 
@@ -440,7 +419,6 @@
   maybe(describe, device !== null)('Live capture', function () {
 
     var Live = dot11.capture.Live;
-
     var opts = {monitor: true, promisc: true}; // Speed up.
 
     it('can find the default device', function () {
@@ -585,21 +563,22 @@
 
     });
 
-    it.skip('can inject a packet', function (done) {
+    it('can inject a packet', function (done) {
       // TODO: fix this test.
 
       var capture = new Live(device, {promisc: true, monitor: true});
-
-      var packet = '000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b';
+      var packet = new Buffer('000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b', 'hex');
       var found = false;
 
       capture
         .once('readable', function () {
-          this.write(new Buffer(packet, 'hex'));
+          var i = 100;
+          while (i--) {
+            this.write(packet);
+          }
         })
         .on('data', function (buf) {
-          found = found || buf.toString('hex') === packet;
-          // console.log(buf.toString('hex'));
+          found = found || bufferEquals(buf, packet);
          })
         .on('end', function () {
           assert.ok(found);
@@ -610,5 +589,32 @@
     });
 
   });
+
+  // Global helpers.
+
+  // Skip test if predicate is false (fn should be `describe` or `it`).
+  function maybe(fn, predicate) {
+
+    return predicate ? fn : fn.skip;
+
+  }
+
+  // Check whether two buffers are equal.
+  function bufferEquals(a, b) {
+
+    if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+      return undefined;
+    }
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+    return true;
+
+  }
 
 })();
