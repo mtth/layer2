@@ -29,11 +29,13 @@ This event is guaranteed to be emitted after both `'end'` and `'finish'`
 events. This is useful as it lets us use methods such as `getStats` from these
 events' handlers.
 
-#### new dot11.capture.Live(dev, [opts])
+#### new dot11.capture.Live([dev], [opts])
 
 Create a new readable stream from a network interface.
 
-+ `dev` {String} The device to listen to (e.g. `'en0'`).
++ `dev` {String} The device to listen to (e.g. `'en0'`). If `dev` is `null` or
+  `undefined`, the default network interface will be used. On some platforms,
+  `'any'` can be specified to listen on all interfaces.
 + `opts` {Object} Various options:
   + `monitor` {Boolean} Capture in monitor mode. [default: `false`]
   + `promisc` {Boolean} Capture in promiscuous mode. [default: `false`]

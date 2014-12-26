@@ -1,9 +1,11 @@
+#include "pcap_util.h"
 #include "pcap_wrapper.h"
 
 
 void init(v8::Handle<v8::Object> exports) {
 
-    PcapWrapper::expose(exports);
+    util_expose(exports);
+    wrapper_expose(exports);
 
 }
 

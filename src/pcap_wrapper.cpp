@@ -404,34 +404,34 @@ void PcapWrapper::on_packet(
 
 // Registration.
 
-void PcapWrapper::expose(Handle<Object> exports) {
+void wrapper_expose(Handle<Object> exports) {
 
   char className[] = "Wrapper";
 
   // Prepare constructor template
-  Local<FunctionTemplate> tpl = FunctionTemplate::New(init);
+  Local<FunctionTemplate> tpl = FunctionTemplate::New(PcapWrapper::init);
   tpl->SetClassName(String::NewSymbol(className));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype
-  add_to_prototype(tpl, activate, "activate");
-  add_to_prototype(tpl, break_loop, "breakLoop");
-  add_to_prototype(tpl, close, "close");
-  add_to_prototype(tpl, dispatch, "dispatch");
-  add_to_prototype(tpl, dump, "dumpPacket");
-  add_to_prototype(tpl, from_dead, "fromDead");
-  add_to_prototype(tpl, from_device, "fromDevice");
-  add_to_prototype(tpl, from_savefile, "fromSavefile");
-  add_to_prototype(tpl, get_datalink, "getLinkType");
-  add_to_prototype(tpl, get_snaplen, "getMaxPacketSize");
-  add_to_prototype(tpl, get_stats, "getStats");
-  add_to_prototype(tpl, inject, "injectPacket");
-  add_to_prototype(tpl, set_buffersize, "setBufferSize");
-  add_to_prototype(tpl, set_filter, "setFilter");
-  add_to_prototype(tpl, set_promisc, "setPromisc");
-  add_to_prototype(tpl, set_rfmon, "setMonitor");
-  add_to_prototype(tpl, set_snaplen, "setMaxPacketSize");
-  add_to_prototype(tpl, to_savefile, "toSavefile");
+  add_to_prototype(tpl, PcapWrapper::activate, "activate");
+  add_to_prototype(tpl, PcapWrapper::break_loop, "breakLoop");
+  add_to_prototype(tpl, PcapWrapper::close, "close");
+  add_to_prototype(tpl, PcapWrapper::dispatch, "dispatch");
+  add_to_prototype(tpl, PcapWrapper::dump, "dumpPacket");
+  add_to_prototype(tpl, PcapWrapper::from_dead, "fromDead");
+  add_to_prototype(tpl, PcapWrapper::from_device, "fromDevice");
+  add_to_prototype(tpl, PcapWrapper::from_savefile, "fromSavefile");
+  add_to_prototype(tpl, PcapWrapper::get_datalink, "getLinkType");
+  add_to_prototype(tpl, PcapWrapper::get_snaplen, "getMaxPacketSize");
+  add_to_prototype(tpl, PcapWrapper::get_stats, "getStats");
+  add_to_prototype(tpl, PcapWrapper::inject, "injectPacket");
+  add_to_prototype(tpl, PcapWrapper::set_buffersize, "setBufferSize");
+  add_to_prototype(tpl, PcapWrapper::set_filter, "setFilter");
+  add_to_prototype(tpl, PcapWrapper::set_promisc, "setPromisc");
+  add_to_prototype(tpl, PcapWrapper::set_rfmon, "setMonitor");
+  add_to_prototype(tpl, PcapWrapper::set_snaplen, "setMaxPacketSize");
+  add_to_prototype(tpl, PcapWrapper::to_savefile, "toSavefile");
 
   exports->Set(
     String::NewSymbol(className),

@@ -18,7 +18,15 @@
     length: 780
   };
 
+  function maybe(fn, predicate) {
+
+    return predicate ? fn : fn.skip;
+
+  }
+
   describe('Replay capture', function () {
+
+    var Replay = dot11.capture.Replay;
 
     // Test reading an entire file.
 
@@ -26,7 +34,7 @@
 
       var nPackets = 0;
 
-      new dot11.capture.Replay(largeCapture.path)
+      new Replay(largeCapture.path)
         .on('data', function () { nPackets++; })
         .on('end', function () {
           assert.equal(nPackets, largeCapture.length);
@@ -40,7 +48,7 @@
       var nPackets = 0;
       var nBreaks = 0;
 
-      new dot11.capture.Replay(largeCapture.path, {
+      new Replay(largeCapture.path, {
         bufferSize: 100000 // Not big enough for an entire batch.
       })
         .on('break', function () { nBreaks++; })
@@ -59,7 +67,7 @@
       var nPackets = 0;
       var nBreaks = 0;
 
-      new dot11.capture.Replay(largeCapture.path, {
+      new Replay(largeCapture.path, {
         bufferSize: 65535, // Not big enough for an entire batch.
         maxPacketSize: 65535
       })
@@ -79,7 +87,7 @@
       var nPackets2 = 0;
       var nPackets3 = 0;
 
-      new dot11.capture.Replay(largeCapture.path)
+      new Replay(largeCapture.path)
         .on('data', function () { nPackets1++; })
         .on('data', function () { nPackets2++; })
         .on('data', function () { nPackets3++; })
@@ -96,7 +104,7 @@
 
       var isClosed = false;
 
-      new dot11.capture.Replay(largeCapture.path)
+      new Replay(largeCapture.path)
         .on('data', function () { assert.ok(!isClosed); })
         .on('close', function () { isClosed = true; })
         .on('end', function () {
@@ -111,7 +119,7 @@
 
       var nPackets = 0;
 
-      new dot11.capture.Replay(largeCapture.path, {batchSize: 1})
+      new Replay(largeCapture.path, {batchSize: 1})
         .on('data', function () {
           if (nPackets++ === 10) this.close();
         })
@@ -124,7 +132,7 @@
 
     it('supports closing after a timeout', function (done) {
 
-      var capture = new dot11.capture.Replay(largeCapture.path, {
+      var capture = new Replay(largeCapture.path, {
         batchSize: 2 // Small enough to guarantee it won't be read in one go.
       });
       var nPackets = 0;
@@ -143,7 +151,7 @@
     it('supports closing after a built-in timeout', function (done) {
       // I.e. lets the event loop run after a while.
 
-      var capture = new dot11.capture.Replay(largeCapture.path, {
+      var capture = new Replay(largeCapture.path, {
         batchSize: 2 // Small enough to guarantee it won't be read in one go.
       });
       var nPackets = 0;
@@ -163,7 +171,7 @@
 
     function testReadSinglePacket(batchSize, callback) {
 
-      new dot11.capture.Replay(smallCapture.path, {batchSize: batchSize })
+      new Replay(smallCapture.path, {batchSize: batchSize })
         .once('readable', function () {
           assert.ok(this.read() !== null);
           this.close();
@@ -208,7 +216,7 @@
       var nPackets = 0;
       var nFetches = 0;
 
-      new dot11.capture.Replay(largeCapture.path, {batchSize: batchSize})
+      new Replay(largeCapture.path, {batchSize: batchSize})
         .on('data', function () { nPackets++; })
         .on('fetch', function (ratio) {
           nFetches++;
@@ -298,6 +306,8 @@
 
   describe('Save capture', function () {
 
+    var Save = dot11.capture.Save;
+
     function checkEqual(pathA, pathB) {
 
       var replayA = new dot11.capture.Replay(pathA);
@@ -324,10 +334,10 @@
       var savePath = fromName('empty.pcap');
 
       assert.throws(function () {
-        new dot11.capture.Save(savePath).write('');
+        new Save(savePath).write('');
       });
       assert.throws(function () {
-        new dot11.capture.Save(savePath, {linkType: 'FOO'}).write('');
+        new Save(savePath, {linkType: 'FOO'}).write('');
       });
 
     });
@@ -336,7 +346,7 @@
 
       var savePath = fromName('write.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath, {
+      var save = new Save(savePath, {
         linkType: replay.getLinkType()
       });
 
@@ -355,7 +365,7 @@
 
       var savePath = fromName('pipe.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath, {
+      var save = new Save(savePath, {
         linkType: replay.getLinkType()
       });
 
@@ -372,7 +382,7 @@
 
       var savePath = fromName('pipe_infer.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath);
+      var save = new Save(savePath);
 
       replay
         .pipe(save)
@@ -387,7 +397,7 @@
 
       var savePath = fromName('truncate.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath, {
+      var save = new Save(savePath, {
         maxPacketSize: 50
       });
 
@@ -406,7 +416,7 @@
 
       var savePath = fromName('close.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath, {
+      var save = new Save(savePath, {
         linkType: replay.getLinkType()
       });
 
@@ -418,14 +428,39 @@
 
   });
 
-  describe('Live capture', function () {
+  // Live capture (relies on having a functional interface).
 
-    var device = 'en0';
+  var device;
+  try {
+    device = dot11.capture.Live.getDefaultDevice();
+  } catch (err) {
+    device = null;
+  }
+
+  maybe(describe, device !== null)('Live capture', function () {
+
+    var Live = dot11.capture.Live;
+
     var opts = {monitor: true, promisc: true}; // Speed up.
+
+    it('can find the default device', function () {
+      // We already know this will work but oh well.
+
+      var dev = Live.getDefaultDevice();
+      assert.ok(dev !== null);
+
+    });
+
+    it('can list all devices', function () {
+
+      var devs = Live.getAllDevices();
+      assert.ok(devs !== null && devs.length > 0);
+
+    });
 
     it('reads a single packet', function (done) {
 
-      new dot11.capture.Live(device, opts)
+      new Live(device, opts)
         .once('readable', function () {
           var data = this.read();
           var stats = this.getStats();
@@ -441,7 +476,7 @@
 
       var nErrors = 0;
 
-      new dot11.capture.Live(device, {maxPacketSize: 10})
+      new Live(device, {maxPacketSize: 10})
         .close(500)
         .on('error', function () { nErrors++; })
         .on('data', function () {})
@@ -458,7 +493,7 @@
       var nPackets = 0;
       var stats;
 
-      new dot11.capture.Live(device, opts)
+      new Live(device, opts)
         .on('data', function (data) {
           assert.ok(data !== null);
           if (++nPackets === totalPackets) {
@@ -476,7 +511,7 @@
 
     it('closes after a given timeout', function (done) {
 
-      var capture = new dot11.capture.Live(device, opts);
+      var capture = new Live(device, opts);
       var nPackets = 0;
 
       capture
@@ -491,7 +526,7 @@
 
     it('closes from outside', function (done) {
 
-      var capture = new dot11.capture.Live(device, opts);
+      var capture = new Live(device, opts);
       var nPackets = 0;
       var ended = false;
       var finished = false;
@@ -512,7 +547,7 @@
 
     it('closes after the writable side finishes', function (done) {
 
-      var capture = new dot11.capture.Live(device, opts);
+      var capture = new Live(device, opts);
       var ended = false;
       var finished = false;
 
@@ -532,7 +567,7 @@
 
     it('closes after the readable side ends', function (done) {
 
-      var capture = new dot11.capture.Live(device, opts);
+      var capture = new Live(device, opts);
       var ended = false;
       var finished = false;
 
@@ -553,7 +588,7 @@
     it.skip('can inject a packet', function (done) {
       // TODO: fix this test.
 
-      var capture = new dot11.capture.Live(device, {promisc: true, monitor: true});
+      var capture = new Live(device, {promisc: true, monitor: true});
 
       var packet = '000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b';
       var found = false;

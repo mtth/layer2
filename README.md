@@ -30,14 +30,14 @@ captures as root.
 Quickstart
 ----------
 
-In the example below, we create a readable stream from the `en0` network
-interface in promiscuous mode and store 5 seconds' worth of packets. We also
-print each packet's length and the total number of packets processed.
+In the example below, we create a readable stream from default network
+interface and store 5 seconds' worth of packets. We also print each packet's
+length and the total number of packets processed.
 
 ```javascript
 var dot11 = require('dot11');
 
-new dot11.capture.Live('en0', {promisc: true})
+new dot11.capture.Live()
   .close(5000)
   .on('data', function (buf) {
     console.log('Read packet of length: ' + buf.length);
@@ -48,8 +48,10 @@ new dot11.capture.Live('en0', {promisc: true})
   .pipe(new dot11.capture.Save('log.pcap'));
 ```
 
-A `Replay` stream is also available to stream packets from a saved capture
-file.
+The above example is only using the default options, it is possible to specify
+which interface to listen to and what modes to activate (e.g. promiscuous or
+monitor). A `Replay` stream is also available to stream packets from a saved
+capture file.
 
 
 Documentation
