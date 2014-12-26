@@ -116,7 +116,7 @@
           if (nPackets++ === 10) this.close();
         })
         .on('end', function () {
-          assert.ok(nPackets < 100); // Small margin.
+          assert.ok(nPackets < largeCapture.length); // Small margin.
           done();
         });
 
@@ -399,6 +399,20 @@
             .on('error', function () {}) // Skip buffer overflow errors.
             .on('end', function () { done(); });
         });
+
+    });
+
+    it('closes on finish', function (done) {
+
+      var savePath = fromName('close.pcap');
+      var replay = new dot11.capture.Replay(smallCapture.path);
+      var save = new dot11.capture.Save(savePath, {
+        linkType: replay.getLinkType()
+      });
+
+      save
+        .on('close', function () { replay.close(); done(); })
+        .end(replay.read());
 
     });
 
