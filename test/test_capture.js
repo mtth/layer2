@@ -56,11 +56,16 @@
 
     it('closes automatically after reading a file', function (done) {
 
-      function onEnd(capture, cb) { assert.ok(capture.isClosed()); cb(); }
+      var isClosed = false;
 
       new dot11.capture.Replay(largeCapture.path)
-        .on('data', function () { assert.ok(!this.isClosed()); })
-        .on('end', function () { onEnd(this, done); });
+        .on('data', function () { assert.ok(!isClosed); })
+        .on('close', function () { isClosed = true; })
+        .on('end', function () {
+          setImmediate(function () {
+            assert.ok(isClosed); done();
+          });
+        });
 
     });
 
@@ -262,8 +267,12 @@
 
       var savePath = fromName('empty.pcap');
 
-      assert.throws(function () { new dot11.capture.Save(savePath); });
-      assert.throws(function () { new dot11.capture.Save(savePath, 'FOO'); });
+      assert.throws(function () {
+        new dot11.capture.Save(savePath).write('');
+      });
+      assert.throws(function () {
+        new dot11.capture.Save(savePath, 'FOO').write('');
+      });
 
     });
 
@@ -271,7 +280,9 @@
 
       var savePath = fromName('write.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath, replay.getDatalink());
+      var save = new dot11.capture.Save(savePath, {
+        linkType: replay.getLinkType()
+      });
 
       replay
         .on('data', function (buf) { save.write(buf); })
@@ -288,7 +299,22 @@
 
       var savePath = fromName('pipe.pcap');
       var replay = new dot11.capture.Replay(smallCapture.path);
-      var save = new dot11.capture.Save(savePath, replay.getDatalink());
+      var save = new dot11.capture.Save(savePath, replay.getLinkType());
+
+      replay
+        .pipe(save)
+        .on('finish', function () {
+          checkEqual(savePath, smallCapture.path);
+          done();
+        });
+
+    });
+
+    it('can be piped to and infer the link type', function (done) {
+
+      var savePath = fromName('pipe_infer.pcap');
+      var replay = new dot11.capture.Replay(smallCapture.path);
+      var save = new dot11.capture.Save(savePath);
 
       replay
         .pipe(save)

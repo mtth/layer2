@@ -1,11 +1,9 @@
-#include "pcap_reader.h"
-#include "pcap_writer.h"
+#include "pcap_wrapper.h"
 
 
 void init(v8::Handle<v8::Object> exports) {
 
-    PcapReader::expose(exports);
-    PcapWriter::expose(exports);
+    PcapWrapper::expose(exports);
 
 }
 

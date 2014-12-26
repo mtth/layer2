@@ -8,6 +8,19 @@ This module contains different packet streams.
 
 ### Class: dot11.capture.Live
 
+On top of the usual stream events, the following are available:
+
+### Event: 'fetch'
+
+Emitted each time a batch of packets is fetched from the underlying resource.
+
++ `batchUsage` {Number} Fraction of batch size used. In live mode, this should
+  be consistently under 1 in order to avoid filling up PCAP's buffer and losing
+  packets there.
++ `bufferUsage` {Number} Fraction of the buffer used. This is mostly useful in
+  replay mode, as in live mode we are guaranteed (if the buffer sizes between
+  here and PCAP as equal) that this will never overflow.
+
 #### new dot11.capture.Live(dev, [opts])
 
 Create a new readable stream from a network interface.
@@ -29,17 +42,11 @@ Create a new readable stream from a network interface.
 
 #### live.close()
 
-Terminate the stream.
+Terminate the stream and close underlying resources.
 
 Note that depending on when this is called, a few more packets might be emitted
 before the stream actually closes (this number is guaranteed to be lower than
 the capture's batch size).
-
-#### live.isClosed()
-
-Check if the capture is still running.
-
-+ return {Boolean}
 
 #### live.getStats()
 
@@ -52,15 +59,16 @@ dropped by the interface (e.g. because of filters). See `man pcap_stats` for
 more details. Finally, note that these statistics are not exact and can even
 mean different things depending on the platform.
 
-#### live.getDatalink()
+#### live.getLinkType()
 
 Get output data link type. E.g. `'IEEE802_11_RADIO'`.
 
 + return {String}
 
-This is useful in particular for creating `Save` streams (see below).
+See [here](http://www.tcpdump.org/linktypes.html) for the full list. This is
+useful in particular for creating `Save` streams (see below).
 
-#### live.getSnapLen()
+#### live.getMaxPacketSize()
 
 Get underlying snapshot length.
 
@@ -71,11 +79,22 @@ Also useful for saves.
 
 ### Class: dot11.capture.Replay
 
+Readable packet stream from a saved file.
+
+### Event: 'fetch'
+
+Emitted each time a batch of packets is fetched from the underlying resource.
+
++ `batchUsage` {Number} Fraction of batch size used. In live mode, this should
+  be consistently under 1 in order to avoid filling up PCAP's buffer and losing
+  packets there.
++ `bufferUsage` {Number} Fraction of the buffer used. This is mostly useful in
+  replay mode, as in live mode we are guaranteed (if the buffer sizes between
+  here and PCAP as equal) that this will never overflow.
+
 #### new dot11.capture.Replay(path, [opts])
 
-Readable packet stream from saved file.
-
-+ `path` {String} Path to a saved capture file (pcap format).
++ `path` {String} Path to a saved capture file (PCAP format).
 + `opts` {Object} Various options:
   + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold packets.
     Larger means more packets can be gathered in fewer dispatch calls (this
@@ -92,13 +111,7 @@ Note that depending on when this is called, a few more packets might be emitted
 before the stream actually closes (this number is guaranteed to be lower than
 the capture's batch size).
 
-#### replay.isClosed()
-
-Check if the capture is still running.
-
-+ return {Boolean}
-
-#### replay.getDatalink()
+#### replay.getLinkType()
 
 Get output data link type. E.g. `'IEEE802_11_RADIO'`.
 
@@ -106,7 +119,7 @@ Get output data link type. E.g. `'IEEE802_11_RADIO'`.
 
 This is useful in particular for creating `Save` streams (see below).
 
-#### replay.getSnapLen()
+#### replay.getMaxPacketSize()
 
 Also useful for saves.
 
@@ -115,14 +128,15 @@ Also useful for saves.
 
 ### Class: dot11.capture.Save
 
-#### new dot11.capture.Save(path, datalink, [opts])
+#### new dot11.capture.Save(path, [opts])
 
 Writable stream to save packets to the `.pcap` format (compatible with
 Wireshark and Tcpdump).
 
 + `path` {String} The path where the capture will be stored.
-+ `datalink` {String} The type of link that will be saved.
 + `opts` {Object} Optional parameters:
+  + `linkType` {String} The data link type. If not specified here, it will be
+    inferred from the first stream piped.
   + `maxPacketSize` {Number} The maximum packet capture length to store in the
     file's global header. [default: `65535`]
 

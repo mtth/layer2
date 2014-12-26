@@ -4,8 +4,7 @@
       "target_name": "pcap",
       "sources": [
         "src/pcap.cpp",
-        "src/pcap_reader.cpp",
-        "src/pcap_writer.cpp"
+        "src/pcap_wrapper.cpp"
       ],
       "link_settings": {
         "libraries": [

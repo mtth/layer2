@@ -35,7 +35,7 @@ var dot11 = require('dot11');
 var live = new dot11.capture.Live('en0', {promisc: true});
 
 // Create a writable stream to eventually store our data.
-var save = new dot11.capture.Save('log.pcap', live.getDatalink());
+var save = new dot11.capture.Save('log.pcap');
 
 // Read and store 5 seconds' worth of packets from our live stream.
 var nPackets = 0;

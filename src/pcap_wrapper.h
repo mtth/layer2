@@ -1,17 +1,15 @@
-#ifndef NODE_PCAP_READER_H
-#define NODE_PCAP_READER_H
+#ifndef NODE_PCAP_WRAPPER_H
+#define NODE_PCAP_WRAPPER_H
 
 #include <node.h>
 #include <pcap/pcap.h>
 
 
-class PcapWriter;
-
 /**
  * Class for reading packets (either live or from a save file).
  *
  */
-class PcapReader : public node::ObjectWrap {
+class PcapWrapper : public node::ObjectWrap {
 
 public:
 
@@ -19,22 +17,25 @@ public:
 
 private:
 
-  friend class PcapWriter;
-
-  v8::Persistent<v8::Function> on_packet_callback;
-  struct bpf_program filter;
-  pcap_t *handle;
+  FILE *dump_file_p;
   char *buffer_data;
+  pcap_dumper_t *dump_handle;
+  pcap_t *handle;
   size_t buffer_length;
   size_t buffer_offset;
+  struct bpf_program filter;
+  v8::Persistent<v8::Function> on_packet_callback;
 
-  PcapReader();
-  ~PcapReader();
+  PcapWrapper();
+  ~PcapWrapper();
 
   static v8::Handle<v8::Value> activate(const v8::Arguments& args);
   static v8::Handle<v8::Value> break_loop(const v8::Arguments& args);
   static v8::Handle<v8::Value> close(const v8::Arguments& args);
   static v8::Handle<v8::Value> dispatch(const v8::Arguments& args);
+  static v8::Handle<v8::Value> dump(const v8::Arguments& args);
+  static v8::Handle<v8::Value> dump_packet(const v8::Arguments& args);
+  static v8::Handle<v8::Value> from_dead(const v8::Arguments& args);
   static v8::Handle<v8::Value> from_device(const v8::Arguments& args);
   static v8::Handle<v8::Value> from_savefile(const v8::Arguments& args);
   static v8::Handle<v8::Value> get_datalink(const v8::Arguments& args);
@@ -47,6 +48,7 @@ private:
   static v8::Handle<v8::Value> set_promisc(const v8::Arguments& args);
   static v8::Handle<v8::Value> set_rfmon(const v8::Arguments& args);
   static v8::Handle<v8::Value> set_snaplen(const v8::Arguments& args);
+  static v8::Handle<v8::Value> to_savefile(const v8::Arguments& args);
   static void on_packet(u_char *reader_p, const struct pcap_pkthdr* pkthdr, const u_char* packet);
 
 };
