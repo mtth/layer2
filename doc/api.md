@@ -5,9 +5,12 @@
 
 This module contains the following 3 streams:
 
-+ A duplex stream of packets from a live network interface: `Live`.
-+ A readable stream of packets from a saved capture file: `Replay`.
-+ A writable stream of packets to write to a capture file: `Save`.
++ [`Live`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturelive)
+  A duplex stream of packets from a live network interface.
++ [`Replay`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturereplay)
+  A readable stream of packets from a saved capture file.
++ [`Save`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturesave)
+  A writable stream of packets to write to a capture file.
 
 
 ### Class: dot11.capture.Live
@@ -279,7 +282,15 @@ defined (as truncated packets do not get carried over).
 
 ## Transform
 
-Various decoders and extractors.
+The transform module contains streams useful to process capture streams.
+Currently, the following streams are implemented:
+
++ [`Decoder`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11transformdecoderopts)
+  A duplex stream that transform packets made of raw bytes (i.e. buffers) into
+  JavaScript objects.
++ [`Extractor`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11transformextractoropts)
+  A duplex stream that extracts inner frames (e.g. an 802.11 frame encapsulated
+  in a frame with a Radiotap header).
 
 
 ### Class: dot11.transform.Decoder([opts])
@@ -323,9 +334,6 @@ Get decoded data link type.
 
 ### Class: dot11.transform.Extractor([opts])
 
-A duplex stream used to transform raw packets (i.e. buffers) to parsed objects.
-
-
 #### Event: 'readable'
 
 Emitted when the first frame can be read.
@@ -349,9 +357,9 @@ Emitted when the decoder was unable to extract a frame.
 #### new dot11.transform.Extractor([opts])
 
 + `opts` {Object} Various options:
-  + `toLinkType` {String} The data link type from which to extract data. If
+  + `fromLinkType` {String} The data link type from which to extract data. If
     piped to from another `dot11` stream, this will be inferred automatically.
-  + `fromLinkType` {String} The data link type expected as output. If a single
+  + `toLinkType` {String} The data link type expected as output. If a single
     conversion is possible from the input link type, this will also be inferred
     automatically. Note that relying on this inference might break in the
     future if more extractor types are added (whereas the first inference is

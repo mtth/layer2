@@ -1,7 +1,7 @@
 {
   "name": "dot11",
   "version": "0.1.4",
-  "description": "Wi-Fi packets streams!",
+  "description": "Wi-Fi packets & streams",
   "main": "./lib",
   "scripts": {
     "build-debug": "node-gyp configure && node-gyp build --debug",
