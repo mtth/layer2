@@ -1,5 +1,8 @@
 language: node_js
 
+node_js:
+  - "0.10"
+
 os:
   - linux
   - osx
@@ -7,13 +10,7 @@ os:
 before_install:
   - env | sort
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -qq update; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
 
 install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libpcap-dev; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install pcap; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew outdated pcap || brew upgrade pcap; fi
   - npm install
-
-node_js:
-  - "0.10"
