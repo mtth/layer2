@@ -1,8 +1,5 @@
 #include <node_buffer.h>
-#include <node_version.h>
 #include <sys/ioctl.h>
-#include <cstring>
-#include <string.h>
 #include "pcap_wrapper.h"
 
 #define precondition(b) \
