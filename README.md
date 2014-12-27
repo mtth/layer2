@@ -8,7 +8,6 @@ It is inspired by other packet capturing libraries (e.g.
 [lib_pcap](https://github.com/mranney/node_pcap)).
 
 
-
 ## Installation
 
 ```bash
