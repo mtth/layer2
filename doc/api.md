@@ -3,27 +3,74 @@
 
 ## Capture
 
-This module contains different packet streams.
+This module contains the following 3 streams:
+
++ A duplex stream of packets from a live network interface: `Live`.
++ A readable stream of packets from a saved capture file: `Replay.
++ A writable stream of packets to write to a capture file: `Save`.
 
 
 ### Class: dot11.capture.Live
 
-On top of the usual stream events, the following are available:
+The `Live` class is a duplex (i.e. readable and writable) stream of packets. An
+instance of this class will listen to a given network interface (e.g. `'en0'`)
+and stream out any packets available. Any packets written to the stream will be
+injected via this same interface (if supported by your OS).
+
+```javascript
+var nPackets = 0;
+
+// Counting the number of packets received in 10 seconds.
+new Live('en0', {promisc: true, monitor: true})
+  .on('data', function (buf) { nPackets++; })
+  .on('end', function () { console.log('Received ' + nPackets + ' packets.'); })
+  .close(10000);
+```
+
+### Event: 'readable'
+
+Emitted when the first packet can be read.
+
+### Event: 'data'
+
++ `packet` {Buffer} A packet.
+
+Emitted each time a packet is available for reading.
+
+### Event: 'end'
+
+Emitted after `close` is called but before the underlying device is closed.
+
+### Event 'finish'
+
+Emitted right after the writable end of the stream closes (e.g. caused by
+calling the `end` method). Similarly to the `'end'` event, the underlying
+resource is guaranteed to still be open at this time.
+
+### Event 'error'
+
++ `err` {Error} The error that caused this.
+
+Emitted when something went wrong. Currently the main cause is packet
+truncation (if the `maxPacketSize` parameter is too small).
 
 #### Event: 'fetch'
 
 Emitted each time a batch of packets is fetched from the underlying resource.
 
-+ `batchUsage` {Number} Fraction of batch size used. In live mode, this should
-  be consistently under 1 in order to avoid filling up PCAP's buffer and losing
++ `batchUsage` {Number} Fraction of batch size used. This should be kept
+  consistently under 1 in order to avoid filling up PCAP's buffer and losing
   packets there.
-+ `bufferUsage` {Number} Fraction of the buffer used. This is mostly useful in
-  replay mode, as in live mode we are guaranteed (if the buffer sizes between
-  here and PCAP as equal) that this will never overflow.
++ `bufferUsage` {Number} Fraction of the buffer used. This is only minimally
+  useful for live streams, as we are guaranteed that the internal buffer will
+  not overflow (the size is chosen appropriately w.r.t the underlying PCAP
+  buffer).
 
 #### Event: 'close'
 
-Emitted when the underlying device is closed.
+Emitted after the underlying device is closed.
+
+Most methods on the stream will be unavailable at this point.
 
 This event is guaranteed to be emitted after both `'end'` and `'finish'`
 events. This is useful as it lets us use methods such as `getStats` from these
@@ -39,7 +86,6 @@ Create a new readable stream from a network interface.
 + `opts` {Object} Various options:
   + `monitor` {Boolean} Capture in monitor mode. [default: `false`]
   + `promisc` {Boolean} Capture in promiscuous mode. [default: `false`]
-  + `filter` {String} BPF packet filter. [default: `''`]
   + `maxPacketSize` {Number} Packet snapshot length (i.e. how much of each
     packet is retained). [default: `65535`]
   + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold packets.
@@ -72,15 +118,7 @@ Get PCAP statistics for stream.
 
 + return {Object}
 
-Sample result:
-
-```javascript
-{
-  psRecv: 87,
-  psDrop: 0,
-  psIfDrop: 0
-}
-```
+Sample result: `{ psRecv: 87, psDrop: 0, psIfDrop: 0 }`.
 
 This includes total packets received, dropped because of buffer overflow, and
 dropped by the interface (e.g. because of filters). See `man pcap_stats` for
@@ -102,23 +140,54 @@ Get underlying snapshot length.
 
 + return {Number}
 
-Also useful for saves.
+Also useful for creating saves.
 
 
 ### Class: dot11.capture.Replay
 
 Readable packet stream from a saved file.
 
+### Event: 'readable'
+
+Emitted when the first packet can be read.
+
+### Event: 'data'
+
++ `packet` {Buffer} A packet.
+
+Emitted each time a packet is available for reading.
+
+### Event: 'end'
+
+Emitted when the end of the file is reached.
+
+Similarly to `Live`, this will be emitted before the underlying device is
+closed.
+
+### Event 'error'
+
++ `err` {Error} The error that caused this.
+
+Emitted when something went wrong. Currently the main cause is packet
+truncation (if the `maxPacketSize` parameter is too small).
+
 #### Event: 'fetch'
 
 Emitted each time a batch of packets is fetched from the underlying resource.
 
-+ `batchUsage` {Number} Fraction of batch size used. In live mode, this should
-  be consistently under 1 in order to avoid filling up PCAP's buffer and losing
-  packets there.
-+ `bufferUsage` {Number} Fraction of the buffer used. This is mostly useful in
-  replay mode, as in live mode we are guaranteed (if the buffer sizes between
-  here and PCAP as equal) that this will never overflow.
++ `batchUsage` {Number} Fraction of batch size used. In the case of a `Replay`,
+  this fraction will typically be very close to `1`.
++ `bufferUsage` {Number} Fraction of the buffer used. This is useful to avoid
+  having too many dispatch loops interrupted prematurely (see `'break'` event
+  below).
+
+### Event 'break'
+
+If the temporary buffer size is too small to hold a full batch of packets, the
+packet dispatching loop must be interrupted. When this happens, this event is
+emitted. As good performance relies on minimizing the total number of
+dispatches (i.e. fetches), tracking this event can be useful when slowness
+occurs (or simply in order to optimize the batch and buffer size).
 
 #### Event: 'close'
 
@@ -133,6 +202,10 @@ This event is guaranteed to be emitted after the `'end'` event.
   + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold packets.
     Larger means more packets can be gathered in fewer dispatch calls (this
     will effectively cap the batchSize option). [default: `1024 * 1024` (1MB)]
+  + `batchSize` {Number} Number of packets read during each call to PCAP. A
+    higher number here is more efficient but runs the risk of overflowing
+    internal buffers (especially in the case of replay streams, which can't
+    rely on the PCAP dispatch call returning in time). [default: `1000`]
 
 Note that unlike the live capture stream, this stream will automatically
 close once the end of the file read is reached.
@@ -163,6 +236,27 @@ Also useful for saves.
 
 
 ### Class: dot11.capture.Save
+
+A writable stream useful to store captures for later. The format used is
+compatible with Wireshark and Tcpdump and can be read normally by them.
+
+
+### Event 'finish'
+
+Emitted right after the stream ends (e.g. caused by calling the `end` method).
+The underlying resource is guaranteed to still be open at this time.
+
+### Event 'error'
+
++ `err` {Error} The error that caused this.
+
+Emitted when something went wrong.
+
+#### Event: 'close'
+
+Emitted after the underlying device is closed.
+
+Most methods on the stream will be unavailable at this point.
 
 #### new dot11.capture.Save(path, [opts])
 

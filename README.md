@@ -34,7 +34,7 @@ each packet's length and the total number of packets processed.
 ```javascript
 var dot11 = require('dot11');
 
-var liveStream = new dot11.capture.Live(); // Readable stream.
+var liveStream = new dot11.capture.Live(); // Readable stream of packets.
 var saveStream = new dot11.capture.Save('log.pcap'); // Writable stream.
 
 liveStream
