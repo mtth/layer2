@@ -1,6 +1,7 @@
+#include "pcap_wrapper.h"
+#include <cstring>
 #include <node_buffer.h>
 #include <sys/ioctl.h>
-#include "pcap_wrapper.h"
 
 #define precondition(b) \
   if (!(b)) \
@@ -365,10 +366,11 @@ Handle<Value> PcapWrapper::dump(const Arguments& args) {
 
   // Create fake packet header.
   int snaplen = pcap_snapshot(wrapper->handle);
-  struct pcap_pkthdr pktheader = {};
-  pktheader.ts = tv;
-  pktheader.caplen = packet_length > snaplen ? snaplen : packet_length;
-  pktheader.len = packet_length; // WARNING: this might be wrong.
+  struct pcap_pkthdr pktheader = {
+    tv, // ts
+    packet_length > snaplen ? snaplen : packet_length, // caplen
+   packet_length // len (WARNING: this might be wrong)
+  };
 
   pcap_dump((u_char *) wrapper->dump_handle, &pktheader, (u_char *) packet_data);
 
