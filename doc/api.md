@@ -27,27 +27,27 @@ new Live('en0', {promisc: true, monitor: true})
   .close(10000);
 ```
 
-### Event: 'readable'
+#### Event: 'readable'
 
 Emitted when the first packet can be read.
 
-### Event: 'data'
+#### Event: 'data'
 
 + `packet` {Buffer} A packet.
 
 Emitted each time a packet is available for reading.
 
-### Event: 'end'
+#### Event: 'end'
 
 Emitted after `close` is called but before the underlying device is closed.
 
-### Event 'finish'
+#### Event 'finish'
 
 Emitted right after the writable end of the stream closes (e.g. caused by
 calling the `end` method). Similarly to the `'end'` event, the underlying
 resource is guaranteed to still be open at this time.
 
-### Event 'error'
+#### Event 'error'
 
 + `err` {Error} The error that caused this.
 
@@ -147,24 +147,24 @@ Also useful for creating saves.
 
 Readable packet stream from a saved file.
 
-### Event: 'readable'
+#### Event: 'readable'
 
 Emitted when the first packet can be read.
 
-### Event: 'data'
+#### Event: 'data'
 
 + `packet` {Buffer} A packet.
 
 Emitted each time a packet is available for reading.
 
-### Event: 'end'
+#### Event: 'end'
 
 Emitted when the end of the file is reached.
 
 Similarly to `Live`, this will be emitted before the underlying device is
 closed.
 
-### Event 'error'
+#### Event 'error'
 
 + `err` {Error} The error that caused this.
 
@@ -181,7 +181,7 @@ Emitted each time a batch of packets is fetched from the underlying resource.
   having too many dispatch loops interrupted prematurely (see `'break'` event
   below).
 
-### Event 'break'
+#### Event 'break'
 
 If the temporary buffer size is too small to hold a full batch of packets, the
 packet dispatching loop must be interrupted. When this happens, this event is
@@ -241,12 +241,12 @@ A writable stream useful to store captures for later. The format used is
 compatible with Wireshark and Tcpdump and can be read normally by them.
 
 
-### Event 'finish'
+#### Event 'finish'
 
 Emitted right after the stream ends (e.g. caused by calling the `end` method).
 The underlying resource is guaranteed to still be open at this time.
 
-### Event 'error'
+#### Event 'error'
 
 + `err` {Error} The error that caused this.
 
@@ -279,4 +279,92 @@ defined (as truncated packets do not get carried over).
 
 ## Transform
 
-Various decoders and extractors (soon).
+Various decoders and extractors.
+
+
+### Class: dot11.transform.Decoder([opts])
+
+A duplex stream used to transform raw packets (i.e. buffers) to parsed objects.
+
+#### Event: 'readable'
+
+Emitted when the first frame can be read.
+
+#### Event: 'data'
+
++ `frame` {Object | String} A (potentially stringified) object representation
+  of the packet.
+
+Emitted each time a frame is available for reading.
+
+#### Event: 'end'
+
+Emitted when there are no more frames to read.
+
+#### Event 'error'
+
++ `err` {Error} The error that caused this.
+
+Emitted when the decoder was unable to decode a packets.
+
+#### new dot11.transform.Decoder([opts])
+
++ `opts` {Object} Various options:
+  + `linkType` {String} The data link type to be decoded. If the stream is
+    piped to from another `dot11` stream, this will be inferred automatically.
+  + `ignoreErrors` {Boolean} Ignore any decoding errors. [default: `false`]
+  + `stringify` {Boolean} Jsonify the decoded objects (useful for example if
+    piping to `process.stdout`). [default: `false`]
+
+#### getLinkType()
+
+Get decoded data link type.
+
+
+### Class: dot11.transform.Extractor([opts])
+
+A duplex stream used to transform raw packets (i.e. buffers) to parsed objects.
+
+
+#### Event: 'readable'
+
+Emitted when the first frame can be read.
+
+#### Event: 'data'
+
++ `frame` {Buffer} The extracted frame.
+
+Emitted each time a frame is available for reading.
+
+#### Event: 'end'
+
+Emitted when there are no more frames to read.
+
+#### Event 'error'
+
++ `err` {Error} The error that caused this.
+
+Emitted when the decoder was unable to extract a frame.
+
+#### new dot11.transform.Extractor([opts])
+
++ `opts` {Object} Various options:
+  + `toLinkType` {String} The data link type from which to extract data. If
+    piped to from another `dot11` stream, this will be inferred automatically.
+  + `fromLinkType` {String} The data link type expected as output. If a single
+    conversion is possible from the input link type, this will also be inferred
+    automatically. Note that relying on this inference might break in the
+    future if more extractor types are added (whereas the first inference is
+    safe).
+  + `ignoreErrors` {Boolean} Ignore any extraction errors. [default: `false`]
+
+#### activate()
+
+If you are manually `write`ing on an `Extractor` stream (instead of `pipe`ing),
+call this to setup the stream internals first.
+
+#### getLinkType([incoming])
+
++ `incoming` {Boolean} Whether to return the incoming or outgoing link type.
+
+Get extracted from/to data link type.
