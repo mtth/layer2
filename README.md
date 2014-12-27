@@ -2,7 +2,7 @@
 
 *A powerful yet simple API for Wi-Fi monitoring.*
 
-`dot11` leverages Node.js's [streams](http://nodejs.org/api/stream.html) to
+`dot11` leverages Node.js' [streams](http://nodejs.org/api/stream.html) to
 provide an intuitive and efficient interface for packet capture and injection.
 It is inspired by other packet capturing libraries (e.g.
 [lib_pcap](https://github.com/mranney/node_pcap)).
@@ -36,9 +36,13 @@ captures as root.
 
 ### Capture
 
-In the example below, we create a readable stream from default network
-interface and store 5 seconds' worth of packets to `log.pcap`. We also print
-each packet's length and the total number of packets processed.
+In the example below, we create a readable
+[`Live`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturelive)
+stream from default network interface and store 5 seconds' worth of packets to
+`log.pcap` by writing to a
+[`Save`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturesave)
+stream. We also print each packet's length and the total number of packets
+processed.
 
 ```javascript
 var dot11 = require('dot11');
@@ -55,12 +59,15 @@ liveStream
 
 The above example is only using the default options, it is possible to specify
 which interface to listen to and what modes to activate (e.g. promiscuous or
-monitor). A `Replay` stream is also available to stream packets from a saved
-capture file.
+monitor). A
+[`Replay`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturereplay)
+stream is also available to stream packets from a saved capture file.
 
 ### Transform
 
-TODO: write doc for this.
+`dot11` currently has decoders for Radiotap headers and (partially) 802.11
+packets. It also features an extractor from Radiotap to the latter. Hopefully
+more transformations will be added soon.
 
 
 ## Documentation
