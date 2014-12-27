@@ -358,11 +358,6 @@ Emitted when the decoder was unable to extract a frame.
     safe).
   + `ignoreErrors` {Boolean} Ignore any extraction errors. [default: `false`]
 
-#### activate()
-
-If you are manually `write`ing on an `Extractor` stream (instead of `pipe`ing),
-call this to setup the stream internals first.
-
 #### getLinkType([incoming])
 
 + `incoming` {Boolean} Whether to return the incoming or outgoing link type.

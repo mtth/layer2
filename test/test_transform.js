@@ -235,13 +235,33 @@
 
     });
 
-    it('infers the from and to types when possible', function (done) {
+    it('infers the from and to types when piping', function (done) {
 
       var capture = new dot11.capture.Replay(captures.small.path);
       var extractor = new Extractor();
 
       capture
         .pipe(extractor)
+        .once('readable', function () {
+          assert.equal(this.getLinkType(true), 'IEEE802_11_RADIO');
+          assert.equal(this.getLinkType(), 'IEEE802_11_FRAME');
+          done();
+        });
+
+    });
+
+    it('activates on read', function (done) {
+
+      var capture = new dot11.capture.Replay(captures.small.path);
+      var extractor = new Extractor({
+        fromLinkType: 'IEEE802_11_RADIO',
+        toLinkType: 'IEEE802_11_FRAME'
+      });
+
+      capture
+        .on('data', function (buf) { extractor.write(buf); });
+
+      extractor
         .once('readable', function () {
           assert.equal(this.getLinkType(true), 'IEEE802_11_RADIO');
           assert.equal(this.getLinkType(), 'IEEE802_11_FRAME');
