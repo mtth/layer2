@@ -616,8 +616,8 @@
 
   }
 
-  // Check whether there is a semi active network we can listen to.
   function hasActiveDevice() {
+    // Check whether there is a semi active network we can listen to.
 
     var device;
     try {

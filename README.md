@@ -7,6 +7,19 @@ provide an intuitive and efficient interface for packet capture and injection.
 It is inspired by other packet capturing libraries (e.g.
 [lib_pcap](https://github.com/mranney/node_pcap)).
 
+```javascript
+var dot11 = require('dot11');
+
+var capture = new dot11.capture.Live('en0', {promisc: true, monitor: true});
+var extractor = new dot11.transform.Extractor();
+var decoder = new dot11.transform.Decoder({stringify: true, ignoreErrors: true});
+
+capture                     // Stream of Wi-Fi packets inside Radiotap headers.
+  .pipe(extractor)          // Stream of extracted 802.11 frames.
+  .pipe(decoder)            // Stream of decoded and stringified 802.11 frames.
+  .pipe(process.stdout);    // Output result to console.
+```
+
 
 ## Installation
 
@@ -20,6 +33,8 @@ captures as root.
 
 
 ## Quickstart
+
+### Capture
 
 In the example below, we create a readable stream from default network
 interface and store 5 seconds' worth of packets to `log.pcap`. We also print
@@ -42,6 +57,10 @@ The above example is only using the default options, it is possible to specify
 which interface to listen to and what modes to activate (e.g. promiscuous or
 monitor). A `Replay` stream is also available to stream packets from a saved
 capture file.
+
+### Transform
+
+TODO: write doc for this.
 
 
 ## Documentation
