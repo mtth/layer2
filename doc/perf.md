@@ -1,6 +1,28 @@
 # Performance benchmarks
 
-Current numbers:
+
+Captures are downloaded from the [Wireshark sample captures
+page](http://wiki.wireshark.org/SampleCaptures) and replicated by a factor of
+1000.
+
+To run these benchmarks:
+
+```bash
+$ npm run perf
+```
+
+
+## Raw packet throughput
+
+Current numbers for pass-through implementation.
+
+Columns:
+
++ Package
++ Total packets processed
++ Average time per packet
++ Total time
++ Capture file
 
 ```bash
 dot11   1748000 1.2242178135011441 us/p 2139.932738 ms  dat/airtunes-1.pcap.1000
@@ -17,6 +39,7 @@ pcap    81000   1.8874165555555558 us/p 152.880741 ms   dat/vnc-sample.pcap.1000
 pcap    1093000 1.6044667493138152 us/p 1753.682157 ms  dat/wpa-Induction.pcap.1000
 ```
 
-Captures are downloaded from the [Wireshark sample captures
-page](http://wiki.wireshark.org/SampleCaptures) and replicated by a factor of
-1000.
+Average throughput:
+
++ `dot11`: 0.86 million packets per second
++ `pcap`: 0.56 million packets per second

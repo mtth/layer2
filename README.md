@@ -1,17 +1,12 @@
 # Dot11 [![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
 
+*A powerful yet simple API for Wi-Fi monitoring.*
 
-Wi-Fi packets streams!
+`dot11` leverages Node.js's [streams](http://nodejs.org/api/stream.html) to
+provide an intuitive and efficient interface for packet capture and injection.
+It is inspired by other packet capturing libraries (e.g.
+[lib_pcap](https://github.com/mranney/node_pcap)).
 
-
-## Motivation
-
-`dot11` aims to provide an efficient and powerful yet simple interface to Wi-Fi
-(802.11) transmissions, both for capturing and emitting. If you know how to use
-streams, you know how to use `dot11` (and event if not, it's not hard)!
-
-Its API is similar to the built-in `Socket`, but for lower network layers. It
-is originally inspired by [node_pcap](https://github.com/mranney/node_pcap).
 
 
 ## Installation
@@ -54,6 +49,16 @@ capture file.
 
 You can find the API docs
 [here](https://github.com/mtth/dot11/blob/master/doc/api.md).
+
+
+## Benchmarks
+
+Average raw packet throughput (see [Performance
+benchmarks](https://github.com/mtth/dot11/blob/master/doc/perf.md) for more
+details):
+
++ `pcap`: 0.56 million packets per second.
++ `dot11`: 0.86 million packets per second.
 
 
 ## Tests
