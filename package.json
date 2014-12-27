@@ -4,8 +4,8 @@
   "description": "Wi-Fi packets streams!",
   "main": "./lib",
   "scripts": {
+    "build-debug": "node-gyp configure && node-gyp build --debug",
     "clean": "rm -rf build node_modules",
-    "debug": "node-gyp configure && node-gyp build --debug",
     "test": "$(npm bin)/mocha"
   },
   "engines": {

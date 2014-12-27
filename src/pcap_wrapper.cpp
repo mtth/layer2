@@ -258,20 +258,27 @@ Handle<Value> PcapWrapper::activate(const Arguments& args) {
   precondition(args.Length() == 0);
   HandleScope scope;
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+
   if (pcap_activate(wrapper->handle)) {
     return ThrowException(Exception::Error(String::New(pcap_geterr(wrapper->handle))));
   }
 
+#if defined(__APPLE_CC__) || defined(__APPLE__)
   // Work around buffering bug in BPF on OSX 10.6 as of May 19, 2010 This may
   // result in dropped packets under load because it disables the (broken)
   // buffer
   // http://seclists.org/tcpdump/2010/q1/110
-#if defined(__APPLE_CC__) || defined(__APPLE__)
   #include <net/bpf.h>
   int fd = pcap_get_selectable_fd(wrapper->handle);
   int v = 1;
-  ioctl(fd, BIOCIMMEDIATE, &v);
-  // TODO - check return value
+  if (ioctl(fd, BIOCIMMEDIATE, &v) == -1) {
+    return ThrowException(Exception::Error(String::New("Can't set device to non-blocking mode.")));
+  }
+#else
+  char errbuf[PCAP_ERRBUF_SIZE];
+  if (pcap_setnonblock(wrapper->handle, 1, errbuf) == -1) {
+    return ThrowException(Exception::Error(String::New(errbuf)));
+  }
 #endif
 
   return args.This();
