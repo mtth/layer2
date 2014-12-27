@@ -11,11 +11,10 @@
   var captures = [
     'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=mesh.pcap',
     'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=airtunes-1.pcap',
-    'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=dhcp.pcap',
     'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=vnc-sample.pcap',
-    'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=slammer.pcap',
     'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=dns-remoteshell.pcap',
-    'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=arp-storm.pcap'
+    'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=arp-storm.pcap',
+    'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=wpa-Induction.pcap'
   ];
 
   var dPath = path.join(__dirname, 'dat');
