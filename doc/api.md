@@ -6,7 +6,7 @@
 This module contains the following 3 streams:
 
 + A duplex stream of packets from a live network interface: `Live`.
-+ A readable stream of packets from a saved capture file: `Replay.
++ A readable stream of packets from a saved capture file: `Replay`.
 + A writable stream of packets to write to a capture file: `Save`.
 
 

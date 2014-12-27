@@ -6,6 +6,7 @@
   "scripts": {
     "build-debug": "node-gyp configure && node-gyp build --debug",
     "clean": "rm -rf build node_modules",
+    "perf": "cd perf && make",
     "test": "$(npm bin)/mocha"
   },
   "engines": {
