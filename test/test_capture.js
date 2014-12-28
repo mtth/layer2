@@ -29,6 +29,27 @@
 
     var Replay = dot11.capture.Replay;
 
+    it('returns the correct maximum packet size', function () {
+
+      var capture = new Replay(captures.large.path);
+      assert.equal(capture.getMaxPacketSize(), 65535);
+
+    });
+
+    it('returns the correct link type', function () {
+
+      var capture = new Replay(captures.large.path);
+      assert.equal(capture.getLinkType(), 'IEEE802_11_RADIO');
+
+    });
+
+    it('returns the correct path', function () {
+
+      var capture = new Replay(captures.large.path);
+      assert.equal(capture.getPath(), captures.large.path);
+
+    });
+
     it('can read an entire file', function (done) {
 
       var nPackets = 0;
@@ -132,7 +153,7 @@
     it('supports closing after a timeout', function (done) {
 
       var capture = new Replay(captures.large.path, {
-        batchSize: 2 // Small enough to guarantee it won't be read in one go.
+        batchSize: 1 // Small enough to guarantee it won't be read in one go.
       });
       var nPackets = 0;
 
@@ -163,6 +184,17 @@
           done();
         });
       setTimeout(function () { capture.close(); }, 1);
+
+    });
+
+    it('closes after ending', function (done) {
+
+      var ended = false;
+
+      new Replay(captures.large.path)
+        .on('data', function () {})
+        .on('end', function () { ended = true; })
+        .on('close', function () { done(); });
 
     });
 
@@ -238,13 +270,6 @@
 
     });
 
-    it('returns the correct snapshot length', function () {
-
-        var capture = new dot11.capture.Replay(captures.large.path);
-        assert.equal(capture.getMaxPacketSize(), 65535);
-
-    });
-
     function testDispatching(batchSize, callback) {
 
       var totalPackets = captures.large.length;
@@ -286,6 +311,22 @@
 
     var Save = dot11.capture.Save;
 
+    it('returns the correct maximum packet size', function () {
+
+      var savePath = fromName('max_packet_size_default.pcap');
+      var save = new Save(savePath, {maxPacketSize: 1024});
+      assert.equal(save.getMaxPacketSize(), 1024);
+
+    });
+
+    it('returns the correct link type', function () {
+
+      var savePath = fromName('link_type.pcap');
+      var save = new Save(savePath, {linkType: 'IEEE802_11_RADIO'});
+      assert.equal(save.getLinkType(), 'IEEE802_11_RADIO');
+
+    });
+
     it('throws an error when using an empty/invalid link type', function () {
 
       var savePath = fromName('empty.pcap');
@@ -299,6 +340,15 @@
 
     });
 
+    it('returns the correct path', function () {
+
+      var savePath = fromName('path.pcap');
+      var save = new Save(savePath);
+      assert.equal(save.getPath(), savePath);
+
+    });
+
+
     it('can be written to', function (done) {
 
       var savePath = fromName('write.pcap');
@@ -309,9 +359,11 @@
 
       replay
         .on('data', function (buf) { save.write(buf); })
-        .on('end', function () {
-          save.end();
-          checkEqual(savePath, captures.small.path);
+        .on('end', function () { save.end(); }); // Not piping so manual close.
+
+      save
+        .on('close', function () {
+          checkEqual(this.getPath(), captures.small.path);
           done();
         });
 
@@ -322,13 +374,11 @@
 
       var savePath = fromName('pipe.pcap');
       var replay = new dot11.capture.Replay(captures.small.path);
-      var save = new Save(savePath, {
-        linkType: replay.getLinkType()
-      });
+      var save = new Save(savePath, {linkType: replay.getLinkType()});
 
       replay
         .pipe(save)
-        .on('finish', function () {
+        .on('close', function () {
           checkEqual(savePath, captures.small.path);
           done();
         });
@@ -343,7 +393,7 @@
 
       replay
         .pipe(save)
-        .on('finish', function () {
+        .on('close', function () {
           checkEqual(savePath, captures.small.path);
           done();
         });
@@ -354,31 +404,29 @@
 
       var savePath = fromName('truncate.pcap');
       var replay = new dot11.capture.Replay(captures.small.path);
-      var save = new Save(savePath, {
-        maxPacketSize: 50
-      });
+      var save = new Save(savePath, {maxPacketSize: 50});
 
       replay
         .pipe(save)
         .on('close', function () {
           new dot11.capture.Replay(savePath)
             .on('data', function (buf) { assert.ok(buf.length <= 50); })
-            .on('error', function () {}) // Skip buffer overflow errors.
+            .on('error', function () {}) // Skip packet overflow errors.
             .on('end', function () { done(); });
         });
 
     });
 
-    it('closes on finish', function (done) {
+    it('closes after finish', function (done) {
 
       var savePath = fromName('close.pcap');
       var replay = new dot11.capture.Replay(captures.small.path);
-      var save = new Save(savePath, {
-        linkType: replay.getLinkType()
-      });
+      var save = new Save(savePath, {linkType: replay.getLinkType()});
+      var finished = false;
 
       save
-        .on('close', function () { replay.close(); done(); })
+        .on('finish', function () { finished = true; replay.close(); })
+        .on('close', function () { assert.ok(finished); done(); })
         .end(replay.read());
 
     });
