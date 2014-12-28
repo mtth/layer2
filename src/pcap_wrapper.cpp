@@ -272,11 +272,6 @@ Handle<Value> PcapWrapper::activate(const Arguments& args) {
   if (ioctl(fd, BIOCIMMEDIATE, &v) == -1) {
     return ThrowException(Exception::Error(String::New("Can't set device to non-blocking mode.")));
   }
-#else
-  char errbuf[PCAP_ERRBUF_SIZE];
-  if (pcap_setnonblock(wrapper->handle, 1, errbuf) == -1) {
-    return ThrowException(Exception::Error(String::New(errbuf)));
-  }
 #endif
 
   return args.This();

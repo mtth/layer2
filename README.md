@@ -36,7 +36,7 @@ captures as root.
 
 ### Capture
 
-In the example below, we create a readable
+In the example below, we create a
 [`Live`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturelive)
 stream from the default network interface and store 5 seconds' worth of packets to
 a file by writing to a
