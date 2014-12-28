@@ -6,7 +6,7 @@
   var assert = require('assert'),
       decoders = require('../lib/decoders');
 
-  describe('Decoder', function () {
+  describe('Decoder for', function () {
 
     describe('IEEE802_11_RADIO', function () {
 
