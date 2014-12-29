@@ -333,18 +333,24 @@ Emitted each time a frame is available for reading.
 
 Emitted when there are no more frames to read.
 
+#### Event 'warning'
+
++ `err` {Error} The error that caused extraction to fail. For convenience, the
+  offending packet is available as `err.data`.
+
+Emitted when the decoder was unable to decode a packet.
+
 #### Event 'error'
 
 + `err` {Error} The error that caused this.
 
-Emitted when the decoder was unable to decode a packets.
+Emitted when something fatal happened (e.g. invalid link type).
 
 #### new dot11.transform.Decoder([opts])
 
 + `opts` {Object} Various options:
   + `linkType` {String} The data link type to be decoded. If the stream is
     piped to from another `dot11` stream, this will be inferred automatically.
-  + `ignoreErrors` {Boolean} Ignore any decoding errors. [default: `false`]
   + `stringify` {Boolean} Jsonify the decoded objects (useful for example if
     piping to `process.stdout`). [default: `false`]
 
@@ -369,11 +375,18 @@ Emitted each time a frame is available for reading.
 
 Emitted when there are no more frames to read.
 
+#### Event 'warning'
+
++ `err` {Error} The error that caused the decoding to fail. The offending
+  packet is available as `err.data`.
+
+Emitted when the decoder was unable to extract a frame.
+
 #### Event 'error'
 
 + `err` {Error} The error that caused this.
 
-Emitted when the decoder was unable to extract a frame.
+Emitted when something fatal happened (e.g. invalid link type).
 
 #### new dot11.transform.Extractor([opts])
 
@@ -385,7 +398,6 @@ Emitted when the decoder was unable to extract a frame.
     automatically. Note that relying on this inference might break in the
     future if more extractor types are added (whereas the first inference is
     safe).
-  + `ignoreErrors` {Boolean} Ignore any extraction errors. [default: `false`]
 
 #### getLinkType([incoming])
 

@@ -12,7 +12,7 @@ var dot11 = require('dot11');
 
 var capture = new dot11.capture.Live('en0', {monitor: true});
 var extractor = new dot11.transform.Extractor();
-var decoder = new dot11.transform.Decoder({ignoreErrors: true, stringify: true});
+var decoder = new dot11.transform.Decoder({stringify: true});
 
 capture                     // Stream of packets with Radiotap headers.
   .pipe(extractor)          // Stream of extracted 802.11 frames.
