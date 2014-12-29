@@ -40,6 +40,9 @@ Emitted when the first packet can be read.
 
 Emitted each time a packet is available for reading.
 
+Attaching a handler to this event (and `pipe`ing) is the preferred way of
+reading this stream of packets.
+
 #### Event: 'end'
 
 Emitted after `close` is called but before the underlying device is closed.
@@ -103,6 +106,23 @@ Note that a section of length `maxPacketSize` is reserved at the end of the
 temporary buffer to protect from overflows. This way, the internal mechanism
 that fetches packets by batch (for performance), has enough time to stop
 without losing any packets.
+
+#### live.read()
+
++ return {Buffer}
+
+Get a packet from the stream if available, and `null` otherwise.
+
+To guarantee that some data is available, this should only be called after the `'readable'` event has been triggered:
+
+```javascript
+live.on('readable', function () {
+    var buf;
+    while ((buf = this.read()) !== null) {
+      packets.push(buf);
+    }
+  });
+```
 
 #### live.close([timeout])
 

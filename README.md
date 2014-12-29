@@ -10,11 +10,11 @@ It is inspired by other packet capturing libraries (e.g.
 ```javascript
 var dot11 = require('dot11');
 
-var capture = new dot11.capture.Live('en0', {promisc: true, monitor: true});
+var capture = new dot11.capture.Live('en0', {monitor: true});
 var extractor = new dot11.transform.Extractor();
-var decoder = new dot11.transform.Decoder({stringify: true, ignoreErrors: true});
+var decoder = new dot11.transform.Decoder({ignoreErrors: true, stringify: true});
 
-capture                     // Stream of Wi-Fi packets inside Radiotap headers.
+capture                     // Stream of packets with Radiotap headers.
   .pipe(extractor)          // Stream of extracted 802.11 frames.
   .pipe(decoder)            // Stream of decoded and stringified 802.11 frames.
   .pipe(process.stdout);    // Output result to console.

@@ -120,6 +120,24 @@
 
     });
 
+    it('can be read packet by packet', function (done) {
+
+      var packets = [];
+
+      new Replay(captures.small.path)
+        .on('readable', function () {
+          var buf;
+          while ((buf = this.read()) !== null) {
+            packets.push(buf);
+          }
+        })
+        .on('end', function () {
+          assert.equal(packets.length, captures.small.length);
+          done();
+        });
+
+    });
+
     it('closes automatically after reading a file', function (done) {
 
       var isClosed = false;
