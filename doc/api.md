@@ -329,16 +329,16 @@ Emitted when the first frame can be read.
 
 Emitted each time a frame is available for reading.
 
+#### Event 'invalid'
+
++ `err` {Error} The error that caused the decoding to fail. For convenience,
+  the offending packet is available as `err.data`.
+
+Emitted when an invalid packet can't be decoded.
+
 #### Event: 'end'
 
 Emitted when there are no more frames to read.
-
-#### Event 'warning'
-
-+ `err` {Error} The error that caused extraction to fail. For convenience, the
-  offending packet is available as `err.data`.
-
-Emitted when the decoder was unable to decode a packet.
 
 #### Event 'error'
 
@@ -371,16 +371,16 @@ Emitted when the first frame can be read.
 
 Emitted each time a frame is available for reading.
 
+#### Event 'invalid'
+
++ `err` {Error} The error that caused the extraction to fail. The offending
+  packet is available as `err.data`.
+
+Emitted when the decoder was unable to extract the frame from a invalid packet.
+
 #### Event: 'end'
 
 Emitted when there are no more frames to read.
-
-#### Event 'warning'
-
-+ `err` {Error} The error that caused the decoding to fail. The offending
-  packet is available as `err.data`.
-
-Emitted when the decoder was unable to extract a frame.
 
 #### Event 'error'
 
