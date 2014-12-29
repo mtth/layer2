@@ -3,8 +3,16 @@
   "version": "0.1.6",
   "description": "Wi-Fi packets & streams",
   "keywords": [
-    "wifi", "802.11", "packet", "stream", "monitor", "capture", "injection",
-    "pcap", "wireshark", "tcpdump"
+    "wifi",
+    "802.11",
+    "packet",
+    "stream",
+    "monitor",
+    "capture",
+    "injection",
+    "pcap",
+    "wireshark",
+    "tcpdump"
   ],
   "main": "./lib",
   "scripts": {
@@ -17,6 +25,7 @@
     "node": "0.10.x"
   },
   "devDependencies": {
+    "deep-diff": "^0.3.0",
     "mocha": "^2.0.1"
   },
   "repository": {

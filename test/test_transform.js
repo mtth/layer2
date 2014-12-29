@@ -75,13 +75,13 @@
     it('infers the from type', function (done) {
 
       var capture = new dot11.capture.Replay(captures.small.path);
-      var extractor = new Extractor({toLinkType: 'IEEE802_11_FRAME'});
+      var extractor = new Extractor({toLinkType: 'IEEE802_11'});
 
       capture
         .pipe(extractor)
         .once('readable', function () {
           assert.equal(this.getLinkType(true), 'IEEE802_11_RADIO');
-          assert.equal(this.getLinkType(), 'IEEE802_11_FRAME');
+          assert.equal(this.getLinkType(), 'IEEE802_11');
           done();
         });
 
@@ -96,7 +96,7 @@
         .pipe(extractor)
         .once('readable', function () {
           assert.equal(this.getLinkType(true), 'IEEE802_11_RADIO');
-          assert.equal(this.getLinkType(), 'IEEE802_11_FRAME');
+          assert.equal(this.getLinkType(), 'IEEE802_11');
           done();
         });
 
@@ -107,7 +107,7 @@
       var capture = new dot11.capture.Replay(captures.small.path);
       var extractor = new Extractor({
         fromLinkType: 'IEEE802_11_RADIO',
-        toLinkType: 'IEEE802_11_FRAME'
+        toLinkType: 'IEEE802_11'
       });
 
       capture
@@ -116,7 +116,7 @@
       extractor
         .once('readable', function () {
           assert.equal(this.getLinkType(true), 'IEEE802_11_RADIO');
-          assert.equal(this.getLinkType(), 'IEEE802_11_FRAME');
+          assert.equal(this.getLinkType(), 'IEEE802_11');
           done();
         });
 
@@ -125,7 +125,7 @@
     it('extracts all valid packets', function (done) {
 
       var capture = new dot11.capture.Replay(captures.large.path);
-      var extractor = new Extractor({toLinkType: 'IEEE802_11_FRAME'});
+      var extractor = new Extractor({toLinkType: 'IEEE802_11'});
       var nPackets = 0;
 
       capture
@@ -138,12 +138,12 @@
 
     });
 
-    it('extracts IEEE802_11_RADIO to IEEE802_11_FRAME', function (done) {
+    it('extracts IEEE802_11_RADIO to IEEE802_11', function (done) {
 
       var capture = new dot11.capture.Replay(captures.small.path);
       var extractor = new Extractor({
         fromLinkType: 'IEEE802_11_RADIO',
-        toLinkType: 'IEEE802_11_FRAME'
+        toLinkType: 'IEEE802_11'
       });
       var decoder = new dot11.transform.Decoder();
 
@@ -151,7 +151,7 @@
         .pipe(extractor)
         .pipe(decoder)
         .once('readable', function () {
-          assert.equal(this.getLinkType(), 'IEEE802_11_FRAME');
+          assert.equal(this.getLinkType(), 'IEEE802_11');
           assert.deepEqual(this.read() , {
             version: 0,
             type: 'mgmt',

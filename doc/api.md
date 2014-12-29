@@ -116,6 +116,7 @@ Get a packet from the stream if available, and `null` otherwise.
 To guarantee that some data is available, this should only be called after the `'readable'` event has been triggered:
 
 ```javascript
+var packets = [];
 live.on('readable', function () {
     var buf;
     while ((buf = this.read()) !== null) {
