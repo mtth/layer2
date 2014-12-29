@@ -137,6 +137,7 @@
             'da': 'ff:ff:ff:ff:ff:ff',
             'sa': 'ac:22:0b:ce:6d:e0',
             'bssid': 'ac:22:0b:ce:6d:e0',
+            'encryption': 'ccmp',
             'body': new Buffer(0) // FIXME
           }
         );
@@ -164,8 +165,7 @@
             'ta': 'fc:4d:d4:2b:ab:28',
             'da': '16:ab:f0:a5:84:60',
             'sa': 'fc:4d:d4:2b:ab:28',
-            'bssid': '16:ab:f0:a5:84:60',
-            'body': new Buffer(0)
+            'bssid': '16:ab:f0:a5:84:60'
           }
         );
 
