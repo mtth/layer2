@@ -14,6 +14,10 @@
     large: {
       path: './test/dat/mesh780.pcap',
       length: 780
+    },
+    mixed: { // With invalid packets.
+      path: './test/dat/mixed.pcap',
+      length: {valid: 155, invalid: 11}
     }
   };
 
@@ -57,10 +61,38 @@
 
       capture
         .pipe(decoder)
-        .on('data', function () { nPackets++; })
+        .on('data', function (data) {
+          assert.ok(data && typeof data == 'object');
+          nPackets++;
+        })
         .on('end', function () {
           assert.equal(this.getLinkType(), 'IEEE802_11_RADIO');
           assert.equal(nPackets, captures.small.length);
+          done();
+        });
+
+    });
+
+    it('emits events when a packet fails to decode', function (done) {
+
+      var capture = new dot11.capture.Replay(captures.mixed.path);
+      var decoder = new Decoder();
+      var nValidPackets = 0;
+      var nInvalidPackets = 0;
+
+      capture
+        .pipe(decoder)
+        .on('data', function (data) {
+          assert.ok(data && typeof data == 'object');
+          nValidPackets++;
+        })
+        .on('invalid', function (err) {
+          assert.ok(err.data && typeof err.data == 'object');
+          nInvalidPackets++;
+        })
+        .on('end', function () {
+          assert.equal(nValidPackets, captures.mixed.length.valid);
+          assert.equal(nInvalidPackets, captures.mixed.length.invalid);
           done();
         });
 
