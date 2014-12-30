@@ -336,6 +336,11 @@ Emitted each time a frame is available for reading.
 
 Emitted when an invalid packet can't be decoded.
 
+We are not emitting errors here because node would unpipe any readable stream
+writing to this decoder when it emits an error (and it is expensive to reattach
+them each time). Moreover these are hard to control since there are corrupted
+packets relatively often.
+
 #### Event: 'end'
 
 Emitted when there are no more frames to read.

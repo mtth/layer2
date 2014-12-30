@@ -73,6 +73,25 @@
 
     });
 
+    it('emits end when the writable side finished', function (done) {
+
+      var capture = new dot11.capture.Replay(captures.large.path);
+      var decoder = new Decoder({linkType: capture.getLinkType()});
+      var nPackets = 0;
+
+      capture
+        .on('data', function (buf) { decoder.write(buf); })
+        .on('end', function () { decoder.end(); });
+
+      decoder
+        .on('data', function () { nPackets++; })
+        .on('end', function () {
+          assert.equal(nPackets, captures.large.length);
+          done();
+        });
+
+    });
+
     it('emits events when a packet fails to decode', function (done) {
 
       var capture = new dot11.capture.Replay(captures.mixed.path);
@@ -162,6 +181,28 @@
 
       capture
         .pipe(extractor)
+        .on('data', function () { nPackets++; })
+        .on('end', function () {
+          assert.equal(nPackets, captures.large.length);
+          done();
+        });
+
+    });
+
+    it('emits end when the writable side finished', function (done) {
+
+      var capture = new dot11.capture.Replay(captures.large.path);
+      var extractor = new Extractor({
+        fromLinkType: 'IEEE802_11_RADIO',
+        toLinkType: 'IEEE802_11'
+      });
+      var nPackets = 0;
+
+      capture
+        .on('data', function (buf) { extractor.write(buf); })
+        .on('end', function () { extractor.end(); });
+
+      extractor
         .on('data', function () { nPackets++; })
         .on('end', function () {
           assert.equal(nPackets, captures.large.length);
