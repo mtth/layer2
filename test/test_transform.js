@@ -220,23 +220,6 @@
           .pipe(decoder)
           .once('readable', function () {
             assert.equal(this.getLinkType(), 'IEEE802_11');
-            assert.deepEqual(this.read() , {
-              version: 0,
-              type: 'mgmt',
-              subType: 'beacon',
-              toDs: 0,
-              fromDs: 0,
-              retry: 0,
-              powerMgmt: 0,
-              moreData: 0,
-              moreFrag: 0,
-              duration: 0,
-              ra: 'ff:ff:ff:ff:ff:ff',
-              da: 'ff:ff:ff:ff:ff:ff',
-              ta: '06:03:7f:07:a0:16',
-              sa: '06:03:7f:07:a0:16',
-              bssid: '06:03:7f:07:a0:16'
-            });
             done();
           });
 

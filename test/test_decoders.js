@@ -36,7 +36,7 @@
 
       // Uncomment this to be able to analyze the frames used for testing in
       // this section from Tcpdump or Wireshark.
-      // after(function () { helper.save('dat/IEEE802_11.pcap'); });
+      after(function () { helper.save('dat/IEEE802_11.pcap'); });
 
       it('decodes beacon frames', function () {
 
@@ -53,6 +53,8 @@
             'moreFrag': 0,
             'moreData': 0,
             'duration': 0,
+            'fragN': 0,
+            'seqN': 1915,
             'ra': 'ff:ff:ff:ff:ff:ff',
             'ta': '06:03:7f:07:a0:16',
             'da': 'ff:ff:ff:ff:ff:ff',
@@ -129,7 +131,7 @@
             'sa': 'ac:22:0b:ce:6d:e0',
             'bssid': 'ac:22:0b:ce:6d:e0',
             'encryption': 'ccmp',
-            'data': new Buffer(0) // FIXME
+            'body': new Buffer(0) // FIXME
           }
         );
 
@@ -205,27 +207,87 @@
 
       });
 
-      it.skip('decodes qos-data cf-ack frames', function () {
+      it('decodes probe responses', function () {
 
         helper.compare(
-          '98bffe15c47e5e58d84dcedea94f2bc7da666bd6739e6bd8803bfde0fffd8cb7',
+          '50003a01002258957e368af7c7ce57bd8af7c7ce57bd002b928953137a03000064002104000b7866696e69747977696669010882848b9624b0486c0301012a01042f010432048c1298602d1abd181bffffff00000000000000000000000000000000000000003d1601001300000000000000000000000000000000000000dd090010180200001c0000dd180050f2020101840003a4000027a4000042435e0062322f00d9b873b7',
+          {
+            'version': 0,
+            'type': 'mgmt',
+            'subType': 'probe-res',
+            'toDs': 0,
+            'fromDs': 0,
+            'retry': 0,
+            'powerMgmt': 0,
+            'moreFrag': 0,
+            'moreData': 0,
+            'fragN': 0,
+            'seqN': 688,
+            'duration': 314,
+            'ra': '00:22:58:95:7e:36',
+            'ta': '8a:f7:c7:ce:57:bd',
+            'da': '00:22:58:95:7e:36',
+            'sa': '8a:f7:c7:ce:57:bd',
+            'bssid': '8a:f7:c7:ce:57:bd'
+            // 'body': new Buffer('928953137a03000064002104', 'hex')
+          }
+        );
+
+      });
+
+      it('decodes data frames (tkip, from ds)', function () {
+
+        helper.compare(
+          '0842000001005e7ffffa58238c2e1f0d78f7bef4e0664091a828bc60120000001bf80989e473411d0f1ace8d1a00ad52aaa4d88cc857de1297f7b6252f2bb9cbeb3eada18ed09065443369454b47ea701199a825299f811117767d8799f9de34dced537e8d0c7044e5e0881b7f9333b95b36938da2ab1120603a116e387e0e507f0ab9f567c83bd6bd43119c0b50b84cd6ec956468ddc95fa2865d2595d1a56fa0c69b8e754c9f5205e6f4cb79218259188286f584f82c4908787d08100830341d218fd22593997eab4187a015ba05972a',
           {
             'version': 0,
             'type': 'data',
-            'subType': 'qos-data cf-ack',
-            'toDs': 1,
+            'subType': 'data',
+            'toDs': 0,
             'fromDs': 1,
-            'retry': 1,
-            'powerMgmt': 1,
-            'moreFrag': 1,
-            'moreData': 1,
-            'fragN': 11,
-            'seqN': 3462,
+            'retry': 0,
+            'powerMgmt': 0,
+            'moreFrag': 0,
+            'moreData': 0,
+            'fragN': 0,
+            'seqN': 2324,
             'duration': 0,
-            'ra': 'c4:7e:5e:58:d8:4d',
-            'ta': 'ce:de:a9:4f:2b:c7',
-            'da': 'da:66:6b:d6:73:9e',
-            'sa': '80:3b:fd:e0:ff:fd'
+            'encryption': 'tkip',
+            'ra': '01:00:5e:7f:ff:fa',
+            'ta': '58:23:8c:2e:1f:0d',
+            'da': '01:00:5e:7f:ff:fa',
+            'sa': '78:f7:be:f4:e0:66',
+            'bssid': '58:23:8c:2e:1f:0d',
+            'body': new Buffer('1bf80989e473411d0f1ace8d1a00ad52aaa4d88cc857de1297f7b6252f2bb9cbeb3eada18ed09065443369454b47ea701199a825299f811117767d8799f9de34dced537e8d0c7044e5e0881b7f9333b95b36938da2ab1120603a116e387e0e507f0ab9f567c83bd6bd43119c0b50b84cd6ec956468ddc95fa2865d2595d1a56fa0c69b8e754c9f5205e6f4cb79218259188286f584f82c4908787d08100830341d218fd22593997eab4187a015', 'hex')
+          }
+        );
+
+      });
+
+      it('decodes qos-data frames (ccmp, to ds)', function () {
+
+        helper.compare(
+          '88493a0100259c58c39e784b87dfc32801005e7ffffac00a0600090b002000000000d6272209e6095f853df52eea857514e3cb71afab524140c858497d54365cae9b5ebb2ccb449b22df2e56487d5992ebb61e056100',
+          {
+            'version': 0,
+            'type': 'data',
+            'subType': 'qos-data',
+            'toDs': 1,
+            'fromDs': 0,
+            'retry': 1,
+            'powerMgmt': 0,
+            'moreFrag': 0,
+            'moreData': 0,
+            'fragN': 0,
+            'seqN': 172,
+            'duration': 314,
+            'encryption': 'ccmp',
+            'ra': '00:25:9c:58:c3:9e',
+            'ta': '78:4b:87:df:c3:28',
+            'da': '01:00:5e:7f:ff:fa',
+            'sa': '78:4b:87:df:c3:28',
+            'bssid': '00:25:9c:58:c3:9e',
+            'body': new Buffer('d6272209e6095f853df52eea857514e3cb71afab524140c858497d54365cae9b5ebb2ccb449b22df2e56487d5992ebb6', 'hex')
           }
         );
 
@@ -245,7 +307,7 @@
             'type': 'ipv4',
             'da': '84:38:35:5f:8e:8a',
             'sa': '08:86:3b:3b:39:c7',
-            'data': new Buffer('aaaa', 'hex')
+            'body': new Buffer('aaaa', 'hex')
           }
         );
 
@@ -289,3 +351,5 @@
   };
 
 })();
+
+// vim: set nowrap
