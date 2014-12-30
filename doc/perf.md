@@ -8,7 +8,9 @@ page](http://wiki.wireshark.org/SampleCaptures) and replicated by a factor of
 
 ## Raw frame throughput
 
-To run this benchmark:
+To run this benchmark you'll first need to install
+[`pcap`](https://github.com/mranney/node_pcap) and
+[`pcap-stream`](https://github.com/wanderview/node-pcap-stream) then:
 
 ```bash
 $ npm run perf-capture
@@ -48,5 +50,5 @@ pcap-stream     1093000 frames  4941 ms   4521 ns/frame   dat/wpa-Induction.pcap
 Average throughput:
 
 + `dot11`: 0.86 million frames per second
-+ [`pcap`](https://github.com/mranney/node_pcap): 0.56 million frames per second
-+ [`pcap-stream`](https://github.com/wanderview/node-pcap-stream): 0.21 million frames per second
++ `pcap`: 0.56 million frames per second
++ `pcap-stream`: 0.21 million frames per second
