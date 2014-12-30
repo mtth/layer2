@@ -41,7 +41,7 @@
       it('decodes beacon frames', function () {
 
         helper.compare(
-          '80000000ffffffffffff06037f07a01606037f07a016b077',
+          '80000000ffffffffffff5a238c2e1f0f5a238c2e1f0f4071100506c74501000064002104000b7866696e69747977696669010882848b9624b0486c0301010504000100002a01042f010432048c1298602d1abd181bffffff00000000000000000000000000000000000000003d1601081500000000000000000000000000000000000000dd090010180200001c0000dd180050f2020101840003a4000027a4000042435e0062322f003deb9577',
           {
             'version': 0,
             'type': 'mgmt',
@@ -54,12 +54,12 @@
             'moreData': 0,
             'duration': 0,
             'fragN': 0,
-            'seqN': 1915,
+            'seqN': 1812,
             'ra': 'ff:ff:ff:ff:ff:ff',
-            'ta': '06:03:7f:07:a0:16',
+            'ta': '5a:23:8c:2e:1f:0f',
             'da': 'ff:ff:ff:ff:ff:ff',
-            'sa': '06:03:7f:07:a0:16',
-            'bssid': '06:03:7f:07:a0:16'
+            'sa': '5a:23:8c:2e:1f:0f',
+            'bssid': '5a:23:8c:2e:1f:0f'
           }
         );
 
@@ -68,7 +68,7 @@
       it('decodes rts frames', function () {
 
         helper.compare(
-          'b400c400606c668ff5e3ac220bce6de0',
+          'b4007c013ce072e6612bcc03fadc202a719fe3d6',
           {
             'version': 0,
             'type': 'ctrl',
@@ -79,9 +79,9 @@
             'powerMgmt': 0,
             'moreFrag': 0,
             'moreData': 0,
-            'duration': 196,
-            'ra': '60:6c:66:8f:f5:e3',
-            'ta': 'ac:22:0b:ce:6d:e0'
+            'duration': 380,
+            'ra': '3c:e0:72:e6:61:2b',
+            'ta': 'cc:03:fa:dc:20:2a'
           }
         );
 
@@ -90,7 +90,7 @@
       it('decodes cts frames', function () {
 
         helper.compare(
-          'c400da0f606c668ff5e3',
+          'c40072008438355f8e8a2c4ba360',
           {
             'version': 0,
             'type': 'ctrl',
@@ -101,8 +101,8 @@
             'powerMgmt': 0,
             'moreFrag': 0,
             'moreData': 0,
-            'duration': 4058,
-            'ra': '60:6c:66:8f:f5:e3'
+            'duration': 114,
+            'ra': '84:38:35:5f:8e:8a'
           }
         );
 
@@ -111,27 +111,27 @@
       it('decodes data frames', function () {
 
         helper.compare(
-          '08420000ffffffffffffac220bce6de0ac220bce6de0a0e45c2400a000000000',
+          '08492c0088f7c7ce57bbfc0fe61dc60888f7c7ce57bad0c83c2a0020000000002de4be0d52e42c5e4ed1c2e7b4239581feb3d9c0e55efe267fc42ae986922a6aa77e09340f23e502548ac514d7cb978501568ae7da1d36e6965fad260dca52d048b0b44fd70b0087ffc3ce35139ce3e9d2c95ed0',
           {
             'version': 0,
             'type': 'data',
             'subType': 'data',
-            'toDs': 0,
-            'fromDs': 1,
-            'retry': 0,
+            'toDs': 1,
+            'fromDs': 0,
+            'retry': 1,
             'powerMgmt': 0,
             'moreFrag': 0,
             'moreData': 0,
             'fragN': 0,
-            'seqN': 3658,
-            'duration': 0,
-            'ra': 'ff:ff:ff:ff:ff:ff',
-            'ta': 'ac:22:0b:ce:6d:e0',
-            'da': 'ff:ff:ff:ff:ff:ff',
-            'sa': 'ac:22:0b:ce:6d:e0',
-            'bssid': 'ac:22:0b:ce:6d:e0',
+            'seqN': 3213,
+            'duration': 44,
+            'ra': '88:f7:c7:ce:57:bb',
+            'ta': 'fc:0f:e6:1d:c6:08',
+            'da': '88:f7:c7:ce:57:ba',
+            'sa': 'fc:0f:e6:1d:c6:08',
+            'bssid': '88:f7:c7:ce:57:bb',
             'encryption': 'ccmp',
-            'body': new Buffer(0) // FIXME
+            'body': new Buffer('2de4be0d52e42c5e4ed1c2e7b4239581feb3d9c0e55efe267fc42ae986922a6aa77e09340f23e502548ac514d7cb978501568ae7da1d36e6965fad260dca52d048b0b44fd70b0087ffc3ce35139ce3e9', 'hex')
           }
         );
 
@@ -140,25 +140,25 @@
       it('decodes qos frames', function () {
 
         helper.compare(
-        'c8093c0016abf0a58460fc4dd42bab2816abf0a5846040b70000',
+          'c8023a01001f5bd11f5788f7c7ce57bb88f7c7ce57bb100c0000068ef9e0',
           {
             'version': 0,
             'type': 'data',
             'subType': 'qos',
-            'toDs': 1,
-            'fromDs': 0,
-            'retry': 1,
+            'toDs': 0,
+            'fromDs': 1,
+            'retry': 0,
             'powerMgmt': 0,
             'moreFrag': 0,
             'moreData': 0,
             'fragN': 0,
-            'seqN': 2932,
-            'duration': 60,
-            'ra': '16:ab:f0:a5:84:60',
-            'ta': 'fc:4d:d4:2b:ab:28',
-            'da': '16:ab:f0:a5:84:60',
-            'sa': 'fc:4d:d4:2b:ab:28',
-            'bssid': '16:ab:f0:a5:84:60'
+            'seqN': 193,
+            'duration': 314,
+            'ra': '00:1f:5b:d1:1f:57',
+            'ta': '88:f7:c7:ce:57:bb',
+            'da': '00:1f:5b:d1:1f:57',
+            'sa': '88:f7:c7:ce:57:bb',
+            'bssid': '88:f7:c7:ce:57:bb'
           }
         );
 
@@ -167,7 +167,7 @@
       it('decodes ack frames', function () {
 
         helper.compare(
-        'd4000000606c668ff5e3',
+        'd40000008438355f8e8a295c78a9',
           {
             'version': 0,
             'type': 'ctrl',
@@ -179,7 +179,7 @@
             'moreFrag': 0,
             'moreData': 0,
             'duration': 0,
-            'ra': '60:6c:66:8f:f5:e3'
+            'ra': '84:38:35:5f:8e:8a'
           }
         );
 
