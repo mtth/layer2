@@ -138,7 +138,7 @@
             'sa': 'ac:22:0b:ce:6d:e0',
             'bssid': 'ac:22:0b:ce:6d:e0',
             'encryption': 'ccmp',
-            'body': new Buffer(0) // FIXME
+            'data': new Buffer(0) // FIXME
           }
         );
 
@@ -241,6 +241,29 @@
       });
 
       // _save('frame.pcap', 'IEEE802_11', hexPackets);
+
+    });
+
+    describe('EN10MB', function () {
+
+      var validate = _validate(decoders.EN10MB);
+      var hexPackets = [
+        '8438355f8e8a08863b3b39c70800aaaa01234567', // ip
+      ];
+
+      it('decodes ip frames', function () {
+
+        validate(
+          hexPackets[0],
+          {
+            'type': 'ipv4',
+            'da': '84:38:35:5f:8e:8a',
+            'sa': '08:86:3b:3b:39:c7',
+            'data': new Buffer('aaaa', 'hex')
+          }
+        );
+
+      });
 
     });
 
