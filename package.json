@@ -1,6 +1,6 @@
 {
   "name": "dot11",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Wi-Fi packets & streams",
   "keywords": [
     "wifi",
@@ -18,7 +18,7 @@
   "scripts": {
     "build-debug": "node-gyp configure && node-gyp build --debug",
     "clean": "rm -rf build node_modules",
-    "perf": "cd perf && make",
+    "perf-capture": "cd perf/capture && make",
     "test": "$(npm bin)/mocha"
   },
   "engines": {

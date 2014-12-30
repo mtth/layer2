@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: dot11 pcap
+all: dot11 pcap pcap-stream
 
 %: | dat
 	@for name in dat/*.1000; do node $@.js "$$name"; done;

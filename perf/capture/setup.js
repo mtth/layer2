@@ -1,12 +1,12 @@
 /* jshint node: true */
 
-(function () {
+(function (root) {
   'use strict';
 
   var fs = require('fs'),
       http = require('http'),
       path = require('path'),
-      dot11 = require('../lib');
+      dot11 = require('../../lib');
 
   var captures = [
     'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=mesh.pcap',
@@ -17,12 +17,14 @@
     'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=wpa-Induction.pcap'
   ];
 
-  var dPath = path.join(__dirname, 'dat');
-
-  setup(1000);
+  if (require.main === module) {
+    setup(1000);
+  }
 
   // Download and expand (by n) capture files.
   function setup(n) {
+
+    var dPath = path.join(__dirname, 'dat');
 
     fs.exists(dPath, function (exists) {
 
@@ -75,4 +77,23 @@
 
   }
 
-})();
+  // Display output
+  function displayResults(label, time, nPackets, path) {
+
+      var totalMs = time[0] * 1000 + time[1] / 1000000;
+      var nsPerPacket = 1000000 * totalMs / nPackets;
+      console.log(
+        label + '\t' +
+        nPackets + ' frames\t' +
+        Math.floor(totalMs) + ' ms\t' +
+        Math.floor(nsPerPacket) + ' ns/frame\t' +
+        path
+      );
+
+  }
+
+  root.exports = {
+    displayResults: displayResults
+  };
+
+})(module);
