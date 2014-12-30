@@ -2,8 +2,10 @@
 
 *A streaming API for Wi-Fi monitoring.*
 
-`dot11` leverages Node.js' [streams](http://nodejs.org/api/stream.html) to
-provide an intuitive and efficient interface for frame capture and injection.
+`dot11` leverages Node.js' built-in
+[streams](http://nodejs.org/api/stream.html) to provide an intuitive and
+efficient interface for frame capture and injection. It also provides parsers
+for various headers (e.g. 802.11 and Ethernet).
 
 ```javascript
 var dot11 = require('dot11');
@@ -85,7 +87,7 @@ Average raw frame throughput (see [Performance
 benchmarks](https://github.com/mtth/dot11/blob/master/doc/perf.md) for more
 details):
 
-+ [`dot11`]: 0.86 million frames per second
++ `dot11`: 0.86 million frames per second
 + [`pcap`](https://github.com/mranney/node_pcap): 0.56 million frames per second
 + [`pcap-stream`](https://github.com/wanderview/node-pcap-stream): 0.21 million frames per second
 

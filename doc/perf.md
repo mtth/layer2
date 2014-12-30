@@ -47,6 +47,6 @@ pcap-stream     1093000 frames  4941 ms   4521 ns/frame   dat/wpa-Induction.pcap
 
 Average throughput:
 
-+ [`dot11`]: 0.86 million frames per second
++ `dot11`: 0.86 million frames per second
 + [`pcap`](https://github.com/mranney/node_pcap): 0.56 million frames per second
 + [`pcap-stream`](https://github.com/wanderview/node-pcap-stream): 0.21 million frames per second
