@@ -8,7 +8,7 @@
       decoders = require('../lib/decoders'), // Not exposed via dot11.
       dot11 = require('../lib');
 
-  describe('Decoder for', function () {
+  describe('Decoder', function () {
 
     describe('IEEE802_11_RADIO', function () {
 

@@ -6,7 +6,7 @@
   var assert = require('assert'),
       extractors = require('../lib/extractors'); // Not exposed via dot11.
 
-  describe('Extractor for', function () {
+  describe('Extractor', function () {
 
     describe('IEEE802_11_RADIO -> IEEE802_11', function () {
 
