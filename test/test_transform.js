@@ -28,7 +28,7 @@
    * + Valid
    *
    */
-  describe('Decoder stream', function () {
+  describe('Decoder transform', function () {
 
     var Decoder = dot11.transform.Decoder;
 
@@ -119,7 +119,7 @@
 
   });
 
-  describe('Extractor stream', function () {
+  describe('Extractor transform', function () {
 
     var Extractor = dot11.transform.Extractor;
 
