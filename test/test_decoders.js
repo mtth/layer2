@@ -13,14 +13,14 @@
     describe('IEEE802_11_RADIO', function () {
 
       var validate = _validate(decoders.IEEE802_11_RADIO);
-      var hexPackets = [
+      var hexFrames = [
         '000020006708040054c6b82400000000220cdaa002000000400100003c142411aa'
       ];
 
       it('decodes radiotap frames', function () {
 
         validate(
-          hexPackets[0],
+          hexFrames[0],
           {
             'headerRevision': 0,
             'headerPad': 0,
@@ -36,7 +36,7 @@
     describe('IEEE802_11', function () {
 
       var validate = _validate(decoders.IEEE802_11);
-      var hexPackets = [
+      var hexFrames = [
         '80000000ffffffffffff06037f07a01606037f07a016b077', // beacon
         'b400c400606c668ff5e3ac220bce6de0', // rts
         'c400da0f606c668ff5e3', // cts
@@ -50,7 +50,7 @@
       it('decodes beacon frames', function () {
 
         validate(
-          hexPackets[0],
+          hexFrames[0],
           {
             'version': 0,
             'type': 'mgmt',
@@ -75,7 +75,7 @@
       it('decodes rts frames', function () {
 
         validate(
-          hexPackets[1],
+          hexFrames[1],
           {
             'version': 0,
             'type': 'ctrl',
@@ -97,7 +97,7 @@
       it('decodes cts frames', function () {
 
         validate(
-          hexPackets[2],
+          hexFrames[2],
           {
             'version': 0,
             'type': 'ctrl',
@@ -118,7 +118,7 @@
       it('decodes data frames', function () {
 
         validate(
-          hexPackets[3],
+          hexFrames[3],
           {
             'version': 0,
             'type': 'data',
@@ -147,7 +147,7 @@
       it('decodes qos frames', function () {
 
         validate(
-          hexPackets[4],
+          hexFrames[4],
           {
             'version': 0,
             'type': 'data',
@@ -174,7 +174,7 @@
       it('decodes ack frames', function () {
 
         validate(
-          hexPackets[5],
+          hexFrames[5],
           {
             'version': 0,
             'type': 'ctrl',
@@ -195,7 +195,7 @@
       it('decodes block-ack frames', function () {
 
         validate(
-          hexPackets[6],
+          hexFrames[6],
           {
             'version': 0,
             'type': 'ctrl',
@@ -217,7 +217,7 @@
       it.skip('decodes qos-data cf-ack frames', function () {
 
         validate(
-          hexPackets[7],
+          hexFrames[7],
           {
             'version': 0,
             'type': 'data',
@@ -240,21 +240,21 @@
 
       });
 
-      // _save('frame.pcap', 'IEEE802_11', hexPackets);
+      // _save('frame.pcap', 'IEEE802_11', hexFrames);
 
     });
 
     describe('EN10MB', function () {
 
       var validate = _validate(decoders.EN10MB);
-      var hexPackets = [
+      var hexFrames = [
         '8438355f8e8a08863b3b39c70800aaaa01234567', // ip
       ];
 
       it('decodes ip frames', function () {
 
         validate(
-          hexPackets[0],
+          hexFrames[0],
           {
             'type': 'ipv4',
             'da': '84:38:35:5f:8e:8a',
@@ -287,13 +287,13 @@
   }
 
   // Save list of buffers to a file to be compared with Wireshark.
-  function _save(path, linkType, hexPackets) { // jshint ignore:line
+  function _save(path, linkType, hexFrames) { // jshint ignore:line
 
     var save = new dot11.capture.Save(path, {linkType: linkType});
 
     var i;
-    for (i = 0; i < hexPackets.length; i++) {
-      save.write(new Buffer(hexPackets[i], 'hex'));
+    for (i = 0; i < hexFrames.length; i++) {
+      save.write(new Buffer(hexFrames[i], 'hex'));
     }
     save.end();
 

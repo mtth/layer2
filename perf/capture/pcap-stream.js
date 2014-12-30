@@ -13,15 +13,15 @@
   function perf(path) {
 
     var sTime = process.hrtime();
-    var nPackets = 0;
+    var nFrames = 0;
     var pStream = new PcapStream(path);
     pStream
-      .on('data', function () { nPackets++; })
+      .on('data', function () { nFrames++; })
       .on('end', function () {
         setup.displayResults(
           'pcap-stream',
           process.hrtime(sTime),
-          nPackets,
+          nFrames,
           path
         );
       });

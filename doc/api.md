@@ -6,42 +6,42 @@
 This module contains the following 3 streams:
 
 + [`Live`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturelive)
-  A duplex stream of packets from a live network interface.
+  A duplex stream of frames from a live network interface.
 + [`Replay`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturereplay)
-  A readable stream of packets from a saved capture file.
+  A readable stream of frames from a saved capture file.
 + [`Save`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturesave)
-  A writable stream of packets to write to a capture file.
+  A writable stream of frames to write to a capture file.
 
 
 ### Class: dot11.capture.Live
 
-The `Live` class is a duplex (i.e. readable and writable) stream of packets. An
+The `Live` class is a duplex (i.e. readable and writable) stream of frames. An
 instance of this class will listen to a given network interface (e.g. `'en0'`)
-and stream out any packets available. Any packets written to the stream will be
+and stream out any frames available. Any frames written to the stream will be
 injected via this same interface (if supported by your OS).
 
 ```javascript
-var nPackets = 0;
+var nFrames = 0;
 
-// Counting the number of packets received in 10 seconds.
+// Counting the number of frames received in 10 seconds.
 new Live('en0', {promisc: true, monitor: true})
-  .on('data', function (buf) { nPackets++; })
-  .on('end', function () { console.log('Received ' + nPackets + ' packets.'); })
+  .on('data', function (buf) { nFrames++; })
+  .on('end', function () { console.log('Received ' + nFrames + ' frames.'); })
   .close(10000);
 ```
 
 #### Event: 'readable'
 
-Emitted when the first packet can be read.
+Emitted when the first frame can be read.
 
 #### Event: 'data'
 
-+ `packet` {Buffer} A packet.
++ `frame` {Buffer} A frame.
 
-Emitted each time a packet is available for reading.
+Emitted each time a frame is available for reading.
 
 Attaching a handler to this event (and `pipe`ing) is the preferred way of
-reading this stream of packets.
+reading this stream of frames.
 
 #### Event: 'end'
 
@@ -57,16 +57,16 @@ resource is guaranteed to still be open at this time.
 
 + `err` {Error} The error that caused this.
 
-Emitted when something went wrong. Currently the main cause is packet
-truncation (if the `maxPacketSize` parameter is too small).
+Emitted when something went wrong. Currently the main cause is frame
+truncation (if the `maxFrameSize` parameter is too small).
 
 #### Event: 'fetch'
 
-Emitted each time a batch of packets is fetched from the underlying resource.
+Emitted each time a batch of frames is fetched from the underlying resource.
 
 + `batchUsage` {Number} Fraction of batch size used. This should be kept
   consistently under 1 in order to avoid filling up PCAP's buffer and losing
-  packets there.
+  frames there.
 + `bufferUsage` {Number} Fraction of the buffer used. This is only minimally
   useful for live streams, as we are guaranteed that the internal buffer will
   not overflow (the size is chosen appropriately w.r.t the underlying PCAP
@@ -92,35 +92,35 @@ Create a new readable stream from a network interface.
 + `opts` {Object} Various options:
   + `monitor` {Boolean} Capture in monitor mode. [default: `false`]
   + `promisc` {Boolean} Capture in promiscuous mode. [default: `false`]
-  + `maxPacketSize` {Number} Packet snapshot length (i.e. how much of each
-    packet is retained). [default: `65535`]
-  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold packets.
-    Larger means more packets can be gathered in fewer dispatch calls (this
+  + `maxFrameSize` {Number} Frame snapshot length (i.e. how much of each
+    frame is retained). [default: `65535`]
+  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold frames.
+    Larger means more frames can be gathered in fewer dispatch calls (this
     will effectively cap the batchSize option). [default: `1024 * 1024`]
-  + `batchSize` {Number} Number of packets read during each call to PCAP. A
+  + `batchSize` {Number} Number of frames read during each call to PCAP. A
     higher number here is more efficient but runs the risk of overflowing
     internal buffers (especially in the case of replay streams, which can't
     rely on the PCAP dispatch call returning in time). [default: `1000`]
 
-Note that a section of length `maxPacketSize` is reserved at the end of the
+Note that a section of length `maxFrameSize` is reserved at the end of the
 temporary buffer to protect from overflows. This way, the internal mechanism
-that fetches packets by batch (for performance), has enough time to stop
-without losing any packets.
+that fetches frames by batch (for performance), has enough time to stop
+without losing any frames.
 
 #### live.read()
 
 + return {Buffer}
 
-Get a packet from the stream if available, and `null` otherwise.
+Get a frame from the stream if available, and `null` otherwise.
 
 To guarantee that some data is available, this should only be called after the `'readable'` event has been triggered:
 
 ```javascript
-var packets = [];
+var frames = [];
 live.on('readable', function () {
     var buf;
     while ((buf = this.read()) !== null) {
-      packets.push(buf);
+      frames.push(buf);
     }
   });
 ```
@@ -132,7 +132,7 @@ Terminate the stream and close underlying resources.
 + `timeout` {Number} Timeout in milliseconds after which to close the stream.
   [default: `0`]
 
-Note that depending on when this is called, a few more packets might be emitted
+Note that depending on when this is called, a few more frames might be emitted
 before the stream actually closes (this number is guaranteed to be lower than
 the capture's batch size).
 
@@ -144,7 +144,7 @@ Get PCAP statistics for stream.
 
 Sample result: `{ psRecv: 87, psDrop: 0, psIfDrop: 0 }`.
 
-This includes total packets received, dropped because of buffer overflow, and
+This includes total frames received, dropped because of buffer overflow, and
 dropped by the interface (e.g. because of filters). See `man pcap_stats` for
 more details. Finally, note that these statistics are not exact and can even
 mean different things depending on the platform.
@@ -158,7 +158,7 @@ Get output data link type. E.g. `'IEEE802_11_RADIO'`.
 See [here](http://www.tcpdump.org/linktypes.html) for the full list. This is
 useful in particular for creating `Save` streams (see below).
 
-#### live.getMaxPacketSize()
+#### live.getMaxFrameSize()
 
 Get underlying snapshot length.
 
@@ -169,17 +169,17 @@ Also useful for creating saves.
 
 ### Class: dot11.capture.Replay
 
-Readable packet stream from a saved file.
+Readable frame stream from a saved file.
 
 #### Event: 'readable'
 
-Emitted when the first packet can be read.
+Emitted when the first frame can be read.
 
 #### Event: 'data'
 
-+ `packet` {Buffer} A packet.
++ `frame` {Buffer} A frame.
 
-Emitted each time a packet is available for reading.
+Emitted each time a frame is available for reading.
 
 #### Event: 'end'
 
@@ -192,12 +192,12 @@ closed.
 
 + `err` {Error} The error that caused this.
 
-Emitted when something went wrong. Currently the main cause is packet
-truncation (if the `maxPacketSize` parameter is too small).
+Emitted when something went wrong. Currently the main cause is frame
+truncation (if the `maxFrameSize` parameter is too small).
 
 #### Event: 'fetch'
 
-Emitted each time a batch of packets is fetched from the underlying resource.
+Emitted each time a batch of frames is fetched from the underlying resource.
 
 + `batchUsage` {Number} Fraction of batch size used. In the case of a `Replay`,
   this fraction will typically be very close to `1`.
@@ -207,8 +207,8 @@ Emitted each time a batch of packets is fetched from the underlying resource.
 
 #### Event 'break'
 
-If the temporary buffer size is too small to hold a full batch of packets, the
-packet dispatching loop must be interrupted. When this happens, this event is
+If the temporary buffer size is too small to hold a full batch of frames, the
+frame dispatching loop must be interrupted. When this happens, this event is
 emitted. As good performance relies on minimizing the total number of
 dispatches (i.e. fetches), tracking this event can be useful when slowness
 occurs (or simply in order to optimize the batch and buffer size).
@@ -223,10 +223,10 @@ This event is guaranteed to be emitted after the `'end'` event.
 
 + `path` {String} Path to a saved capture file (PCAP format).
 + `opts` {Object} Various options:
-  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold packets.
-    Larger means more packets can be gathered in fewer dispatch calls (this
+  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold frames.
+    Larger means more frames can be gathered in fewer dispatch calls (this
     will effectively cap the batchSize option). [default: `1024 * 1024` (1MB)]
-  + `batchSize` {Number} Number of packets read during each call to PCAP. A
+  + `batchSize` {Number} Number of frames read during each call to PCAP. A
     higher number here is more efficient but runs the risk of overflowing
     internal buffers (especially in the case of replay streams, which can't
     rely on the PCAP dispatch call returning in time). [default: `1000`]
@@ -241,7 +241,7 @@ Terminate the stream.
 + `timeout` {Number} Timeout in milliseconds after which to close the stream.
   [default: `0`]
 
-Note that even if timeout is set to 0, a few more packets might be emitted
+Note that even if timeout is set to 0, a few more frames might be emitted
 before the stream actually closes.
 
 #### replay.getLinkType()
@@ -252,7 +252,7 @@ Get output data link type. E.g. `'IEEE802_11_RADIO'`.
 
 This is useful in particular for creating `Save` streams (see below).
 
-#### replay.getMaxPacketSize()
+#### replay.getMaxFrameSize()
 
 Also useful for saves.
 
@@ -284,21 +284,21 @@ Most methods on the stream will be unavailable at this point.
 
 #### new dot11.capture.Save(path, [opts])
 
-Writable stream to save packets to the `.pcap` format (compatible with
+Writable stream to save frames to the `.pcap` format (compatible with
 Wireshark and Tcpdump).
 
 + `path` {String} The path where the capture will be stored.
 + `opts` {Object} Optional parameters:
   + `linkType` {String} The data link type. If not specified here, it will be
     inferred from the first stream piped.
-  + `maxPacketSize` {Number} The maximum packet capture length to store in the
-    file's global header. [default: `65535`]
+  + `maxFrameSize` {Number} The maximum frame capture length (to store in the
+    file's global header). [default: `65535`]
 
-Note that the total length parameter in each packet header will be
-assigned to the packet's captured length (and not the original packet
+Note that the total length parameter in each frame header will be
+assigned to the frame's captured length (and not the original frame
 length as it isn't available anymore). This shouldn't be a problem as long
 as this class is only used to store the output of a Capture class here
-defined (as truncated packets do not get carried over).
+defined (as truncated frames do not get carried over).
 
 
 ## Transform
@@ -307,7 +307,7 @@ The transform module contains streams useful to process capture streams.
 Currently, the following streams are implemented:
 
 + [`Decoder`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11transformdecoderopts)
-  A duplex stream that transform packets made of raw bytes (i.e. buffers) into
+  A duplex stream that transform frames made of raw bytes (i.e. buffers) into
   JavaScript objects.
 + [`Extractor`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11transformextractoropts)
   A duplex stream that extracts inner frames (e.g. an 802.11 frame encapsulated
@@ -316,7 +316,7 @@ Currently, the following streams are implemented:
 
 ### Class: dot11.transform.Decoder([opts])
 
-A duplex stream used to transform raw packets (i.e. buffers) to parsed objects.
+A duplex stream used to transform raw frames (i.e. buffers) to parsed objects.
 
 #### Event: 'readable'
 
@@ -325,21 +325,21 @@ Emitted when the first frame can be read.
 #### Event: 'data'
 
 + `frame` {Object | String} A (potentially stringified) object representation
-  of the packet.
+  of the frame.
 
 Emitted each time a frame is available for reading.
 
 #### Event 'invalid'
 
 + `err` {Error} The error that caused the decoding to fail. For convenience,
-  the offending packet is available as `err.data`.
+  the offending frame is available as `err.data`.
 
-Emitted when an invalid packet can't be decoded.
+Emitted when an invalid frame can't be decoded.
 
 We are not emitting errors here because node would unpipe any readable stream
 writing to this decoder when it emits an error (and it is expensive to reattach
 them each time). Moreover these are hard to control since there are corrupted
-packets relatively often.
+frames relatively often.
 
 #### Event: 'end'
 
@@ -379,9 +379,17 @@ Emitted each time a frame is available for reading.
 #### Event 'invalid'
 
 + `err` {Error} The error that caused the extraction to fail. The offending
-  packet is available as `err.data`.
+  frame is available as `err.data`.
 
-Emitted when the decoder was unable to extract the frame from a invalid packet.
+Emitted when the extractor was unable to extract a frame.
+
+#### Event 'skip'
+
++ `frame` {Buffer} The outer frame from which no frame was extracted.
+
+Emitted when the inner extracted frame doesn't have the right type (currently,
+this only happens when extracting from `EN10MB` when the inner frame is neither
+IPv4 nor IPv6).
 
 #### Event: 'end'
 

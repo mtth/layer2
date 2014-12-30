@@ -13,15 +13,15 @@
   function perf(path) {
 
     var sTime = process.hrtime();
-    var nPackets = 0;
+    var nFrames = 0;
     var capture = new dot11.capture.Replay(path);
     capture
-      .on('data', function () { nPackets++; })
+      .on('data', function () { nFrames++; })
       .on('end', function () {
         setup.displayResults(
           'dot11',
           process.hrtime(sTime),
-          nPackets,
+          nFrames,
           path
         );
       });

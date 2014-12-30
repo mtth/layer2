@@ -31,10 +31,10 @@
 
       var Replay = dot11.capture.Replay;
 
-      it('returns the correct maximum packet size', function () {
+      it('returns the correct maximum frame size', function () {
 
         var capture = new Replay(captures.large.path);
-        assert.equal(capture.getMaxPacketSize(), 65535);
+        assert.equal(capture.getMaxFrameSize(), 65535);
 
       });
 
@@ -54,12 +54,12 @@
 
       it('can read an entire file', function (done) {
 
-        var nPackets = 0;
+        var nFrames = 0;
 
         new Replay(captures.large.path)
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.equal(nPackets, captures.large.length);
+            assert.equal(nFrames, captures.large.length);
             done();
           });
 
@@ -67,16 +67,16 @@
 
       it('can read an entire file and breaks if necessary', function (done) {
 
-        var nPackets = 0;
+        var nFrames = 0;
         var nBreaks = 0;
 
         new Replay(captures.large.path, {
           bufferSize: 100000 // Not big enough for an entire batch.
         })
           .on('break', function () { nBreaks++; })
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.equal(nPackets, captures.large.length);
+            assert.equal(nFrames, captures.large.length);
             assert.ok(nBreaks > 0);
             done();
           });
@@ -84,20 +84,20 @@
       });
 
       it('breaks each time if the buffer size is small', function (done) {
-        // I.e. equal to the max packet size.
+        // I.e. equal to the max frame size.
 
-        var nPackets = 0;
+        var nFrames = 0;
         var nBreaks = 0;
 
         new Replay(captures.large.path, {
           bufferSize: 65535, // Not big enough for an entire batch.
-          maxPacketSize: 65535
+          maxFrameSize: 65535
         })
           .on('break', function () { nBreaks++; })
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.equal(nPackets, captures.large.length);
-            assert.equal(nBreaks, nPackets);
+            assert.equal(nFrames, captures.large.length);
+            assert.equal(nBreaks, nFrames);
             done();
           });
 
@@ -105,36 +105,36 @@
 
       it('can be read by several handlers', function (done) {
 
-        var nPackets1 = 0;
-        var nPackets2 = 0;
-        var nPackets3 = 0;
+        var nFrames1 = 0;
+        var nFrames2 = 0;
+        var nFrames3 = 0;
 
         new Replay(captures.large.path)
-          .on('data', function () { nPackets1++; })
-          .on('data', function () { nPackets2++; })
-          .on('data', function () { nPackets3++; })
+          .on('data', function () { nFrames1++; })
+          .on('data', function () { nFrames2++; })
+          .on('data', function () { nFrames3++; })
           .on('end', function () {
-            assert.equal(nPackets1, captures.large.length);
-            assert.equal(nPackets2, captures.large.length);
-            assert.equal(nPackets3, captures.large.length);
+            assert.equal(nFrames1, captures.large.length);
+            assert.equal(nFrames2, captures.large.length);
+            assert.equal(nFrames3, captures.large.length);
             done();
           });
 
       });
 
-      it('can be read packet by packet', function (done) {
+      it('can be read frame by frame', function (done) {
 
-        var packets = [];
+        var frames = [];
 
         new Replay(captures.small.path)
           .on('readable', function () {
             var buf;
             while ((buf = this.read()) !== null) {
-              packets.push(buf);
+              frames.push(buf);
             }
           })
           .on('end', function () {
-            assert.equal(packets.length, captures.small.length);
+            assert.equal(frames.length, captures.small.length);
             done();
           });
 
@@ -155,16 +155,16 @@
 
       });
 
-      it('supports closing after a few packets', function (done) {
+      it('supports closing after a few frames', function (done) {
 
-        var nPackets = 0;
+        var nFrames = 0;
 
         new Replay(captures.large.path, {batchSize: 1})
           .on('data', function () {
-            if (nPackets++ === 10) this.close();
+            if (nFrames++ === 10) this.close();
           })
           .on('end', function () {
-            assert.ok(nPackets < captures.large.length); // Small margin.
+            assert.ok(nFrames < captures.large.length); // Small margin.
             done();
           });
 
@@ -175,14 +175,14 @@
         var capture = new Replay(captures.large.path, {
           batchSize: 1 // Small enough to guarantee it won't be read in one go.
         });
-        var nPackets = 0;
+        var nFrames = 0;
 
         capture
           .close(1)
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.ok(nPackets > 0);
-            assert.ok(nPackets < captures.large.length);
+            assert.ok(nFrames > 0);
+            assert.ok(nFrames < captures.large.length);
             done();
           });
 
@@ -194,13 +194,13 @@
         var capture = new Replay(captures.large.path, {
           batchSize: 2 // Small enough to guarantee it won't be read in one go.
         });
-        var nPackets = 0;
+        var nFrames = 0;
 
         capture
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.ok(nPackets > 0);
-            assert.ok(nPackets < captures.large.length);
+            assert.ok(nFrames > 0);
+            assert.ok(nFrames < captures.large.length);
             done();
           });
         setTimeout(function () { capture.close(); }, 1);
@@ -218,30 +218,30 @@
 
       });
 
-      it('can read a packet when the batch size is 1', function (done) {
+      it('can read a frame when the batch size is 1', function (done) {
 
-        testReadSinglePacket(1, done);
-
-      });
-
-      it('can read a packet when the batch size is small', function (done) {
-        // I.e. batch size smaller than packets in the file.
-
-        testReadSinglePacket(2, done);
+        testReadSingleFrame(1, done);
 
       });
 
-      it('can read a packet when the batch size matches', function (done) {
-        // I.e. batch size equal to packets in the file.
+      it('can read a frame when the batch size is small', function (done) {
+        // I.e. batch size smaller than frames in the file.
 
-        testReadSinglePacket(3, done);
+        testReadSingleFrame(2, done);
 
       });
 
-      it('can read a packet when the batch size is large', function (done) {
-        // I.e. batch size greater than packets in the file.
+      it('can read a frame when the batch size matches', function (done) {
+        // I.e. batch size equal to frames in the file.
 
-        testReadSinglePacket(4, done);
+        testReadSingleFrame(3, done);
+
+      });
+
+      it('can read a frame when the batch size is large', function (done) {
+        // I.e. batch size greater than frames in the file.
+
+        testReadSingleFrame(4, done);
 
       });
 
@@ -269,10 +269,10 @@
 
       });
 
-      it('yields correct packets', function (done) {
+      it('yields correct frames', function (done) {
 
         var index = 0;
-        var packets = {
+        var frames = {
           0: new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex'),
           189: new Buffer('00002000670804006d5d2725000000002230d9a001000000400100003c142411d40000000019e3d3535246e97687', 'hex'),
           218: new Buffer('0000200067080400b51e2a2500000000220cd7a001000000400100003c14241108020000ffffffffffff06037f07a0160016cbace5f95083aaaa0300000008004500009be957000040117b3c0a0000c00a0000ff0277027700870d3b663034652033206970703a2f2f31302e302e302e3139323a3633312f7072696e746572732f41646f626550444638202222202241646f62652050444620382e3022202241646f62652050444620333031362e31303222206a6f622d7368656574733d6e6f6e652c6e6f6e65206c656173652d6475726174696f6e3d3330300a', 'hex'),
@@ -281,7 +281,7 @@
 
         new dot11.capture.Replay(captures.large.path)
           .on('data', function (data) {
-            var original = packets[index++];
+            var original = frames[index++];
             if (original) {
               assert.ok(bufferEquals(data, original));
             }
@@ -292,27 +292,27 @@
 
       function testDispatching(batchSize, callback) {
 
-        var totalPackets = captures.large.length;
-        var totalFetches = Math.ceil(totalPackets / batchSize) + 1;
-        var nPackets = 0;
+        var totalFrames = captures.large.length;
+        var totalFetches = Math.ceil(totalFrames / batchSize) + 1;
+        var nFrames = 0;
         var nFetches = 0;
 
         new Replay(captures.large.path, {batchSize: batchSize})
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('fetch', function (ratio) {
             nFetches++;
             if (nFetches < totalFetches - 1) assert.equal(ratio, 1);
             if (nFetches === totalFetches) assert.equal(ratio, 0);
           })
           .on('end', function () {
-            assert.equal(nPackets, totalPackets);
+            assert.equal(nFrames, totalFrames);
             assert.equal(nFetches, totalFetches);
             callback();
           });
 
       }
 
-      function testReadSinglePacket(batchSize, callback) {
+      function testReadSingleFrame(batchSize, callback) {
 
         new Replay(captures.small.path, {batchSize: batchSize })
           .once('readable', function () {
@@ -331,11 +331,11 @@
 
       var Save = dot11.capture.Save;
 
-      it('returns the correct maximum packet size', function () {
+      it('returns the correct maximum frame size', function () {
 
-        var savePath = fromName('max_packet_size_default.pcap');
-        var save = new Save(savePath, {maxPacketSize: 1024});
-        assert.equal(save.getMaxPacketSize(), 1024);
+        var savePath = fromName('max_frame_size_default.pcap');
+        var save = new Save(savePath, {maxFrameSize: 1024});
+        assert.equal(save.getMaxFrameSize(), 1024);
 
       });
 
@@ -420,18 +420,18 @@
 
       });
 
-      it('truncates packets if necessary', function (done) {
+      it('truncates frames if necessary', function (done) {
 
         var savePath = fromName('truncate.pcap');
         var replay = new dot11.capture.Replay(captures.small.path);
-        var save = new Save(savePath, {maxPacketSize: 50});
+        var save = new Save(savePath, {maxFrameSize: 50});
 
         replay
           .pipe(save)
           .on('close', function () {
             new dot11.capture.Replay(savePath)
               .on('data', function (buf) { assert.ok(buf.length <= 50); })
-              .on('error', function () {}) // Skip packet overflow errors.
+              .on('error', function () {}) // Skip frame overflow errors.
               .on('end', function () { done(); });
           });
 
@@ -484,7 +484,7 @@
       var Live = dot11.capture.Live;
 
       beforeEach(function () {
-        // Make sure there are some packets to listen to.
+        // Make sure there are some frames to listen to.
 
         setTimeout(randomRequest, 0);
         setTimeout(randomRequest, 50);
@@ -504,7 +504,7 @@
 
       });
 
-      it('reads a single packet', function (done) {
+      it('reads a single frame', function (done) {
 
         new Live()
           .once('readable', function () {
@@ -518,11 +518,11 @@
 
       });
 
-      it('throws an error on packet truncation by default', function (done) {
+      it('throws an error on frame truncation by default', function (done) {
 
         var nErrors = 0;
 
-        new Live(null, {maxPacketSize: 10})
+        new Live(null, {maxFrameSize: 10})
           .close(500)
           .on('error', function () { nErrors++; })
           .on('data', function () {})
@@ -535,20 +535,20 @@
 
       it('emits events and closes', function (done) {
 
-        var totalPackets = 2;
-        var nPackets = 0;
+        var totalFrames = 2;
+        var nFrames = 0;
         var stats;
 
         new Live()
           .on('data', function (data) {
             assert.ok(data !== null);
-            if (++nPackets === totalPackets) {
+            if (++nFrames === totalFrames) {
               stats = this.getStats();
               this.close();
             }
           })
           .on('end', function () {
-            assert.ok(nPackets >= totalPackets);
+            assert.ok(nFrames >= totalFrames);
             assert.ok(stats && stats.psRecv >= 2);
             done();
           });
@@ -557,13 +557,13 @@
 
       it('closes after a given timeout', function (done) {
 
-        var nPackets = 0;
+        var nFrames = 0;
 
         new Live()
           .close(10)
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.ok(nPackets > 0);
+            assert.ok(nFrames > 0);
             done();
           });
 
@@ -571,17 +571,17 @@
 
       it('closes from outside', function (done) {
 
-        var nPackets = 0;
+        var nFrames = 0;
         var ended = false;
         var finished = false;
         var capture = new Live();
 
         capture
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('finish', function () { finished = true; })
           .on('end', function () { ended = true; })
           .on('close', function () {
-            assert.ok(nPackets > 0);
+            assert.ok(nFrames > 0);
             assert.ok(finished);
             assert.ok(ended);
             done();
@@ -630,22 +630,22 @@
 
       });
 
-      it.skip('can inject a packet', function (done) {
+      it.skip('can inject a frame', function (done) {
         // TODO: fix this test.
 
         var capture = new Live();
-        var packet = new Buffer('000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b', 'hex');
+        var frame = new Buffer('000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b', 'hex');
         var found = false;
 
         capture
           .once('readable', function () {
             var i = 100;
             while (i--) {
-              this.write(packet);
+              this.write(frame);
             }
           })
           .on('data', function (buf) {
-            found = found || bufferEquals(buf, packet);
+            found = found || bufferEquals(buf, frame);
           })
           .on('end', function () {
             assert.ok(found);

@@ -1,6 +1,6 @@
 # Dot11 [![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
 
-*A streaming API for Wi-Fi monitoring.*
+*A streaming API for Wi-Fi traffic monitoring.*
 
 `dot11` leverages Node.js' built-in
 [streams](http://nodejs.org/api/stream.html) to provide an intuitive and

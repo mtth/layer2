@@ -15,7 +15,7 @@
       path: './test/dat/mesh780.pcap',
       length: 780
     },
-    mixed: { // With invalid packets.
+    mixed: { // With invalid frames.
       path: './test/dat/mixed.pcap',
       length: {valid: 155, invalid: 11}
     }
@@ -36,8 +36,8 @@
           .pipe(decoder)
           .once('readable', function () {
             assert.equal(this.getLinkType(), 'IEEE802_11_RADIO');
-            var packet = this.read();
-            assert.deepEqual(packet, {
+            var frame = this.read();
+            assert.deepEqual(frame, {
               'headerRevision': 0,
               'headerPad': 0,
               'headerLength': 32,
@@ -52,17 +52,17 @@
 
         var capture = new dot11.capture.Replay(captures.small.path);
         var decoder = new Decoder();
-        var nPackets = 0;
+        var nFrames = 0;
 
         capture
           .pipe(decoder)
           .on('data', function (data) {
             assert.ok(data && typeof data == 'object');
-            nPackets++;
+            nFrames++;
           })
           .on('end', function () {
             assert.equal(this.getLinkType(), 'IEEE802_11_RADIO');
-            assert.equal(nPackets, captures.small.length);
+            assert.equal(nFrames, captures.small.length);
             done();
           });
 
@@ -72,41 +72,41 @@
 
         var capture = new dot11.capture.Replay(captures.large.path);
         var decoder = new Decoder({linkType: capture.getLinkType()});
-        var nPackets = 0;
+        var nFrames = 0;
 
         capture
           .on('data', function (buf) { decoder.write(buf); })
           .on('end', function () { decoder.end(); });
 
         decoder
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.equal(nPackets, captures.large.length);
+            assert.equal(nFrames, captures.large.length);
             done();
           });
 
       });
 
-      it('emits events when a packet fails to decode', function (done) {
+      it('emits events when a frame fails to decode', function (done) {
 
         var capture = new dot11.capture.Replay(captures.mixed.path);
         var decoder = new Decoder();
-        var nValidPackets = 0;
-        var nInvalidPackets = 0;
+        var nValidFrames = 0;
+        var nInvalidFrames = 0;
 
         capture
           .pipe(decoder)
           .on('data', function (data) {
             assert.ok(data && typeof data == 'object');
-            nValidPackets++;
+            nValidFrames++;
           })
           .on('invalid', function (err) {
             assert.ok(err.data && typeof err.data == 'object');
-            nInvalidPackets++;
+            nInvalidFrames++;
           })
           .on('end', function () {
-            assert.equal(nValidPackets, captures.mixed.length.valid);
-            assert.equal(nInvalidPackets, captures.mixed.length.invalid);
+            assert.equal(nValidFrames, captures.mixed.length.valid);
+            assert.equal(nInvalidFrames, captures.mixed.length.invalid);
             done();
           });
 
@@ -168,17 +168,17 @@
 
       });
 
-      it('extracts all valid packets', function (done) {
+      it('extracts all valid frames', function (done) {
 
         var capture = new dot11.capture.Replay(captures.large.path);
         var extractor = new Extractor({toLinkType: 'IEEE802_11'});
-        var nPackets = 0;
+        var nFrames = 0;
 
         capture
           .pipe(extractor)
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.equal(nPackets, captures.large.length);
+            assert.equal(nFrames, captures.large.length);
             done();
           });
 
@@ -191,16 +191,16 @@
           fromLinkType: 'IEEE802_11_RADIO',
           toLinkType: 'IEEE802_11'
         });
-        var nPackets = 0;
+        var nFrames = 0;
 
         capture
           .on('data', function (buf) { extractor.write(buf); })
           .on('end', function () { extractor.end(); });
 
         extractor
-          .on('data', function () { nPackets++; })
+          .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.equal(nPackets, captures.large.length);
+            assert.equal(nFrames, captures.large.length);
             done();
           });
 

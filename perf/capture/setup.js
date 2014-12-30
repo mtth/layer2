@@ -57,7 +57,7 @@
       });
     }
 
-    // Duplicate packets from a capture.
+    // Duplicate frames from a capture.
     function expand(capturePath, n, cb) {
       var replay = new dot11.capture.Replay(capturePath);
       var save = new dot11.capture.Save(capturePath + '.' + n, {
@@ -78,15 +78,15 @@
   }
 
   // Display output
-  function displayResults(label, time, nPackets, path) {
+  function displayResults(label, time, nFrames, path) {
 
       var totalMs = time[0] * 1000 + time[1] / 1000000;
-      var nsPerPacket = 1000000 * totalMs / nPackets;
+      var nsPerFrame = 1000000 * totalMs / nFrames;
       console.log(
         label + '\t' +
-        nPackets + ' frames\t' +
+        nFrames + ' frames\t' +
         Math.floor(totalMs) + ' ms\t' +
-        Math.floor(nsPerPacket) + ' ns/frame\t' +
+        Math.floor(nsPerFrame) + ' ns/frame\t' +
         path
       );
 

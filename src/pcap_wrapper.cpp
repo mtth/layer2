@@ -335,7 +335,7 @@ Handle<Value> PcapWrapper::inject(const Arguments& args) {
   if (n == -1) {
     return ThrowException(Exception::Error(String::New(pcap_geterr(wrapper->handle))));
   } else if (n != packet_length) {
-    return ThrowException(Exception::Error(String::New("Packet injection truncated.")));
+    return ThrowException(Exception::Error(String::New("Frame injection truncated.")));
   }
 
   return args.This();
@@ -364,7 +364,7 @@ Handle<Value> PcapWrapper::dump(const Arguments& args) {
   struct pcap_pkthdr pktheader = {
     tv, // ts
     packet_length > snaplen ? snaplen : packet_length, // caplen
-   packet_length // len (WARNING: this might be wrong)
+    packet_length // len (WARNING: this might be wrong)
   };
 
   pcap_dump((u_char *) wrapper->dump_handle, &pktheader, (u_char *) packet_data);
@@ -393,7 +393,7 @@ void PcapWrapper::on_packet(
   Local<Value> argv[3] = {
     Integer::New(wrapper->buffer_offset), // New offset.
     Integer::New(overflow), // Buffer overflow.
-    Integer::New(packet_overflow) // Packet overflow.
+    Integer::New(packet_overflow) // Frame overflow.
   };
   wrapper->on_packet_callback->Call(Context::GetCurrent()->Global(), 3, argv);
 
@@ -419,19 +419,19 @@ void wrapper_expose(Handle<Object> exports) {
   add_to_prototype(tpl, PcapWrapper::break_loop, "breakLoop");
   add_to_prototype(tpl, PcapWrapper::close, "close");
   add_to_prototype(tpl, PcapWrapper::dispatch, "dispatch");
-  add_to_prototype(tpl, PcapWrapper::dump, "dumpPacket");
+  add_to_prototype(tpl, PcapWrapper::dump, "dumpFrame");
   add_to_prototype(tpl, PcapWrapper::from_dead, "fromDead");
   add_to_prototype(tpl, PcapWrapper::from_device, "fromDevice");
   add_to_prototype(tpl, PcapWrapper::from_savefile, "fromSavefile");
   add_to_prototype(tpl, PcapWrapper::get_datalink, "getLinkType");
-  add_to_prototype(tpl, PcapWrapper::get_snaplen, "getMaxPacketSize");
+  add_to_prototype(tpl, PcapWrapper::get_snaplen, "getMaxFrameSize");
   add_to_prototype(tpl, PcapWrapper::get_stats, "getStats");
-  add_to_prototype(tpl, PcapWrapper::inject, "injectPacket");
+  add_to_prototype(tpl, PcapWrapper::inject, "injectFrame");
   add_to_prototype(tpl, PcapWrapper::set_buffersize, "setBufferSize");
   add_to_prototype(tpl, PcapWrapper::set_filter, "setFilter");
   add_to_prototype(tpl, PcapWrapper::set_promisc, "setPromisc");
   add_to_prototype(tpl, PcapWrapper::set_rfmon, "setMonitor");
-  add_to_prototype(tpl, PcapWrapper::set_snaplen, "setMaxPacketSize");
+  add_to_prototype(tpl, PcapWrapper::set_snaplen, "setMaxFrameSize");
   add_to_prototype(tpl, PcapWrapper::to_savefile, "toSavefile");
 
   exports->Set(

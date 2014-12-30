@@ -13,15 +13,15 @@
   function perf(path) {
 
     var sTime = process.hrtime();
-    var nPackets = 0;
+    var nFrames = 0;
     var session = pcap.createOfflineSession(path);
     session
-      .on('packet', function () { nPackets++; })
+      .on('packet', function () { nFrames++; })
       .on('complete', function () {
         setup.displayResults(
           'pcap',
           process.hrtime(sTime),
-          nPackets,
+          nFrames,
           path
         );
       });
