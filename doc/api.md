@@ -334,7 +334,7 @@ Emitted each time a frame is available for reading.
 + `err` {Error} The error that caused the decoding to fail. For convenience,
   the offending frame is available as `err.data`.
 
-Emitted when an invalid frame can't be decoded.
+Emitted when a frame has an invalid checksum.
 
 We are not emitting errors here because node would unpipe any readable stream
 writing to this decoder when it emits an error (and it is expensive to reattach

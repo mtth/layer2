@@ -36,7 +36,14 @@
 
       // Uncomment this to be able to analyze the frames used for testing in
       // this section from Tcpdump or Wireshark.
-      after(function () { helper.save('dat/IEEE802_11.pcap'); });
+      // after(function () { helper.save('dat/IEEE802_11.pcap'); });
+
+      it('checks the fcs', function () {
+
+        assert.ok(helper.validate('88493a0100259c58c39e784b87dfc32801005e7ffffac00a0600090b002000000000d6272209e6095f853df52eea857514e3cb71afab524140c858497d54365cae9b5ebb2ccb449b22df2e56487d5992ebb61e056100'));
+        assert.ok(!helper.validate('88422c008438355f8e8a08863b3b39c708863b3b39c7e00001001e00002000000000aaaa03000000080045200034556040003a06854448155b1dc0a802250050dc5e1c104c0cb3fce7928010001f03c800000101080a4fb0196c36b68ca9a334bb90ca345b56'));
+
+      });
 
       it('decodes beacon frames', function () {
 
@@ -130,7 +137,7 @@
             'da': '88:f7:c7:ce:57:ba',
             'sa': 'fc:0f:e6:1d:c6:08',
             'bssid': '88:f7:c7:ce:57:bb',
-            'encryption': 'ccmp',
+            'encryption': 'aes',
             'body': new Buffer('2de4be0d52e42c5e4ed1c2e7b4239581feb3d9c0e55efe267fc42ae986922a6aa77e09340f23e502548ac514d7cb978501568ae7da1d36e6965fad260dca52d048b0b44fd70b0087ffc3ce35139ce3e9', 'hex')
           }
         );
@@ -264,7 +271,7 @@
 
       });
 
-      it('decodes qos-data frames (ccmp, to ds)', function () {
+      it('decodes qos-data frames (aes, to ds)', function () {
 
         helper.compare(
           '88493a0100259c58c39e784b87dfc32801005e7ffffac00a0600090b002000000000d6272209e6095f853df52eea857514e3cb71afab524140c858497d54365cae9b5ebb2ccb449b22df2e56487d5992ebb61e056100',
@@ -281,7 +288,7 @@
             'fragN': 0,
             'seqN': 172,
             'duration': 314,
-            'encryption': 'ccmp',
+            'encryption': 'aes',
             'ra': '00:25:9c:58:c3:9e',
             'ta': '78:4b:87:df:c3:28',
             'da': '01:00:5e:7f:ff:fa',
@@ -338,8 +345,11 @@
       expectedObject,
       JSON.stringify(diff(actualObject, expectedObject), null, 2)
     );
-
   };
+
+  Helper.prototype.validate = function (actualString) {
+    return this._decoder.isValid(new Buffer(actualString, 'hex'));
+  }
 
   Helper.prototype.save = function (path) {
     var save = new dot11.capture.Save(path, {linkType: this._linkType});

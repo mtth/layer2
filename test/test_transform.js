@@ -17,7 +17,7 @@
     },
     mixed: { // With invalid frames.
       path: './test/dat/mixed.pcap',
-      length: {valid: 155, invalid: 11}
+      length: {valid: 48, invalid: 118}
     }
   };
 
@@ -211,9 +211,9 @@
         var capture = new dot11.capture.Replay(captures.small.path);
         var extractor = new Extractor({
           fromLinkType: 'IEEE802_11_RADIO',
-          toLinkType: 'IEEE802_11'
+          toLinkType: 'IEEE802_11',
         });
-        var decoder = new dot11.transform.Decoder();
+        var decoder = new dot11.transform.Decoder({assumeValid: true});
 
         capture
           .pipe(extractor)
