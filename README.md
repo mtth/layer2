@@ -1,4 +1,4 @@
-# Dot11 [![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
+# Dot11 [![NPM Version](https://img.shields.io/node/v/gh-badges.svg?style=flat) ![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
 
 *A streaming API for Wi-Fi traffic monitoring.*
 
