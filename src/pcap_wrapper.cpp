@@ -364,7 +364,10 @@ Handle<Value> PcapWrapper::dump(const Arguments& args) {
   struct pcap_pkthdr pktheader = {
     tv, // ts
     packet_length > snaplen ? snaplen : packet_length, // caplen
-    packet_length // len (WARNING: this might be wrong)
+    packet_length, // len
+#ifdef __APPLE__
+    "Length might be wrong if the frame was already truncated." // comment
+#endif
   };
 
   pcap_dump((u_char *) wrapper->dump_handle, &pktheader, (u_char *) packet_data);

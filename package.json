@@ -1,7 +1,7 @@
 {
   "name": "dot11",
-  "version": "0.2.1",
-  "description": "Wi-Fi frames & streams",
+  "version": "0.2.2",
+  "description": "A streaming API for Wi-Fi traffic monitoring.",
   "keywords": [
     "wifi",
     "802.11",

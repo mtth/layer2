@@ -1,7 +1,5 @@
 # Dot11 [![NPM Version](https://img.shields.io/node/v/gh-badges.svg?style=flat) ![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
 
-*A streaming API for Wi-Fi traffic monitoring.*
-
 `dot11` leverages Node.js' built-in
 [streams](http://nodejs.org/api/stream.html) to provide an intuitive and
 efficient interface for frame capture and injection. It also provides parsers
