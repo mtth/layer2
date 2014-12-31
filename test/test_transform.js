@@ -100,8 +100,8 @@
             assert.ok(data && typeof data == 'object');
             nValidFrames++;
           })
-          .on('invalid', function (err) {
-            assert.ok(err.data && typeof err.data == 'object');
+          .on('invalid', function (data, err) {
+            assert.ok(data && err);
             nInvalidFrames++;
           })
           .on('end', function () {

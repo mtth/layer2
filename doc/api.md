@@ -331,8 +331,8 @@ Emitted each time a frame is available for reading.
 
 #### Event 'invalid'
 
-+ `err` {Error} The error that caused the decoding to fail. For convenience,
-  the offending frame is available as `err.data`.
++ `data` {Buffer} The invalid frame.
++ `err` {Error} Description of why this frame is invalid.
 
 Emitted when a frame has an invalid checksum.
 
@@ -378,8 +378,8 @@ Emitted each time a frame is available for reading.
 
 #### Event 'invalid'
 
-+ `err` {Error} The error that caused the extraction to fail. The offending
-  frame is available as `err.data`.
++ `data` {Buffer} The invalid frame.
++ `err` {Error} Description of why this frame is invalid.
 
 Emitted when the extractor was unable to extract a frame.
 
