@@ -211,7 +211,7 @@
         var capture = new dot11.capture.Replay(captures.small.path);
         var extractor = new Extractor({
           fromLinkType: 'IEEE802_11_RADIO',
-          toLinkType: 'IEEE802_11',
+          toLinkType: 'IEEE802_11'
         });
         var decoder = new dot11.transform.Decoder({assumeValid: true});
 
