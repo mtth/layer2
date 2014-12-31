@@ -62,3 +62,31 @@ process.on('SIGINT', function () {
 Be sure to check the
 [FAQ](https://github.com/mtth/dot11/blob/master/doc/faq.md#im-seeing-a-lot-of-invalid-frames-why-is-this)
 if you are seeing a lot of invalid frames.
+
+
+## Find MAC addresses of nearby access points
+
+This script will run for 10 seconds and print the list of discovered BSSIDs
+(i.e. typically the MAC addresses) along with the associated number of frames
+captured.
+
+```javascript
+var capture = new dot11.capture.Live('en0', {monitor: true});
+var extractor = new dot11.transform.Extractor();
+var decoder = new dot11.transform.Decoder();
+var bssids = {};
+
+capture
+  .close(10000)
+  .pipe(extractor)
+  .pipe(decoder)
+  .on('data', function (frame) {
+    var bssid = frame.bssid;
+    if (bssid) {
+      bssids[bssid] = (bssids[bssid] || 0) + 1;
+    }
+  })
+  .on('end', function () {
+    console.dir(bssids);
+  });
+```
