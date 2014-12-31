@@ -6,7 +6,7 @@ corresponding link type is `IEEE802_11_RADIO` (i.e. 802.11 frames with a
 Radiotap header). This is the default on OS X in monitor mode.
 
 
-## 802.11 frame headers
+## 802.11 headers
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
@@ -23,9 +23,11 @@ This output can be directly piped to [jq](http://stedolan.github.io/jq/) for
 easy parsing.
 
 
-## Overall 802.11 activity
+## 802.11 overall activity
 
-Also output total frames and fraction of invalid frames at the end.
+Also output total frames and fraction of invalid frames at the end. Note that
+this measures total number of frames captured, not the total data size (in
+particular, this includes all control and management frames).
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
@@ -64,10 +66,37 @@ Be sure to check the
 if you are seeing a lot of invalid frames.
 
 
-## Find MAC addresses of nearby access points
+## 802.11 data traffic
+
+Outputs the total number of data bytes received per MAC address in the last 10
+seconds.
+
+```javascript
+var capture = new dot11.capture.Live('en0', {monitor: true});
+var extractor = new dot11.transform.Extractor();
+var decoder = new dot11.transform.Decoder();
+var nBytesReceived = {};
+
+capture
+  .close(10000)
+  .pipe(extractor)
+  .pipe(decoder)
+  .on('data', function (frame) {
+    if (frame.type === 'data' && frame.body) {
+      var sa = frame.sa;
+      nBytesReceived[sa] = (nBytesReceived[sa] || 0) + frame.body.length;
+    }
+  })
+  .on('end', function () {
+    console.dir(nBytesReceived);
+  });
+```
+
+
+## MAC addresses of nearby access points
 
 This script will run for 10 seconds and print the list of discovered BSSIDs
-(i.e. typically the MAC addresses) along with the associated number of frames
+(i.e. typically MAC addresses) along with the associated number of frames
 captured.
 
 ```javascript
