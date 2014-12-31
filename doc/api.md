@@ -378,7 +378,7 @@ Emitted each time a frame is available for reading.
 
 #### Event 'invalid'
 
-+ `data` {Buffer} The invalid frame.
++ `data` {Buffer} The invalid (outer) frame.
 + `err` {Error} Description of why this frame is invalid.
 
 Emitted when the extractor was unable to extract a frame.
