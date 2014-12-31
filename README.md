@@ -16,7 +16,7 @@ var decoder = new dot11.transform.Decoder({stringify: true});
 
 capture                     // 802.11 frames with Radiotap headers.
   .pipe(extractor)          // 802.11 frames.
-  .pipe(decoder)            // Decoded and stringified 802.11 frames.
+  .pipe(decoder)            // Decoded and stringified 802.11 headers.
   .pipe(process.stdout);
 ```
 
@@ -27,8 +27,8 @@ capture                     // 802.11 frames with Radiotap headers.
 $ npm install dot11
 ```
 
-`dot11` depends on [libpcap](http://www.tcpdump.org/) (available by default on
-OS X). Note that you might also need to run live captures as root.
+`dot11` depends on [libpcap](http://www.tcpdump.org/). Note that you might
+also need to run live captures as root.
 
 
 ## Documentation
