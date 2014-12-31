@@ -318,6 +318,13 @@ Currently, the following streams are implemented:
 
 A duplex stream used to transform raw frames (i.e. buffers) to parsed objects.
 
+`dot11` currently supports decoding the following link types:
+
++ `IEEE802_11_RADIO` (Radiotap).
++ `IEEE802_11` (raw 802.11).
++ `EN10MB` (Ethernet).
+
+
 #### Event: 'readable'
 
 Emitted when the first frame can be read.
@@ -365,6 +372,14 @@ Get decoded data link type.
 
 
 ### Class: dot11.transform.Extractor([opts])
+
+A stream to extract an inner frame. In most cases, this can be done without
+decoding the complete outer frame which helps efficiency.
+
+`dot11` currently supports extracting the following link types:
+
++ `IEEE802_11_RADIO` to `IEEE802_11`.
+
 
 #### Event: 'readable'
 
