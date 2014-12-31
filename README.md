@@ -14,10 +14,10 @@ var capture = new dot11.capture.Live('en0', {monitor: true});
 var extractor = new dot11.transform.Extractor();
 var decoder = new dot11.transform.Decoder({stringify: true});
 
-capture                     // Stream of frames with Radiotap headers.
-  .pipe(extractor)          // Stream of extracted 802.11 frames.
-  .pipe(decoder)            // Stream of decoded and stringified 802.11 frames.
-  .pipe(process.stdout);    // Output result to console.
+capture                     // 802.11 frames with Radiotap headers.
+  .pipe(extractor)          // 802.11 frames.
+  .pipe(decoder)            // Decoded and stringified 802.11 frames.
+  .pipe(process.stdout);
 ```
 
 
@@ -78,7 +78,7 @@ Hopefully more transformations will be added soon.
 ## Documentation
 
 You can find the API docs
-[here](https://github.com/mtth/dot11/blob/master/doc/api.md).
+[here](https://github.com/mtth/dot11/blob/master/doc/api.md). Several examples are also available [here](https://github.com/mtth/dot11/blob/master/doc/examples.md).
 
 
 ## Benchmarks
