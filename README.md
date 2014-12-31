@@ -30,10 +30,6 @@ $ npm install dot11
 `dot11` depends on [libpcap](http://www.tcpdump.org/) (available by default on
 OS X). Note that you might also need to run live captures as root.
 
-It also features an extractor from Radiotap to 802.11 frames.
-
-Hopefully more transformations will be added soon.
-
 
 ## Documentation
 
