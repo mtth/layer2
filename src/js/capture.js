@@ -8,7 +8,7 @@
   'use strict';
 
   var util = require('util'),
-      pcap = require('../build/Release/pcap'),
+      pcap = require('../../build/Release/pcap'),
       stream = require('stream');
 
   /**

@@ -5,8 +5,8 @@
 
   var assert = require('assert'),
       diff = require('deep-diff'),
-      decoders = require('../lib/decoders'), // Not exposed via dot11.
-      dot11 = require('../lib');
+      decoders = require('../src/js/decoders'), // Not exposed via dot11.
+      dot11 = require('../src/js');
 
   describe('Decoder', function () {
 
@@ -349,7 +349,7 @@
 
   Helper.prototype.validate = function (actualString) {
     return this._decoder.isValid(new Buffer(actualString, 'hex'));
-  }
+  };
 
   Helper.prototype.save = function (path) {
     var save = new dot11.capture.Save(path, {linkType: this._linkType});

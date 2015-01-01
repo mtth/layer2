@@ -15,7 +15,7 @@
     "wireshark",
     "tcpdump"
   ],
-  "main": "./lib",
+  "main": "./src/js",
   "scripts": {
     "build-debug": "node-gyp configure && node-gyp build --debug",
     "clean": "rm -rf build node_modules",

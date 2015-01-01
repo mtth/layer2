@@ -1,4 +1,4 @@
-# Dot11 [![NPM Version](https://img.shields.io/node/v/gh-badges.svg?style=flat) ![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
+# Dot11 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/dot11) [![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
 
 `dot11` leverages Node.js' built-in
 [streams](http://nodejs.org/api/stream.html) to provide an intuitive and
@@ -14,7 +14,7 @@ var decoder = new dot11.transform.Decoder({stringify: true});
 
 capture                     // 802.11 frames with Radiotap headers.
   .pipe(extractor)          // 802.11 frames.
-  .pipe(decoder)            // Decoded and stringified 802.11 headers.
+  .pipe(decoder)            // Decoded and stringified 802.11 frames.
   .pipe(process.stdout);
 ```
 

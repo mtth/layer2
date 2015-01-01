@@ -4,7 +4,7 @@
   'use strict';
 
   var assert = require('assert'),
-      extractors = require('../lib/extractors'); // Not exposed via dot11.
+      extractors = require('../src/js/extractors'); // Not exposed via dot11.
 
   describe('Extractor', function () {
 

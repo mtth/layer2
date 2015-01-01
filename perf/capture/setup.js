@@ -6,7 +6,7 @@
   var fs = require('fs'),
       http = require('http'),
       path = require('path'),
-      dot11 = require('../../lib');
+      dot11 = require('../../src/js');
 
   var captures = [
     'http://wiki.wireshark.org/SampleCaptures?action=AttachFile&do=get&target=mesh.pcap',

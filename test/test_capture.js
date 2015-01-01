@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var dot11 = require('../lib'),
+  var dot11 = require('../src/js'),
       assert = require('assert'),
       crypto = require('crypto'),
       fs = require('fs'),
