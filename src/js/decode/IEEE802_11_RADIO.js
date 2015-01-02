@@ -11,34 +11,10 @@
 (function (root) {
   'use strict';
 
-  function Transform(opts) {
-
-    opts = opts || {};
-    var stringify = opts.stringify || false;
-
-    this._transform = function (data, encoding, callback) {
-
-      var frame;
-
-      try {
-        // Note that Radiocap frames are assumed to be always valid (they are
-        // added locally, so aren't subject to corruption from transmission
-        // over the noisy network).
-        frame = decode(data);
-        if (stringify) {
-          frame = JSON.stringify(frame);
-        }
-      } catch (err) {
-        err.data = data; // Attach raw bytes to error.
-        return callback(err);
-      }
-      return callback(null, frame);
-
-    };
-
-  }
-
   function decode(buf) {
+    // Note that Radiocap frames are assumed to be always valid (they are added
+    // locally, so aren't subject to corruption from transmission over the
+    // noisy network).
 
     var frame = {};
 
@@ -60,9 +36,6 @@
 
   }
 
-  root.exports = {
-    Transform: Transform,
-    decode: decode
-  };
+  root.exports = decode;
 
 })(module);

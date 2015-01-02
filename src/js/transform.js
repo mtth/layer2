@@ -12,55 +12,7 @@
 
   var stream = require('stream'),
       util = require('util'),
-      decoders = require('./decoders'),
       extractors = require('./extractors');
-
-  /**
-   * Decoder stream class.
-   *
-   * This class will "dynamically" look up the correct transform function based
-   * on the link type of the source stream. This is done by having a
-   * placeholder `_transform` method replace itself when it is first called.
-   *
-   */
-  function Decoder(opts) {
-
-    opts = opts || {};
-    var linkType = opts.linkType || null; // Inferred below.
-
-    stream.Transform.call(this, {objectMode: true});
-
-    this.on('pipe', function (src) {
-      // Infer link type from first capture stream piped.
-
-      if (!linkType) {
-        linkType = src.getLinkType();
-      } else if (linkType !== src.getLinkType()) {
-        return this.emit('error', new Error('Inconsistent link type.'));
-      }
-
-    });
-
-    this.getLinkType = function () { return linkType; };
-
-    this._transform = function (data, encoding, callback) {
-
-      if (!linkType) {
-        return this.emit('error', new Error('No link type specified.'));
-      } else if (!(linkType in decoders)) {
-        return this.emit(
-          'error',
-          new Error('Unsupported link type: ' + linkType)
-        );
-      }
-
-      decoders[linkType].Transform.call(this, opts);
-      this._transform(data, encoding, callback);
-
-    };
-
-  }
-  util.inherits(Decoder, stream.Transform);
 
   /**
    * Extractor stream class.
@@ -155,7 +107,6 @@
   // Export things.
 
   root.exports = {
-    Decoder: Decoder,
     Extractor: Extractor
   };
 

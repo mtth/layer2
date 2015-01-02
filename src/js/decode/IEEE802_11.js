@@ -11,46 +11,14 @@
 
   var utils = require('../utils');
 
-  function Transform(opts) {
+  function decode(buf) {
 
-    opts = opts || {};
-    var assumeValid = opts.assumeValid || false;
-    var stringify = opts.stringify || false;
-
-    this._transform = function (data, encoding, callback) {
-
-      var frame;
-
-      if (!assumeValid && !isValid(data)) {
-        this.emit('invalid', data, new Error('Incorrect FCS.'));
-        return callback();
-      }
-
-      try {
-        frame = decode(data);
-        if (stringify) {
-          frame = JSON.stringify(frame);
-        }
-      } catch (err) {
-        err.data = data; // Attach raw bytes to error.
-        this.emit('error', err);
-        return callback();
-      }
-      return callback(null, frame);
-
-    };
-
-  }
-
-  function isValid(buf) {
-
+    // Validate checksum.
     var actualFcs = buf.readUInt32LE(buf.length - 4);
     var computedFcs = utils.crc32(buf.slice(0, buf.length - 4));
-    return actualFcs === computedFcs;
-
-  }
-
-  function decode(buf) {
+    if (actualFcs !== computedFcs) {
+      throw new Error('Invalid FCS.');
+    }
 
     var frame = {};
 
@@ -401,10 +369,6 @@
 
   }
 
-  root.exports = {
-    Transform: Transform,
-    decode: decode,
-    isValid: isValid
-  };
+  root.exports = decode;
 
 })(module);

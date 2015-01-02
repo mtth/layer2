@@ -9,6 +9,8 @@
 (function (root) {
   'use strict';
 
+  var fs = require('fs');
+
   function readMacAddr(buf, offset) {
     // MAC address parser.
     // Returns a formatted address such as 00:01:02:03:04:05.
@@ -58,9 +60,25 @@
 
   }
 
+  function requireDirectory(target, dpath) {
+
+    var names = fs.readdirSync(dpath);
+    var pattern = /([^.]*).js/;
+
+    var i, match;
+    for (i = 0; i < names.length; i++) {
+      match = pattern.exec(names[i]);
+      if (match && match[1] !== 'index') {
+        target[match[1]] = require('./' + match[1]);
+      }
+    }
+
+  }
+
   root.exports = {
     readMacAddr: readMacAddr,
-    crc32: makeCrc32()
+    crc32: makeCrc32(),
+    requireDirectory: requireDirectory
   };
 
 })(module);

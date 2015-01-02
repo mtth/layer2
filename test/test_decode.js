@@ -5,7 +5,6 @@
 
   var assert = require('assert'),
       diff = require('deep-diff'),
-      decoders = require('../src/js/decoders'), // Not exposed via dot11.
       dot11 = require('../src/js');
 
   describe('Decoder', function () {
@@ -40,8 +39,9 @@
 
       it('checks the fcs', function () {
 
-        assert.ok(helper.validate('88493a0100259c58c39e784b87dfc32801005e7ffffac00a0600090b002000000000d6272209e6095f853df52eea857514e3cb71afab524140c858497d54365cae9b5ebb2ccb449b22df2e56487d5992ebb61e056100'));
-        assert.ok(!helper.validate('88422c008438355f8e8a08863b3b39c708863b3b39c7e00001001e00002000000000aaaa03000000080045200034556040003a06854448155b1dc0a802250050dc5e1c104c0cb3fce7928010001f03c800000101080a4fb0196c36b68ca9a334bb90ca345b56'));
+        assert.throws(function () {
+          helper.decode('88422c008438355f8e8a08863b3b39c708863b3b39c7e00001001e00002000000000aaaa03000000080045200034556040003a06854448155b1dc0a802250050dc5e1c104c0cb3fce7928010001f03c800000101080a4fb0196c36b68ca9a334bb90ca345b56');
+        });
 
       });
 
@@ -309,7 +309,7 @@
       it('decodes ip frames', function () {
 
         helper.compare(
-          '8438355f8e8a08863b3b39c70800aaaa01234567',
+          '8438355f8e8a08863b3b39c70800aaaa6e4d2ad1',
           {
             'type': 'ipv4',
             'da': '84:38:35:5f:8e:8a',
@@ -333,22 +333,18 @@
   function Helper(linkType) {
     this._buffers = [];
     this._linkType = linkType;
-    this._decoder = decoders[linkType];
+    this.decode = require('../src/js/decode/' + linkType);
   }
 
   Helper.prototype.compare = function (actualString, expectedObject) {
     var buf = new Buffer(actualString, 'hex');
     this._buffers.push(buf); // Save the buffer.
-    var actualObject = this._decoder.decode(buf);
+    var actualObject = this.decode(buf);
     assert.deepEqual(
       actualObject,
       expectedObject,
       JSON.stringify(diff(actualObject, expectedObject), null, 2)
     );
-  };
-
-  Helper.prototype.validate = function (actualString) {
-    return this._decoder.isValid(new Buffer(actualString, 'hex'));
   };
 
   Helper.prototype.save = function (path) {
