@@ -10,16 +10,14 @@ Radiotap header). This is the default on OS X in monitor mode.
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var extractor = new dot11.transform.Extractor();
 var decoder = new dot11.transform.Decoder({stringify: true});
 
 capture
-  .pipe(extractor)
   .pipe(decoder)
   .pipe(process.stdout);
 ```
 
-This output can be directly piped to [jq](http://stedolan.github.io/jq/) for
+This output can be directly piped to [jq][] for
 easy parsing.
 
 
@@ -31,14 +29,12 @@ particular, this includes all control and management frames).
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var extractor = new dot11.transform.Extractor();
 var decoder = new dot11.transform.Decoder();
 
 var nValid = 0;
 var nInvalid = 0;
 
 capture
-  .pipe(extractor)
   .pipe(decoder)
   .on('data', function () {
     nValid++;
@@ -61,9 +57,7 @@ process.on('SIGINT', function () {
 });
 ```
 
-Be sure to check the
-[FAQ](https://github.com/mtth/dot11/blob/master/doc/faq.md#im-seeing-a-lot-of-invalid-frames-why-is-this)
-if you are seeing a lot of invalid frames.
+Be sure to check the [FAQ][] if you are seeing a lot of invalid frames.
 
 
 ## 802.11 data traffic
@@ -73,15 +67,14 @@ seconds.
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var extractor = new dot11.transform.Extractor();
 var decoder = new dot11.transform.Decoder();
 var nBytesReceived = {};
 
 capture
   .close(10000)
-  .pipe(extractor)
   .pipe(decoder)
   .on('data', function (frame) {
+    frame = frame.body; // Extract 802.11 frame from Radiotap header.
     if (frame.type === 'data' && frame.body) {
       var sa = frame.sa;
       nBytesReceived[sa] = (nBytesReceived[sa] || 0) + frame.body.length;
@@ -101,16 +94,14 @@ captured.
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var extractor = new dot11.transform.Extractor();
 var decoder = new dot11.transform.Decoder();
 var bssids = {};
 
 capture
   .close(10000)
-  .pipe(extractor)
   .pipe(decoder)
   .on('data', function (frame) {
-    var bssid = frame.bssid;
+    var bssid = frame.body.bssid;
     if (bssid) {
       bssids[bssid] = (bssids[bssid] || 0) + 1;
     }
@@ -119,3 +110,6 @@ capture
     console.dir(bssids);
   });
 ```
+
+[jq]: http://stedolan.github.io/jq/
+[FAQ]: https://github.com/mtth/dot11/blob/master/doc/faq.md#im-seeing-a-lot-of-invalid-frames-why-is-this

@@ -301,18 +301,7 @@ as this class is only used to store the output of a Capture class here
 defined (as truncated frames do not get carried over).
 
 
-## Transform
-
-The transform module contains streams useful to process capture streams.
-Currently, the following streams are implemented:
-
-+ [`Decoder`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11transformdecoderopts)
-  A duplex stream that transform frames made of raw bytes (i.e. buffers) into
-  JavaScript objects.
-+ [`Extractor`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11transformextractoropts)
-  A duplex stream that extracts inner frames (e.g. an 802.11 frame encapsulated
-  in a frame with a Radiotap header).
-
+## Decode
 
 ### Class: dot11.transform.Decoder([opts])
 
@@ -369,66 +358,3 @@ Emitted when something fatal happened (e.g. invalid link type).
 #### getLinkType()
 
 Get decoded data link type.
-
-
-### Class: dot11.transform.Extractor([opts])
-
-A stream to extract an inner frame. In most cases, this can be done without
-decoding the complete outer frame which helps efficiency.
-
-`dot11` currently supports extracting the following link types:
-
-+ `IEEE802_11_RADIO` to `IEEE802_11`.
-
-
-#### Event: 'readable'
-
-Emitted when the first frame can be read.
-
-#### Event: 'data'
-
-+ `frame` {Buffer} The extracted frame.
-
-Emitted each time a frame is available for reading.
-
-#### Event 'invalid'
-
-+ `data` {Buffer} The invalid (outer) frame.
-+ `err` {Error} Description of why this frame is invalid.
-
-Emitted when the extractor was unable to extract a frame.
-
-#### Event 'skip'
-
-+ `frame` {Buffer} The outer frame from which no frame was extracted.
-
-Emitted when the inner extracted frame doesn't have the right type (currently,
-this only happens when extracting from `EN10MB` when the inner frame is neither
-IPv4 nor IPv6).
-
-#### Event: 'end'
-
-Emitted when there are no more frames to read.
-
-#### Event 'error'
-
-+ `err` {Error} The error that caused this.
-
-Emitted when something fatal happened (e.g. invalid link type).
-
-#### new dot11.transform.Extractor([opts])
-
-+ `opts` {Object} Various options:
-  + `fromLinkType` {String} The data link type from which to extract data. If
-    piped to from another `dot11` stream, this will be inferred automatically.
-  + `toLinkType` {String} The data link type expected as output. If a single
-    conversion is possible from the input link type, this will also be inferred
-    automatically. Note that relying on this inference might break in the
-    future if more extractor types are added (whereas the first inference is
-    safe).
-
-#### getLinkType([incoming])
-
-+ `incoming` {Boolean} Whether to return the incoming or outgoing link type.
-
-Get extracted from/to data link type.
