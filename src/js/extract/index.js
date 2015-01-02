@@ -1,10 +1,14 @@
 /* jshint node: true */
 
 /**
- * Frame decoding and extraction streams.
+ * Import all extractors inside this folder. The name of the file should
+ * correspond to the link type it extracts _from_.
  *
- * These are meant to provide a single interface to all decoding and extracting
- * functions (also providing link type inference when possible).
+ * An extractor is a "class" that provides `_read` and `_write` methods
+ * (compatible with the duplex stream interface). It takes as constructor
+ * arguments a single dictionary of options.
+ *
+ * TODO: Switch these to actual extractors (i.e. from link layer to IP layer).
  *
  */
 (function (root) {
@@ -12,7 +16,20 @@
 
   var stream = require('stream'),
       util = require('util'),
-      extractors = require('./extractors');
+      utils = require('../utils');
+
+  var extractors = utils.requireDirectory(__dirname);
+
+  /**
+   * Ha.
+   *
+   */
+  function Packet(type, contents) {
+
+    this.type = type;
+    this.contents = contents;
+
+  }
 
   /**
    * Extractor stream class.
@@ -104,9 +121,8 @@
   }
   util.inherits(Extractor, stream.Duplex);
 
-  // Export things.
-
   root.exports = {
+    Packet: Packet,
     Extractor: Extractor
   };
 

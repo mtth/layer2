@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
 
-  function RAW(opts) {
+  function Extract(opts) {
 
     opts = opts || {};
 
@@ -65,8 +65,6 @@
 
   }
 
-  root.exports = {
-    RAW: RAW
-  };
+  root.exports = Extract;
 
 })(module);

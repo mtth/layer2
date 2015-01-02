@@ -10,7 +10,6 @@
 (function (root) {
   'use strict';
 
-
   var stream = require('stream'),
       util = require('util'),
       utils = require('../utils');
@@ -82,13 +81,14 @@
       var decode = decoders[linkType];
 
       // Override function.
-      this._tranform = function (data, encoding, callback) {
+      this._transform = function (data, encoding, callback) {
 
         var contents;
         try {
           contents = decode(data);
         } catch (err) {
-          return this.emit('invalid', data, err);
+          this.emit('invalid', data, err);
+          return callback();
         }
 
         if (stringify) {

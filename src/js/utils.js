@@ -60,18 +60,19 @@
 
   }
 
-  function requireDirectory(target, dpath) {
+  function requireDirectory(dpath) {
 
     var names = fs.readdirSync(dpath);
     var pattern = /([^.]*).js/;
-
+    var target = {};
     var i, match;
     for (i = 0; i < names.length; i++) {
       match = pattern.exec(names[i]);
       if (match && match[1] !== 'index') {
-        target[match[1]] = require('./' + match[1]);
+        target[match[1]] = require(dpath + '/' + match[1]);
       }
     }
+    return target;
 
   }
 

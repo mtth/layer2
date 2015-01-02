@@ -7,7 +7,97 @@
       diff = require('deep-diff'),
       dot11 = require('../src/js');
 
+  var savedCapture = {
+    path: './test/dat/mixed.pcap',
+    length: {valid: 48, invalid: 118}
+  };
+
   describe('Decoder', function () {
+
+    describe('stream', function () {
+
+      var Decoder = dot11.decode.Decoder;
+
+      it('can be piped to and read from', function (done) {
+
+        var capture = new dot11.capture.Replay(savedCapture.path);
+        var decoder = new Decoder({linkType: capture.getLinkType()});
+
+        capture
+          .pipe(decoder)
+          .once('readable', function () {
+            assert.equal(this.getLinkType(), 'IEEE802_11');
+            assert(this.read());
+            done();
+          });
+
+      });
+
+      it('can be piped to and listened to', function (done) {
+
+        var capture = new dot11.capture.Replay(savedCapture.path);
+        var decoder = new Decoder();
+        var nFrames = 0;
+
+        capture
+          .pipe(decoder)
+          .on('data', function (data) {
+            assert.ok(data && typeof data == 'object');
+            nFrames++;
+          })
+          .on('end', function () {
+            assert.equal(this.getLinkType(), 'IEEE802_11');
+            assert.equal(nFrames, savedCapture.length.valid);
+            done();
+          });
+
+      });
+
+      it('emits end when the writable side finished', function (done) {
+
+        var capture = new dot11.capture.Replay(savedCapture.path);
+        var decoder = new Decoder({linkType: capture.getLinkType()});
+        var nFrames = 0;
+
+        capture
+          .on('data', function (buf) { decoder.write(buf); })
+          .on('end', function () { decoder.end(); });
+
+        decoder
+          .on('data', function () { nFrames++; })
+          .on('end', function () {
+            assert.equal(nFrames, savedCapture.length.valid);
+            done();
+          });
+
+      });
+
+      it('emits events when a frame fails to decode', function (done) {
+
+        var capture = new dot11.capture.Replay(savedCapture.path);
+        var decoder = new Decoder();
+        var nValidFrames = 0;
+        var nInvalidFrames = 0;
+
+        capture
+          .pipe(decoder)
+          .on('data', function (data) {
+            assert.ok(data && typeof data == 'object');
+            nValidFrames++;
+          })
+          .on('invalid', function (data, err) {
+            assert.ok(data && err);
+            nInvalidFrames++;
+          })
+          .on('end', function () {
+            assert.equal(nValidFrames, savedCapture.length.valid);
+            assert.equal(nInvalidFrames, savedCapture.length.invalid);
+            done();
+          });
+
+      });
+
+    });
 
     describe('IEEE802_11_RADIO', function () {
 
@@ -16,12 +106,25 @@
       it('decodes radiotap frames', function () {
 
         helper.compare(
-          '000020006708040054c6b82400000000220cdaa002000000400100003c142411aa',
+          '000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6',
           {
             'headerRevision': 0,
             'headerPad': 0,
             'headerLength': 32,
-            'body': new Buffer('aa', 'hex')
+            'body': {
+              'version': 0,
+              'type': 'ctrl',
+              'subType': 'rts',
+              'toDs': 0,
+              'fromDs': 0,
+              'retry': 0,
+              'powerMgmt': 0,
+              'moreFrag': 0,
+              'moreData': 0,
+              'duration': 380,
+              'ra': '3c:e0:72:e6:61:2b',
+              'ta': 'cc:03:fa:dc:20:2a'
+            }
           }
         );
 
