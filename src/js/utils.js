@@ -9,7 +9,30 @@
 (function (root) {
   'use strict';
 
-  var fs = require('fs');
+  var fs = require('fs'),
+      path = require('path');
+
+  /**
+   * Ha.
+   *
+   */
+  function Frame(linkType, contents) {
+
+    this.linkType = linkType;
+    this.contents = contents;
+
+  }
+
+  /**
+   * Ha.
+   *
+   */
+  function Packet(type, contents) {
+
+    this.type = type;
+    this.contents = contents;
+
+  }
 
   function readMacAddr(buf, offset) {
     // MAC address parser.
@@ -69,7 +92,7 @@
     for (i = 0; i < names.length; i++) {
       match = pattern.exec(names[i]);
       if (match && match[1] !== 'index') {
-        target[match[1]] = require(dpath + '/' + match[1]);
+        target[match[1]] = require(path.join(dpath, match[1]));
       }
     }
     return target;
@@ -77,6 +100,8 @@
   }
 
   root.exports = {
+    Frame: Frame,
+    Packet: Packet,
     readMacAddr: readMacAddr,
     crc32: makeCrc32(),
     requireDirectory: requireDirectory

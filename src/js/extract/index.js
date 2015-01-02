@@ -21,17 +21,6 @@
   var extractors = utils.requireDirectory(__dirname);
 
   /**
-   * Ha.
-   *
-   */
-  function Packet(type, contents) {
-
-    this.type = type;
-    this.contents = contents;
-
-  }
-
-  /**
    * Extractor stream class.
    *
    * Similarly to the decoder stream above, in order to be functional, this
@@ -43,38 +32,20 @@
   function Extractor(opts) {
 
     opts = opts || {};
-    var fromLinkType = opts.fromLinkType;
-    var toLinkType = opts.toLinkType;
+    var linkType = opts.linkType;
 
     stream.Duplex.call(this, {objectMode: true});
 
-    this.getLinkType = function (incoming) {
+    // TODO: extract method (from a list of buffers)?
 
-      return incoming ? fromLinkType : toLinkType;
-
-    };
+    this.getLinkType = function () { return linkType; };
 
     this.on('pipe', function (src) {
 
-      if (!fromLinkType) {
-        fromLinkType = src.getLinkType();
-      } else if (fromLinkType !== src.getLinkType()) {
-        return this.emit('error', new Error('Inconsistent source link type.'));
-      }
-
-      if (!toLinkType) {
-        if (fromLinkType in extractors) {
-          var toLinkTypes = Object.keys(extractors[fromLinkType]);
-          if (toLinkTypes.length === 1) {
-            toLinkType = toLinkTypes[0];
-          } else {
-            return this.emit('error', new Error('Ambiguous target link type.'));
-          }
-        } else {
-          return this.emit(
-            'error', new Error('No valid target link type from ' + fromLinkType)
-          );
-        }
+      if (!linkType) {
+        linkType = src.getLinkType();
+      } else if (linkType !== src.getLinkType()) {
+        return this.emit('error', new Error('Inconsistent link type.'));
       }
 
     });
@@ -85,36 +56,30 @@
 
     this._read = function () {
 
-      activate();
-      this._read();
+      activate(this);
+      return this._read();
 
     };
 
     this._write = function (data, encoding, callback) {
 
-      activate();
-      this._write(data, encoding, callback);
+      activate(this);
+      return this._write(data, encoding, callback);
 
     };
 
-    var self = this;
+    function activate(self) {
 
-    function activate() {
-
-      if (fromLinkType && toLinkType) {
-        var srcExtractors = extractors[fromLinkType];
-        if (srcExtractors && toLinkType in srcExtractors) {
-          srcExtractors[toLinkType].call(self, opts);
-        } else {
-          self.emit(
-            'error', new Error(
-              'Unsupported link types: ' + fromLinkType + ' -> ' + toLinkType
-            )
-          );
-        }
-      } else {
-        self.emit('error', new Error('Missing link types.'));
+      if (!linkType) {
+        return self.emit('error', new Error('No link type specified.'));
+      } else if (!(linkType in extractors)) {
+        return self.emit(
+          'error',
+          new Error('Unsupported link type: ' + linkType)
+        );
       }
+
+      extractors[linkType].call(self);
 
     }
 
@@ -122,7 +87,6 @@
   util.inherits(Extractor, stream.Duplex);
 
   root.exports = {
-    Packet: Packet,
     Extractor: Extractor
   };
 

@@ -14,29 +14,8 @@
       util = require('util'),
       utils = require('../utils');
 
+  var Frame = utils.Frame;
   var decoders = utils.requireDirectory(__dirname);
-
-  /**
-   * Ha.
-   *
-   */
-  function Frame(linkType, contents) {
-
-    this.linkType = linkType;
-    this.contents = contents;
-
-  }
-
-  Frame.fromBytes = function (linkType, bytes) {
-
-    if (!(linkType in decoders)) {
-      throw new Error('Unsupported link type: ' + linkType);
-    }
-
-    var contents = decoders[linkType](bytes);
-    return new Frame(linkType, contents);
-
-  };
 
   /**
    * Decoder stream class.
@@ -67,12 +46,26 @@
 
     this.getLinkType = function () { return linkType; };
 
+    this.decode = function (buf) {
+
+      activate(this);
+      return this.decode(buf);
+
+    };
+
     this._transform = function (data, encoding, callback) {
 
+      activate(this);
+      return this._transform(data, encoding, callback);
+
+    };
+
+    function activate(self) {
+
       if (!linkType) {
-        return this.emit('error', new Error('No link type specified.'));
+        return self.emit('error', new Error('No link type specified.'));
       } else if (!(linkType in decoders)) {
-        return this.emit(
+        return self.emit(
           'error',
           new Error('Unsupported link type: ' + linkType)
         );
@@ -80,8 +73,14 @@
 
       var decode = decoders[linkType];
 
-      // Override function.
-      this._transform = function (data, encoding, callback) {
+      // Override functions.
+      self.decode = function (buf) {
+
+        return new Frame(linkType, decode(buf));
+
+      };
+
+      self._transform = function (data, encoding, callback) {
 
         var contents;
         try {
@@ -99,10 +98,7 @@
 
       };
 
-      // And call it again now.
-      this._transform(data, encoding, callback);
-
-    };
+    }
 
   }
   util.inherits(Decoder, stream.Transform);
