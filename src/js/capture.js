@@ -263,21 +263,25 @@
    * Frame capture stream from saved file.
    *
    */
-  function Replay(path, opts) {
+  function Replay(fpath, opts) {
 
     opts = opts || {};
     var bufferSize = opts.bufferSize || 1024 * 1024; // 1 MB
 
     var buffer = new Buffer(bufferSize);
-    var wrapper = new pcap.Wrapper(buffer).fromSavefile(path);
+    var wrapper = new pcap.Wrapper(buffer).fromSavefile(fpath);
 
     stream.Readable.call(this, {objectMode: true, highWaterMark: 1});
 
     Capture.call(this, wrapper, buffer, opts);
 
-    this.once('end', this._closeWrapper.bind(this));
+    this.once('end', function () {
 
-    this.getPath = function () { return path; };
+      process.nextTick(this._closeWrapper.bind(this));
+
+    });
+
+    this.getPath = function () { return fpath; };
 
   }
   util.inherits(Replay, stream.Readable);
@@ -299,11 +303,33 @@
 
   };
 
+  Replay.summarize = function (fpath, cb) {
+
+    var nFrames = 0;
+    var nBytes = 0;
+
+    new Replay(fpath)
+      .on('data', function (buf) {
+        nFrames++;
+        nBytes += buf.length;
+      })
+      .on('end', function () {
+        var summary = {
+          linkType: this.getLinkType(),
+          maxFrameSize: this.getMaxFrameSize(),
+          nFrames: nFrames,
+          nBytes: nBytes
+        };
+        cb(null, summary);
+      });
+
+  };
+
   /**
    * Save capture to file.
    *
    */
-  function Save(path, opts) {
+  function Save(fpath, opts) {
 
     opts = opts || {};
     var linkType = opts.linkType || null; // Inferred from pipe.
@@ -340,7 +366,7 @@
 
     });
 
-    this.getPath = function () { return path; };
+    this.getPath = function () { return fpath; };
 
     this.getLinkType = function () { return linkType; };
 
@@ -354,7 +380,7 @@
         }
         wrapper = new pcap.Wrapper(new Buffer(0)) // Unused buffer.
           .fromDead(linkType, maxFrameSize)
-          .toSavefile(path);
+          .toSavefile(fpath);
       }
       wrapper.dumpFrame(data);
       return callback();

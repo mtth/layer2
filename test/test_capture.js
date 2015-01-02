@@ -290,6 +290,22 @@
 
       });
 
+      it('outputs a summary', function (done) {
+
+        Replay.summarize(captures.large.path, function (err, summary) {
+          assert.deepEqual(summary, {
+            linkType: 'IEEE802_11_RADIO',
+            maxFrameSize: 65535,
+            nFrames: 780,
+            nBytes: 118675
+          });
+          done();
+        });
+
+      });
+
+      // Helpers.
+
       function testDispatching(batchSize, callback) {
 
         var totalFrames = captures.large.length;

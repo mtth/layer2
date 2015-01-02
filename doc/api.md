@@ -219,9 +219,9 @@ Emitted when the underlying device is closed.
 
 This event is guaranteed to be emitted after the `'end'` event.
 
-#### new dot11.capture.Replay(path, [opts])
+#### new dot11.capture.Replay(fpath, [opts])
 
-+ `path` {String} Path to a saved capture file (PCAP format).
++ `fpath` {String} Path to a saved capture file (PCAP format).
 + `opts` {Object} Various options:
   + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold frames.
     Larger means more frames can be gathered in fewer dispatch calls (this
@@ -258,6 +258,15 @@ Also useful for saves.
 
 + return {Number}
 
+#### Replay.summarize(fpath, cb)
+
+Retrieve information about a PCAP file.
+
++ `fpath` {String} Path to a saved capture file.
++ `cb(err, summary)` {Function} Callback to which the summary object is passed.
+  Summary is an object very similar to `{linkType: 'EN10MB', nFrames: 20,
+  nBytes: 474, maxFrameSize: 65535}`.
+
 
 ### Class: dot11.capture.Save
 
@@ -282,12 +291,12 @@ Emitted after the underlying device is closed.
 
 Most methods on the stream will be unavailable at this point.
 
-#### new dot11.capture.Save(path, [opts])
+#### new dot11.capture.Save(fpath, [opts])
 
 Writable stream to save frames to the `.pcap` format (compatible with
 Wireshark and Tcpdump).
 
-+ `path` {String} The path where the capture will be stored.
++ `fpath` {String} The path where the capture will be stored.
 + `opts` {Object} Optional parameters:
   + `linkType` {String} The data link type. If not specified here, it will be
     inferred from the first stream piped.
