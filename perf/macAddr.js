@@ -7,25 +7,23 @@
 (function () {
   'use strict';
 
-  var assert = require('assert');
+  var Benchmark = require('benchmark'),
+      util = require('util');
+
+  var suite = new Benchmark.Suite();
 
   function benchmark(label, decoder) {
 
-    var count = 1000000;
-    var frame = new Buffer('80000000ffffffffffff06037f07a016', 'hex');
-    // (802.11 beacon frame.)
-    var addr, i;
+    var buf = new Buffer('80000000ffffffffffff06037f07a016', 'hex');
 
-    console.time(label);
-    for (i = 0; i < count; i++) {
-      addr = decoder(frame, 10);
-    }
-    assert.equal(addr, '06:03:7f:07:a0:16');
-    console.timeEnd(label);
+    return {
+      name: label,
+      fn: function () { decoder(buf, 10); }
+    };
 
   }
 
-  benchmark('pcap', function (buf, offset) {
+  suite.add(benchmark('pcap', function (buf, offset) {
 
     return [
       lpad(buf[offset].toString(16), 2),
@@ -36,20 +34,9 @@
       lpad(buf[offset + 5].toString(16), 2)
     ].join(':');
 
-  });
+  }));
 
-  benchmark('1', function (buf, offset) {
-
-    return buf.toString('hex', offset, offset + 1) + ':' +
-      buf.toString('hex', offset + 1, offset + 2) + ':' +
-      buf.toString('hex', offset + 2, offset + 3) + ':' +
-      buf.toString('hex', offset + 3, offset + 4) + ':' +
-      buf.toString('hex', offset + 4, offset + 5) + ':' +
-      buf.toString('hex', offset + 5, offset + 6);
-
-  });
-
-  benchmark('2', function (buf, offset) {
+  suite.add(benchmark('1', function (buf, offset) {
 
     return buf.toString('hex', offset, offset + 1) + ':' +
       buf.toString('hex', offset + 1, offset + 2) + ':' +
@@ -58,9 +45,20 @@
       buf.toString('hex', offset + 4, offset + 5) + ':' +
       buf.toString('hex', offset + 5, offset + 6);
 
-  });
+  }));
 
-  benchmark('3', function (buf, offset) {
+  suite.add(benchmark('2', function (buf, offset) {
+
+    return buf.toString('hex', offset, offset + 1) + ':' +
+      buf.toString('hex', offset + 1, offset + 2) + ':' +
+      buf.toString('hex', offset + 2, offset + 3) + ':' +
+      buf.toString('hex', offset + 3, offset + 4) + ':' +
+      buf.toString('hex', offset + 4, offset + 5) + ':' +
+      buf.toString('hex', offset + 5, offset + 6);
+
+  }));
+
+  suite.add(benchmark('3', function (buf, offset) {
 
     return [
       buf.toString('hex', offset, offset + 1),
@@ -71,9 +69,9 @@
       buf.toString('hex', offset + 5, offset + 6)
     ].join(':');
 
-  });
+  }));
 
-  benchmark('4', function (buf, offset) {
+  suite.add(benchmark('4', function (buf, offset) {
 
     var s = buf.toString('hex', offset, offset + 6);
     return [
@@ -85,7 +83,21 @@
       s.slice(10, 12)
     ].join(':');
 
-  });
+  }));
+
+  suite
+    .on('cycle', function () { process.stderr.write('.'); })
+    .on('complete', function () {
+      var bs = this.sort(function (b1, b2) { return b2.hz - b1.hz; });
+      console.error(util.format('\n1.\t\t%s', bs[0]));
+      var i;
+      for (i = 1; i < bs.length; i++) {
+        var b = bs[i];
+        var percent = Math.round((1 - (b.hz / bs[0].hz)) * 100);
+        console.error(util.format('%s.\t-%s%%\t%s', i + 1, percent, b));
+      }
+    })
+    .run();
 
   // Helpers.
 

@@ -16,17 +16,6 @@
    * Ha.
    *
    */
-  function Frame(linkType, contents) {
-
-    this.linkType = linkType;
-    this.contents = contents;
-
-  }
-
-  /**
-   * Ha.
-   *
-   */
   function Packet(type, contents) {
 
     this.type = type;
@@ -100,7 +89,6 @@
   }
 
   root.exports = {
-    Frame: Frame,
     Packet: Packet,
     readMacAddr: readMacAddr,
     crc32: makeCrc32(),
