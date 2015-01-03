@@ -313,7 +313,7 @@
         nFrames++;
         nBytes += buf.length;
       })
-      .on('end', function () {
+      .once('end', function () {
         var summary = {
           linkType: this.getLinkType(),
           maxFrameSize: this.getMaxFrameSize(),

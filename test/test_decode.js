@@ -97,6 +97,36 @@
 
       });
 
+      it('can decode a single frame', function () {
+
+        assert.deepEqual(
+          Decoder.decode(
+            new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex'),
+            'IEEE802_11_RADIO'
+          ),
+          {
+            'headerRevision': 0,
+            'headerPad': 0,
+            'headerLength': 32,
+            'body': {
+              'version': 0,
+              'type': 'ctrl',
+              'subType': 'rts',
+              'toDs': 0,
+              'fromDs': 0,
+              'retry': 0,
+              'powerMgmt': 0,
+              'moreFrag': 0,
+              'moreData': 0,
+              'duration': 380,
+              'ra': '3c:e0:72:e6:61:2b',
+              'ta': 'cc:03:fa:dc:20:2a'
+            }
+          }
+        );
+
+      });
+
     });
 
     describe('IEEE802_11_RADIO', function () {

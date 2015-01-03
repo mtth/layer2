@@ -10,11 +10,13 @@ Radiotap header). This is the default on OS X in monitor mode.
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.transform.Decoder({stringify: true});
+var decoder = new dot11.transform.Decoder();
 
-capture
-  .pipe(decoder)
-  .pipe(process.stdout);
+capture                     // Stream of buffers (frames' raw bytes).
+  .pipe(decoder)            // Stream of objects (decoded frames).
+  .on('data', function (frame) {
+    console.log(JSON.stringify(frame));
+  });
 ```
 
 This output can be directly piped to [jq][] for

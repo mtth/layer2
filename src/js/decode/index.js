@@ -14,7 +14,6 @@
       util = require('util'),
       utils = require('../utils');
 
-  var Frame = utils.Frame;
   var decoders = utils.requireDirectory(__dirname);
 
   /**
@@ -29,7 +28,6 @@
 
     opts = opts || {};
     var linkType = opts.linkType || null; // Inferred below.
-    var stringify = opts.stringify || false;
 
     stream.Transform.call(this, {objectMode: true});
 
@@ -46,13 +44,6 @@
 
     this.getLinkType = function () { return linkType; };
 
-    this.decode = function (buf) {
-
-      activate(this);
-      return this.decode(buf);
-
-    };
-
     this._transform = function (data, encoding, callback) {
 
       activate(this);
@@ -62,39 +53,23 @@
 
     function activate(self) {
 
-      if (!linkType) {
-        return self.emit('error', new Error('No link type specified.'));
-      } else if (!(linkType in decoders)) {
-        return self.emit(
-          'error',
-          new Error('Unsupported link type: ' + linkType)
-        );
+      var decodeFn;
+      try {
+        decodeFn = getDecodeFn(linkType);
+      } catch (err) {
+        return self.emit('error', err);
       }
-
-      var decode = decoders[linkType];
-
-      // Override functions.
-      self.decode = function (buf) {
-
-        return new Frame(linkType, decode(buf));
-
-      };
 
       self._transform = function (data, encoding, callback) {
 
-        var contents;
+        var frame;
         try {
-          contents = decode(data);
+          frame = decodeFn(data);
         } catch (err) {
           this.emit('invalid', data, err);
           return callback();
         }
-
-        if (stringify) {
-          callback(null, JSON.stringify(contents));
-        } else {
-          callback(null, new Frame(linkType, contents));
-        }
+        callback(null, frame);
 
       };
 
@@ -103,8 +78,25 @@
   }
   util.inherits(Decoder, stream.Transform);
 
+  Decoder.decode = function (buf, linkType) {
+
+    var decodeFn = getDecodeFn(linkType);
+    return decodeFn(buf);
+
+  };
+
+  function getDecodeFn(linkType) {
+
+    if (!linkType) {
+      throw new Error('No link type specified.');
+    } else if (!(linkType in decoders)) {
+      throw new Error('Unsupported link type: ' + linkType);
+    }
+    return decoders[linkType];
+
+  }
+
   root.exports = {
-    Frame: Frame,
     Decoder: Decoder
   };
 

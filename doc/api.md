@@ -329,8 +329,7 @@ Emitted when the first frame can be read.
 
 #### Event: 'data'
 
-+ `frame` {Object | String} A (potentially stringified) object representation
-  of the frame.
++ `frame` {Object} An object representation of the frame.
 
 Emitted each time a frame is available for reading.
 
@@ -361,8 +360,6 @@ Emitted when something fatal happened (e.g. invalid link type).
 + `opts` {Object} Various options:
   + `linkType` {String} The data link type to be decoded. If the stream is
     piped to from another `dot11` stream, this will be inferred automatically.
-  + `stringify` {Boolean} Jsonify the decoded objects (useful for example if
-    piping to `process.stdout`). [default: `false`]
 
 #### getLinkType()
 

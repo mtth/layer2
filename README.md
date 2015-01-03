@@ -9,11 +9,13 @@ Ethernet).
 var dot11 = require('dot11');
 
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.transform.Decoder({stringify: true});
+var decoder = new dot11.transform.Decoder();
 
-capture                     // Raw frames.
-  .pipe(decoder)            // Decoded and stringified frames.
-  .pipe(process.stdout);
+capture                     // Stream of buffers (frames' raw bytes).
+  .pipe(decoder)            // Stream of objects (decoded frames).
+  .on('data', function (frame) {
+    console.log(JSON.stringify(frame));
+  });
 ```
 
 
