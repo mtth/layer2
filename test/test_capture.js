@@ -25,6 +25,20 @@
 
   describe('Capture', function () {
 
+    it('can summarize saved captures', function (done) {
+
+      dot11.capture.summarize(captures.large.path, function (err, summary) {
+        assert.deepEqual(summary, {
+          linkType: 'IEEE802_11_RADIO',
+          maxFrameSize: 65535,
+          nFrames: 780,
+          nBytes: 118675
+        });
+        done();
+      });
+
+    });
+
     // Replays.
 
     describe('Replay', function () {
@@ -453,6 +467,36 @@
 
       });
 
+      it('can be piped to multiple times', function (done) {
+
+        var loop = 3;
+        var savePath = fromName('multiple.pcap');
+        var save = new Save(savePath);
+
+        save
+          .on('close', function () {
+            dot11.capture.summarize(savePath, function (err, summary) {
+              assert.equal(summary.nFrames, 9);
+              done();
+            });
+          });
+
+        (function saveOnce() {
+
+          new dot11.capture.Replay(captures.small.path)
+            .on('end', function () {
+              if (--loop) {
+                saveOnce(save);
+              } else {
+                save.end();
+              }
+            })
+            .pipe(save, {end: false});
+
+        })();
+
+      });
+
       // Helpers.
 
       // Name and delete file after test.
@@ -655,22 +699,6 @@
           });
         setTimeout(function () { capture.close(); }, 2000);
 
-      });
-
-    });
-
-    // Helpers.
-
-    it('can output the summary of a saved capture', function (done) {
-
-      dot11.capture.summarize(captures.large.path, function (err, summary) {
-        assert.deepEqual(summary, {
-          linkType: 'IEEE802_11_RADIO',
-          maxFrameSize: 65535,
-          nFrames: 780,
-          nBytes: 118675
-        });
-        done();
       });
 
     });
