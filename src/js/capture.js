@@ -303,28 +303,6 @@
 
   };
 
-  Replay.summarize = function (fpath, cb) {
-
-    var nFrames = 0;
-    var nBytes = 0;
-
-    new Replay(fpath)
-      .on('data', function (buf) {
-        nFrames++;
-        nBytes += buf.length;
-      })
-      .once('end', function () {
-        var summary = {
-          linkType: this.getLinkType(),
-          maxFrameSize: this.getMaxFrameSize(),
-          nFrames: nFrames,
-          nBytes: nBytes
-        };
-        cb(null, summary);
-      });
-
-  };
-
   /**
    * Save capture to file.
    *
@@ -390,12 +368,37 @@
   }
   util.inherits(Save, stream.Writable);
 
+  // Helpers.
+
+  function summarize(fpath, cb) {
+
+    var nFrames = 0;
+    var nBytes = 0;
+
+    new Replay(fpath)
+      .on('data', function (buf) {
+        nFrames++;
+        nBytes += buf.length;
+      })
+      .once('end', function () {
+        var summary = {
+          linkType: this.getLinkType(),
+          maxFrameSize: this.getMaxFrameSize(),
+          nFrames: nFrames,
+          nBytes: nBytes
+        };
+        cb(null, summary);
+      });
+
+  }
+
   // Export things.
 
   root.exports = {
     Live: Live,
     Replay: Replay,
-    Save: Save
+    Save: Save,
+    summarize: summarize
   };
 
 })(module);

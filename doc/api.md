@@ -258,15 +258,6 @@ Also useful for saves.
 
 + return {Number}
 
-#### Replay.summarize(fpath, cb)
-
-Retrieve information about a PCAP file.
-
-+ `fpath` {String} Path to a saved capture file.
-+ `cb(err, summary)` {Function} Callback to which the summary object is passed.
-  Summary is an object very similar to `{linkType: 'EN10MB', nFrames: 20,
-  nBytes: 474, maxFrameSize: 65535}`.
-
 
 ### Class: dot11.capture.Save
 
@@ -308,6 +299,16 @@ assigned to the frame's captured length (and not the original frame
 length as it isn't available anymore). This shouldn't be a problem as long
 as this class is only used to store the output of a Capture class here
 defined (as truncated frames do not get carried over).
+
+
+### dot11.capture.summarize(fpath, cb)
+
+Retrieve information about a PCAP file.
+
++ `fpath` {String} Path to a saved capture file.
++ `cb(err, summary)` {Function} Callback to which the summary object is passed.
+  Summary is an object very similar to `{linkType: 'EN10MB', nFrames: 20,
+  nBytes: 474, maxFrameSize: 65535}`.
 
 
 ## Decode
