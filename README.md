@@ -39,8 +39,8 @@ captures as root.
 Average raw frame throughput (see [Performance benchmarks][benchmarks] for more
 details):
 
-+ `dot11`: 0.86 million frames per second
-+ [`pcap`][node_pcap]: 0.56 million frames per second
++ `dot11`: 0.93 million frames per second
++ [`pcap`][node_pcap]: 0.57 million frames per second
 + [`pcap-stream`][pcap-stream]: 0.21 million frames per second
 
 

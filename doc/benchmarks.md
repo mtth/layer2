@@ -1,13 +1,16 @@
 # Performance benchmarks
 
-Captures are downloaded from the [Wireshark sample captures
-page](http://wiki.wireshark.org/SampleCaptures).
+Captures are downloaded from the [Wireshark sample captures page][captures].
+
+In order to run these benchmarks you'll need to install the development
+dependencies.
 
 
 ## Raw frame throughput
 
-To run this benchmark you'll first need to install the development dependencies
-then:
+This benchmark measures the rate at which frames are processed while replaying
+a capture. This can be viewed as an upper bound on the maximum sustainable live
+capture rate.
 
 ```bash
 $ npm run benchmark-capture
@@ -47,6 +50,12 @@ $ npm run benchmark-capture
 
 Average throughput:
 
-+ `dot11`: 0.86 million frames per second
-+ `pcap`: 0.56 million frames per second
-+ `pcap-stream`: 0.21 million frames per second
++ `dot11`: 0.93 million frames per second.
++ `pcap`: 0.57 million frames per second.
++ `pcap-stream`: 0.21 million frames per second.
+
+Note that in order to reduce the setup and teardown costs the capture files are
+replicated to reach a size of a few megabytes. This way only the marginal frame
+processing time matters.
+
+[captures]: http://wiki.wireshark.org/SampleCaptures
