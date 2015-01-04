@@ -36,12 +36,9 @@ captures as root.
 
 ## Benchmarks
 
-Average raw frame throughput (see [Performance benchmarks][benchmarks] for more
-details):
+[![Capture benchmark](doc/img/capture.png)](https://github.com/mtth/dot11/blob/master/doc/benchmarks.md#raw-frame-throughput)
 
-+ `dot11`: 0.93 million frames per second.
-+ [`pcap`][node_pcap]: 0.57 million frames per second.
-+ [`pcap-stream`][pcap-stream]: 0.21 million frames per second.
+See [Performance benchmarks][benchmarks] for more details.
 
 
 ## Tests

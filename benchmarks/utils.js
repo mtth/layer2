@@ -206,6 +206,70 @@
   }
 
   /**
+   * Highcharts friendly data.
+   *
+   * @param `stats` Object keyed by run name, with stats as values (as returned
+   * by the benchmark's `run` method).
+   *
+   */
+  function toHighcharts(benchmarkStats, opts) {
+
+    opts = opts || {};
+    var title = opts.title || null;
+    var yAxisName = opts.yAxisName || null;
+    var converter = opts.converter || function (o) { return o.avgMs; };
+
+    var categories = Object.keys(benchmarkStats);
+    var seriesObj = {};
+    for (var i = 0; i < categories.length; i++) {
+      var runStats = benchmarkStats[categories[i]];
+      for (var j = 0; j < runStats.length; j++) {
+        var fnStats = runStats[j];
+        if (!(fnStats.name in seriesObj)) {
+          seriesObj[fnStats.name] = [];
+        }
+        seriesObj[fnStats.name].push(converter(fnStats));
+      }
+    }
+
+    var series = [];
+    var fnNames = Object.keys(seriesObj).sort();
+    for (i = 0; i < fnNames.length; i++) {
+      var fnName = fnNames[i];
+      series.push({name: fnName, data: seriesObj[fnName]});
+    }
+
+    return {
+      chart: {type: 'column'},
+      title: {text: title},
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'top',
+        floating: true,
+        x: -5,
+        y: 5,
+        borderWidth: 1,
+        backgroundColor: '#ffffff'
+      },
+      xAxis: {
+        categories: categories,
+        labels: {
+          rotation: -45,
+        }
+      },
+      yAxis: {
+        min: 0,
+        title: {
+          text: yAxisName
+        }
+      },
+      series: series
+    };
+
+  }
+
+  /**
    * Get all saved captures.
    *
    * @return The list of file paths.
@@ -225,6 +289,7 @@
   root.exports = {
     Benchmark: Benchmark,
     expand: expand,
+    toHighcharts: toHighcharts,
     getCapturePaths: getCapturePaths
   };
 
