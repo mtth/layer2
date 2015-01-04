@@ -30,7 +30,7 @@ captures as root.
 
 ## Documentation
 
-[API docs](doc/api.md) and several [examples](doc/examples.md) are available.
+[API docs](doc/api.md) and several [examples](examples/) are available.
 
 
 ## Benchmarks

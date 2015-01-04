@@ -677,7 +677,11 @@
       });
 
       it.skip('can inject a frame', function (done) {
-        // TODO: fix this test.
+        // TODO: fix this test. Two things potentially complicate this. First,
+        // this obviously requires a network card that supports emitting raw
+        // frames (it doesn't seem MacBook Airs do). Second, it doesn't seem
+        // that frames emitted by the machine monitoring get captured (also
+        // tested on a MacBook Air via Wireshark).
 
         var capture = new Live();
         var frame = new Buffer('000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b', 'hex');
