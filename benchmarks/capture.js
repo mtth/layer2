@@ -3,9 +3,7 @@
 (function () {
   'use strict';
 
-  var fs = require('fs'),
-      path = require('path'),
-      util = require('util'),
+  var util = require('util'),
       tmp = require('tmp'),
       utils = require('./utils'),
       dot11 = require('../src/js'),
@@ -42,30 +40,27 @@
   (function run(i) {
     if (i < fpaths.length) {
       var fpath = fpaths[i];
-      tmpExpand(fpath, 1e7, function (tpath, summary) {
-        benchmark.run(20, {fpath: tpath}, function (ts) {
-          console.log(fpath + ': ' + summary.nFrames + ' frames');
-          console.dir(ts);
+      utils.expand(fpath, null, 5e7, function (err, summary, tpath) {
+        benchmark.run(20, {fpath: tpath}, function (stats) {
+          console.log('\n# ' + fpath + ' (' + summary.nFrames + ' frames)');
+          for (var j = 0; j < stats.length; j++) {
+            var e = stats[j];
+            console.log(util.format(
+              '%s ms (±%s)\t %s f/us\t %s B/us\t%s\t%s',
+              e.avgMs.toFixed(2),
+              e.sdvMs.toFixed(2),
+              (1e-3 * summary.nFrames / e.avgMs).toFixed(2),
+              (1e-3 * summary.nBytes / e.avgMs).toFixed(2),
+              'relAvg' in e ?
+                '-' + (100 / (1 + 1 / e.relAvg)).toFixed(0) + '%' :
+                '',
+              e.name
+            ));
+          }
           run(i + 1);
         });
       });
     }
   })(0);
-
-  function tmpExpand(fpath, nBytes, cb) {
-
-    tmp.file(function (err, tpath) {
-
-      if (err) {
-        throw err;
-      }
-
-      utils.expand(fpath, tpath, nBytes, function (err, summary) {
-        cb(tpath, summary);
-      });
-
-    });
-
-  }
 
 })();

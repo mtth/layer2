@@ -19,7 +19,7 @@
   "scripts": {
     "build-debug": "node-gyp configure && node-gyp build --debug",
     "clean": "rm -rf build node_modules",
-    "perf-capture": "cd perf/capture && make",
+    "benchmark-capture": "cd benchmarks && make && node capture.js",
     "test": "$(npm bin)/mocha"
   },
   "engines": {
@@ -27,7 +27,10 @@
   },
   "devDependencies": {
     "deep-diff": "^0.3.0",
-    "mocha": "^2.0.1"
+    "mocha": "^2.0.1",
+    "pcap": "^1.2.0",
+    "pcap-stream": "^0.1.1",
+    "tmp": "0.0.24"
   },
   "repository": {
     "type": "git",

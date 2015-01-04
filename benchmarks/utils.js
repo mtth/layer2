@@ -5,7 +5,8 @@
 
   var dot11 = require('../src/js'),
       fs = require('fs'),
-      path = require('path');
+      path = require('path'),
+      tmp = require('tmp');
 
   /**
    * Expand replay to given number of bytes.
@@ -14,9 +15,9 @@
    * maximum frame size). Note that the entire file's size might be a bit over
    * because of the global header.
    *
-   * @param srcPath Source.
-   * @param dstPath Target.
-   * @param cb(err, summary)
+   * @param `srcPath` Source.
+   * @param `dstPath` Target. If `null`, a temporary file will be created.
+   * @param `cb(err, summary, dstPath)`.
    *
    */
   function expand(srcPath, dstPath, totalBytes, cb) {
@@ -24,23 +25,37 @@
     var nBytes = 0;
     var save = null;
 
-    (function loop() {
+    if (dstPath === null) {
+      tmp.file(function (err, tpath) {
+        if (err) {
+          throw err;
+        }
+        loop(tpath);
+      });
+    } else {
+      process.nextTick(function () { loop(dstPath); });
+    }
+
+    function loop(fpath) {
 
       var finished = false;
 
       new dot11.capture.Replay(srcPath)
         .once('readable', function () {
           if (save === null) {
-            save = new dot11.capture.Save(dstPath, {
+            save = new dot11.capture.Save(fpath, {
               linkType: this.getLinkType()
             })
               .on('close', function () {
                 if (cb) {
-                  dot11.capture.summarize(dstPath, cb);
+                  dot11.capture.summarize(fpath, function (err, summary) {
+                    cb(err, summary, fpath);
+                  });
                 }
               });
           }
         })
+        .on('error', function (err) { cb(err); })
         .on('data', function (buf) {
           nBytes += buf.length;
           if (nBytes < totalBytes) {
@@ -55,19 +70,19 @@
         })
         .on('end', function () {
           if (!finished) {
-            loop(save);
+            loop();
           }
         });
 
-    })();
+    }
 
   }
 
   /**
    * Benchmark functions serially.
    *
-   * This is useful for polite functions (which yield too often to the event
-   * loop to be correctly benchmarked by traditional async code).
+   * This is useful for async functions which yield too often to the event
+   * loop to be correctly benchmarked.
    *
    */
   function Benchmark() {
@@ -94,6 +109,8 @@
     };
 
     /**
+     * `run(n, [opts], cb)`
+     *
      * Run all functions serially.
      *
      * @param `n` The number of runs per function.
@@ -111,18 +128,17 @@
       }
 
       var names = Object.keys(fns);
-      var times = {};
+      var stats = {};
       var i = 0;
 
       (function runCb(ts) {
         if (ts) {
-          times[names[i++]] = ts;
+          stats[names[i++]] = ts;
         }
         if (i < names.length) {
-          var fn = fns[names[i]];
-          runFn(fn, n, opts, runCb);
+          setImmediate(function () { runFn(fns[names[i]], n, opts, runCb); });
         } else {
-          cb(times);
+          cb(getRankedStats(stats));
         }
       })();
 
@@ -142,7 +158,7 @@
         }
         if (i++ < n) {
           t = process.hrtime();
-          fn(runCb, opts);
+          process.nextTick(function () { fn(runCb, opts); });
         } else {
           cb(getStats(times));
         }
@@ -163,6 +179,27 @@
         var sdvMs = Math.sqrt(varMs) / ts.length;
         return {avgMs: avgMs, sdvMs: sdvMs};
       }
+
+    }
+
+    function getRankedStats(stats) {
+
+      var es = [];
+      for (var name in stats) {
+        var stat = stats[name];
+        stat.name = name;
+        es.push(stat);
+      }
+
+      es = es.sort(function (a, b) { return a.avgMs - b.avgMs; });
+
+      var avg = es[0].avgMs;
+      for (var i = 1; i < es.length; i++) {
+        var e = es[i];
+        e.relAvg = (e.avgMs - avg) / avg;
+      }
+
+      return es;
 
     }
 
