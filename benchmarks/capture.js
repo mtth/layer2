@@ -4,6 +4,7 @@
   'use strict';
 
   var util = require('util'),
+      path = require('path'),
       tmp = require('tmp'),
       utils = require('./utils'),
       dot11 = require('../src/js'),
@@ -37,15 +38,19 @@
 
   var fpaths = utils.getCapturePaths('dat/');
   var benchmarkStats = {};
+  var nRuns = 20;
 
   (function run(i) {
     if (i < fpaths.length) {
       var fpath = fpaths[i];
-      var fname = /dat\/([^.]*)\.pcap/.exec(fpath)[1];
+      var fname = path.basename(fpath, '.pcap');
       utils.expand(fpath, null, 5e7, function (err, summary, tpath) {
-        benchmark.run(20, {fpath: tpath}, function (stats) {
+        benchmark.run(nRuns, {fpath: tpath}, function (stats) {
           benchmarkStats[fname] = stats;
-          console.log('\n# ' + fpath + ' (' + summary.nFrames + ' frames)');
+          console.log(util.format(
+            '\n# %s (%s frames, %s runs)',
+            fname, summary.nFrames, nRuns
+          ));
           for (var j = 0; j < stats.length; j++) {
             var e = stats[j];
             e.frameThroughput = 1e-3 * summary.nFrames / e.avgMs;
@@ -67,8 +72,8 @@
     } else {
       console.log('\nHighcharts graph data:');
       console.log(JSON.stringify(utils.toHighcharts(benchmarkStats, {
-        title: 'Raw throughput',
-        yAxisName: 'frames / second',
+        title: 'Capture',
+        yAxisName: 'Frames / second',
         converter: function (o) { return 1e6 * o.frameThroughput; }
       })));
     }

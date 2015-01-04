@@ -211,6 +211,11 @@
    * @param `stats` Object keyed by run name, with stats as values (as returned
    * by the benchmark's `run` method).
    *
+   * This should be used with the basic column demo fiddle (link below), after
+   * setting the height to 500px.
+   *
+   * http://jsfiddle.net/gh/get/jquery/1.9.1/highslide-software/highcharts.com/tree/master/samples/highcharts/demo/column-basic/
+   *
    */
   function toHighcharts(benchmarkStats, opts) {
 
