@@ -1,9 +1,8 @@
 # Dot11 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/dot11) [![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
 
 `dot11` leverages Node.js' built-in [streams][] to provide an intuitive and
-efficient interface for frame capture and injection. It also provides parsers
-for various link types (e.g. 802.11 with [Radiotap][] headers, raw 802.11,
-Ethernet).
+efficient interface for frame capture and injection. It also provides decoders
+for various link types.
 
 ```javascript
 var dot11 = require('dot11');
