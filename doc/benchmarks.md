@@ -6,7 +6,7 @@ In order to run these benchmarks you'll need to install the development
 dependencies.
 
 
-## Raw frame throughput
+## Capture
 
 This benchmark measures the rate at which frames are processed while replaying
 a capture. This can be viewed as an upper bound on the maximum sustainable live
@@ -48,7 +48,9 @@ $ npm run benchmark-capture
 1609.47 ms (±15.00)      0.21 f/us       31.07 B/us     -77%    pcap-stream
 ```
 
-Average throughput:
+![Capture benchmark](img/capture.png)
+
+Average raw throughput:
 
 + `dot11`: 0.93 million frames per second.
 + `pcap`: 0.57 million frames per second.

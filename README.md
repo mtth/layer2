@@ -31,14 +31,14 @@ captures as root.
 
 ## Documentation
 
-[API docs][] and several [examples][] are available.
+[API docs](doc/api.md) and several [examples](doc/examples.md) are available.
 
 
 ## Benchmarks
 
-[![Capture benchmark](doc/img/capture.png)](https://github.com/mtth/dot11/blob/master/doc/benchmarks.md#raw-frame-throughput)
+[![Capture benchmark](doc/img/capture.png)](doc/benchmarks.md#capture)
 
-See [Performance benchmarks][benchmarks] for more details.
+See [here](doc/benchmarks.md) for more details.
 
 
 ## Tests
@@ -53,8 +53,5 @@ Some tests require an active internet connection.
 [Radiotap]: http://www.radiotap.org/
 [streams]: http://nodejs.org/api/stream.html
 [libpcap]: http://www.tcpdump.org/
-[API docs]: https://github.com/mtth/dot11/blob/master/doc/api.md
-[examples]: https://github.com/mtth/dot11/blob/master/doc/examples.md
-[benchmarks]: https://github.com/mtth/dot11/blob/master/doc/benchmarks.md
 [node_pcap]: https://github.com/mranney/node_pcap
 [pcap-stream]: https://github.com/wanderview/node-pcap-stream
