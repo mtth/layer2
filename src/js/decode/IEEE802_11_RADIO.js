@@ -18,15 +18,21 @@
     // locally, so aren't subject to corruption from transmission over the
     // noisy network).
 
-    var frame = {};
+    var headerLength = buf.readUInt16LE(2);
+    var body = IEEE802_11(buf.slice(headerLength, buf.length));
 
-    frame.headerRevision = buf[0];
-    frame.headerPad = buf[1];
-    frame.headerLength = buf.readUInt16LE(2);
-    // TODO: Decode other radiotap fields.
-    frame.body = IEEE802_11(buf.slice(frame.headerLength, buf.length));
-
-    return frame;
+    if (body === null) {
+      // Don't waste time decoding anything if the contained frame is invalid.
+      return null;
+    } else {
+      // TODO: Decode other radiotap fields.
+      return {
+        headerLength: headerLength,
+        headerRevision: buf[0],
+        headerPad: buf[1],
+        body: body
+      };
+    }
 
   }
 

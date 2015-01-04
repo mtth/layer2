@@ -17,7 +17,7 @@
     var actualFcs = buf.readUInt32LE(buf.length - 4);
     var computedFcs = utils.crc32(buf.slice(0, buf.length - 4));
     if (actualFcs !== computedFcs) {
-      throw new Error('Invalid FCS.');
+      return null;
     }
 
     var frame = {};

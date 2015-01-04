@@ -1,6 +1,6 @@
 {
   "name": "dot11",
-  "version": "0.3.0",
+  "version": "0.3.3",
   "description": "A streaming API for Wi-Fi traffic monitoring.",
   "keywords": [
     "wifi",
@@ -20,6 +20,7 @@
     "build-debug": "node-gyp configure && node-gyp build --debug",
     "clean": "rm -rf build node_modules",
     "benchmark-capture": "cd benchmarks && make && node capture.js",
+    "benchmark-decode": "cd benchmarks && node decode.js",
     "test": "$(npm bin)/mocha"
   },
   "engines": {

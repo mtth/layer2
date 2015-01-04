@@ -85,8 +85,8 @@
             assert.ok(data && typeof data == 'object');
             nValidFrames++;
           })
-          .on('invalid', function (data, err) {
-            assert.ok(data && err);
+          .on('invalid', function (data) {
+            assert.ok(data);
             nInvalidFrames++;
           })
           .on('end', function () {
@@ -101,8 +101,8 @@
 
         assert.deepEqual(
           Decoder.decode(
-            new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex'),
-            'IEEE802_11_RADIO'
+            'IEEE802_11_RADIO',
+            new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex')
           ),
           {
             'headerRevision': 0,
