@@ -16,7 +16,7 @@
 
     describe('stream', function () {
 
-      var Decoder = dot11.decode.Decoder;
+      var Decoder = dot11.Decoder;
 
       it('can be piped to and read from', function (done) {
 

@@ -17,7 +17,7 @@
     .addFn('dot11', function (cb, opts) {
       var nFrames = 0;
       var capture = new dot11.capture.Replay(opts.fpath);
-      var decoder = new dot11.decode.Decoder();
+      var decoder = new dot11.Decoder();
       capture
         .pipe(decoder)
         .on('data', function (frame) {

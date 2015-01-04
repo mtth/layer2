@@ -10,7 +10,7 @@ Radiotap header). This is the default on OS X in monitor mode.
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.transform.Decoder();
+var decoder = new dot11.Decoder();
 
 capture                     // Stream of buffers (frames' raw bytes).
   .pipe(decoder)            // Stream of objects (decoded frames).
@@ -31,7 +31,7 @@ particular, this includes all control and management frames).
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.transform.Decoder();
+var decoder = new dot11.Decoder();
 
 var nValid = 0;
 var nInvalid = 0;
@@ -69,7 +69,7 @@ seconds.
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.transform.Decoder();
+var decoder = new dot11.Decoder();
 var nBytesReceived = {};
 
 capture
@@ -96,7 +96,7 @@ captured.
 
 ```javascript
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.transform.Decoder();
+var decoder = new dot11.Decoder();
 var bssids = {};
 
 capture

@@ -8,7 +8,7 @@ for various link types.
 var dot11 = require('dot11');
 
 var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.transform.Decoder();
+var decoder = new dot11.Decoder();
 
 capture                     // Stream of buffers (frames' raw bytes).
   .pipe(decoder)            // Stream of objects (decoded frames).

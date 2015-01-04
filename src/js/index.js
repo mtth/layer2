@@ -5,8 +5,8 @@
 
   root.exports = {
     capture: require('./capture'),
-    decode: require('./decode'),
-    extract: require('./extract')
+    Decoder: require('./decode').Decoder,
+    Extractor: require('./extract').Extractor
   };
 
 })(module);

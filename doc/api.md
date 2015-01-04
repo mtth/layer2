@@ -36,7 +36,7 @@ Emitted when the first frame can be read.
 
 #### Event: 'data'
 
-+ `frame` {Buffer} A frame.
++ `buf` {Buffer} A frame.
 
 Emitted each time a frame is available for reading.
 
@@ -177,7 +177,7 @@ Emitted when the first frame can be read.
 
 #### Event: 'data'
 
-+ `frame` {Buffer} A frame.
++ `buf` {Buffer} A frame.
 
 Emitted each time a frame is available for reading.
 
@@ -313,7 +313,7 @@ Retrieve information about a PCAP file.
 
 ## Decode
 
-### Class: dot11.transform.Decoder([opts])
+### Class: dot11.Decoder([opts])
 
 A duplex stream used to transform raw frames (i.e. buffers) to parsed objects.
 
@@ -337,7 +337,6 @@ Emitted each time a frame is available for reading.
 #### Event 'invalid'
 
 + `data` {Buffer} The invalid frame.
-+ `err` {Error} Description of why this frame is invalid.
 
 Emitted when a frame has an invalid checksum.
 
@@ -356,12 +355,20 @@ Emitted when there are no more frames to read.
 
 Emitted when something fatal happened (e.g. invalid link type).
 
-#### new dot11.transform.Decoder([opts])
+#### new dot11.Decoder([opts])
 
 + `opts` {Object} Various options:
   + `linkType` {String} The data link type to be decoded. If the stream is
     piped to from another `dot11` stream, this will be inferred automatically.
 
-#### getLinkType()
+#### decoder.getLinkType()
 
 Get decoded data link type.
+
+#### Decoder.decode(linkType, buf)
+
++ `linkType` {String} The data link type.
++ `buf` {Buffer} The frame to be decoded.
+
+This method is provided as a convenience to decode a single frame. It isn't as
+efficient as piping through the decoder stream.
