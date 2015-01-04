@@ -47,10 +47,6 @@
     this.getMaxFrameSize = function () { return wrapper.getMaxFrameSize(); };
 
     this.close = function (timeout) {
-      // We do not try to break the loop early here as we are guaranteed that
-      // this method can only ever be called outside of a dispatch call (since
-      // we don't return to the event loop until the end and we never call it
-      // ourselves internally).
 
       var self = this;
       setTimeout(function () { self.push(null); }, timeout || 0);
@@ -88,12 +84,8 @@
 
       setImmediate(function () {
         // We wrap the dispatch call in a `setImmediate` in order to defer back
-        // to the event loop. Ideally, the frame handlers would be called
-        // asynchronously however the current implementation has the
-        // `_dispatch` call block until all the frames from this batch have
-        // been processed. Furthermore, using `process.nextTick` doesn't seem
-        // to be sufficient to let other code run. Finally, this makes tuning
-        // the batch size and buffer sizes very relevant to performance.
+        // to the event loop once in a while. Note that this makes tuning the
+        // batch size and buffer sizes very relevant to performance.
 
         if (self._hasFrame()) {
           return self.emit('error', new Error('Preemptive fetch.'));
