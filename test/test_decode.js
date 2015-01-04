@@ -14,9 +14,9 @@
 
   describe('Decoder', function () {
 
-    describe('stream', function () {
+    var Decoder = dot11.Decoder;
 
-      var Decoder = dot11.Decoder;
+    describe('stream', function () {
 
       it('can be piped to and read from', function (done) {
 
@@ -455,39 +455,41 @@
 
     });
 
-  });
+    /**
+    * Helper to view output sample frames to a capture file.
+    * This lets us easily view them from Wireshark or Tcpdump (convenient when
+    * changing the format of the decoder, especially when adding a field).
+    *
+    */
+    function Helper(linkType) {
 
-  /**
-   * Helper to view output sample frames to a capture file.
-   * This lets us easily view them from Wireshark or Tcpdump (convenient when
-   * changing the format of the decoder, especially when adding a field).
-   *
-   */
-  function Helper(linkType) {
-    this._buffers = [];
-    this._linkType = linkType;
-    this.decode = require('../src/js/decode/' + linkType);
-  }
+      var buffers = [];
 
-  Helper.prototype.compare = function (actualString, expectedObject) {
-    var buf = new Buffer(actualString, 'hex');
-    this._buffers.push(buf); // Save the buffer.
-    var actualObject = this.decode(buf);
-    assert.deepEqual(
-      actualObject,
-      expectedObject,
-      JSON.stringify(diff(actualObject, expectedObject), null, 2)
-    );
-  };
+      this.decode = Decoder.decode.bind(null, linkType);
 
-  Helper.prototype.save = function (path) {
-    var save = new dot11.capture.Save(path, {linkType: this._linkType});
-    var i;
-    for (i = 0; i < this._buffers.length; i++) {
-      save.write(this._buffers[i]);
+      this.compare = function (actualString, expectedObject) {
+        var buf = new Buffer(actualString, 'hex');
+        buffers.push(buf); // Save the buffer.
+        var actualObject = this.decode(buf);
+        assert.deepEqual(
+          actualObject,
+          expectedObject,
+          JSON.stringify(diff(actualObject, expectedObject), null, 2)
+        );
+      };
+
+      this.save = function (path) {
+        var save = new dot11.capture.Save(path, {linkType: linkType});
+        var i;
+        for (i = 0; i < buffers.length; i++) {
+          save.write(buffers[i]);
+        }
+        save.end();
+      };
+
     }
-    save.end();
-  };
+
+  });
 
 })();
 

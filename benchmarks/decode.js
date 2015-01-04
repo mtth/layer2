@@ -26,6 +26,18 @@
         })
         .on('end', function () { cb(); });
     })
+    .addFn('dot11 no-crc', function (cb, opts) {
+      var nFrames = 0;
+      var capture = new dot11.capture.Replay(opts.fpath);
+      var decoder = new dot11.Decoder({assumeValid: true});
+      capture
+        .pipe(decoder)
+        .on('data', function (frame) {
+          // if (!nFrames) { console.dir(frame); }
+          nFrames++;
+        })
+        .on('end', function () { cb(); });
+    })
     .addFn('pcap', function (cb, opts) {
       var nFrames = 0;
       var session = pcap.createOfflineSession(opts.fpath);

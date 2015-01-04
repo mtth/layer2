@@ -4,7 +4,13 @@
  * Import all decoders inside this folder. The name of the file should
  * correspond to the link type it decodes.
  *
- * A decoder is a function that takes in a buffer and returns an object.
+ * A decoder is a function that abides by the following contract:
+ *
+ * + Its signature is `decode(buf, opts)`, where `buf` is the buffer to decode
+ *   and `opts` is an object containing various options. Both are guaranteed to
+ *   be non null.
+ * + It should return `null` when a frame is invalid. Throwing errors should be
+ *   avoided (e.g. only happen on actual parsing error).
  *
  */
 (function (root) {
@@ -64,7 +70,7 @@
 
         var frame;
         try {
-          frame = decodeFn(data);
+          frame = decodeFn(data, opts);
         } catch (err) {
           return callback(err);
         }
@@ -82,10 +88,10 @@
   }
   util.inherits(Decoder, stream.Transform);
 
-  Decoder.decode = function (linkType, buf) {
+  Decoder.decode = function (linkType, buf, opts) {
 
     var decodeFn = getDecodeFn(linkType);
-    return decodeFn(buf);
+    return decodeFn(buf, opts || {});
 
   };
 

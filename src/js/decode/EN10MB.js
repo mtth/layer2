@@ -16,19 +16,24 @@
 
   var utils = require('../utils');
 
-  function decode(buf) {
+  function decode(buf, opts) {
 
-    // Validate checksum.
-    var actualFcs = buf.readUInt32LE(buf.length - 4);
-    var computedFcs = utils.crc32(buf.slice(0, buf.length - 4));
-    if (actualFcs !== computedFcs) {
-      return null;
+    var assumeValid = opts.assumeValid;
+
+    if (!assumeValid) {
+      // Validate checksum.
+      var actualFcs = buf.readUInt32LE(buf.length - 4);
+      var computedFcs = utils.crc32(buf.slice(0, buf.length - 4));
+      if (actualFcs !== computedFcs) {
+        return null;
+      }
     }
 
     // Parse addresses.
-    var frame = {};
-    frame.da = utils.readMacAddr(buf, 0);
-    frame.sa = utils.readMacAddr(buf, 6);
+    var frame = {
+      da: utils.readMacAddr(buf, 0),
+      sa: utils.readMacAddr(buf, 6)
+    };
 
     // Add type.
     var type = buf.readUInt16BE(12);
