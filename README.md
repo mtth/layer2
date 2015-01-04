@@ -39,9 +39,9 @@ captures as root.
 Average raw frame throughput (see [Performance benchmarks][benchmarks] for more
 details):
 
-+ `dot11`: 0.93 million frames per second
-+ [`pcap`][node_pcap]: 0.57 million frames per second
-+ [`pcap-stream`][pcap-stream]: 0.21 million frames per second
++ `dot11`: 0.93 million frames per second.
++ [`pcap`][node_pcap]: 0.57 million frames per second.
++ [`pcap-stream`][pcap-stream]: 0.21 million frames per second.
 
 
 ## Tests
@@ -58,6 +58,6 @@ Some tests require an active internet connection.
 [libpcap]: http://www.tcpdump.org/
 [API docs]: https://github.com/mtth/dot11/blob/master/doc/api.md
 [examples]: https://github.com/mtth/dot11/blob/master/doc/examples.md
-[benchmarks]: https://github.com/mtth/dot11/blob/master/doc/perf.md
+[benchmarks]: https://github.com/mtth/dot11/blob/master/doc/benchmarks.md
 [node_pcap]: https://github.com/mranney/node_pcap
 [pcap-stream]: https://github.com/wanderview/node-pcap-stream
