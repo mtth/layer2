@@ -311,8 +311,6 @@ Retrieve information about a PCAP file.
   nBytes: 474, maxFrameSize: 65535}`.
 
 
-## Decode
-
 ### Class: layer2.Decoder([opts])
 
 A duplex stream used to transform raw frames (i.e. buffers) to parsed objects.
@@ -322,7 +320,6 @@ A duplex stream used to transform raw frames (i.e. buffers) to parsed objects.
 + `IEEE802_11_RADIO` (Radiotap).
 + `IEEE802_11` (raw 802.11).
 + `EN10MB` (Ethernet).
-
 
 #### Event: 'readable'
 
@@ -360,6 +357,9 @@ Emitted when something fatal happened (e.g. invalid link type).
 + `opts` {Object} Various options:
   + `linkType` {String} The data link type to be decoded. If the stream is
     piped to from another `layer2` stream, this will be inferred automatically.
+  + `assumeValid` {Boolean} Whether or not to do the CRC checks. If you know
+    that all frames have correct FCS' then you can set this to true to
+    increase performance (~10% faster).
 
 #### decoder.getLinkType()
 
@@ -369,6 +369,14 @@ Get decoded data link type.
 
 + `linkType` {String} The data link type.
 + `buf` {Buffer} The frame to be decoded.
++ return {Object}
 
 This method is provided as a convenience to decode a single frame. It isn't as
 efficient as piping through the decoder stream.
+
+#### Decoder.isSupported(linkType)
+
++ `linkType` {String} The data link type.
++ return {Boolean}
+
+Check whether a given link type can be decoded.

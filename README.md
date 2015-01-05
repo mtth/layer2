@@ -35,11 +35,10 @@ captures as root.
 
 `layer2` is built with both ease of use and performance in mind. This means you
 can benefit from the productivity gains of writing JavaScript and still handle
-throughput rates higher than any network you will likely encounter.
-
-Currently `layer2` can sustain throughput rates upwards of a hundred thousand
-frames per second (over a million when processing raw frames). You can read
-more about this on the [benchmarks](doc/benchmarks.md).
+throughput rates higher than any network you will likely encounter. Currently
+`layer2` can sustain throughput rates upwards of a hundred thousand frames per
+second (over a million when processing raw frames). You can read more about
+this on the [benchmarks page](doc/benchmarks.md).
 
 
 ## Tests
