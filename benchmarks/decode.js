@@ -52,7 +52,7 @@
 
   // var fpaths = utils.getCapturePaths('dat/');
   var fpaths = ['../dat/valid.pcap'];
-  var nRuns = 20;
+  var nRuns = 50;
 
   (function run(i) {
     if (i < fpaths.length) {

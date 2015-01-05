@@ -133,7 +133,7 @@
 
       var helper = new Helper('IEEE802_11_RADIO');
 
-      it('decodes radiotap frames', function () {
+      it('decodes basic header fields', function () {
 
         helper.compare(
           '000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6',
@@ -157,6 +157,27 @@
             }
           }
         );
+
+      });
+
+      it('skips if the bad FCS bit is set', function () {
+
+        assert.ok(helper.decode(new Buffer('000019006f0800009627433d00000000560c1c164001d0a4010862', 'hex')) === null);
+        // This would throw an exception if it wasn't skipped (the 802.11 frame
+        // isn't valid).
+
+      });
+
+      it('adds the valid flag if the bad FCS bit is unset', function () {
+
+        assert.ok(helper.decode(new Buffer('000019006f0800009627433d00000000160c1c164001d0a40108623000ffffffffffff907240152c7d8438355f8e8a305fb303006000000000aaaa0300000008004500002cf3030000401170bc0a0001030a0001ffe82a21a400184c60424a4e42020100000000000000000000061b98c5f6f151714912707f', 'hex')) !== null);
+        // The FCS is invalid here so this would return null otherwise.
+
+      });
+
+      it('passes through if no bad FCS bit is present', function () {
+
+        assert.ok(helper.decode(new Buffer('000019006d0800009627433d00000000160c1c164001d0a40108623000ffffffffffff907240152c7d8438355f8e8a305fb303006000000000aaaa0300000008004500002cf3030000401170bc0a0001030a0001ffe82a21a400184c60424a4e42020100000000000000000000061b98c5f6f151714912707f', 'hex')) === null);
 
       });
 
