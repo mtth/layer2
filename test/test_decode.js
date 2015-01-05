@@ -127,6 +127,14 @@
 
       });
 
+      it('can be check whether a link type is supported', function () {
+
+        assert.ok(Decoder.isSupported('IEEE802_11_RADIO'));
+        assert.ok(Decoder.isSupported('ieee802_11_radio'));
+        assert.ok(!Decoder.isSupported('foobar'));
+
+      });
+
     });
 
     describe('IEEE802_11_RADIO', function () {

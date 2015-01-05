@@ -95,6 +95,12 @@
 
   };
 
+  Decoder.isSupported = function (linkType) {
+
+    return typeof linkType == 'string' && linkType.toUpperCase() in decoders;
+
+  };
+
   function getDecodeFn(linkType) {
 
     if (!linkType) {
