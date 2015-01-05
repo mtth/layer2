@@ -53,11 +53,13 @@ $ npm run benchmark-capture
 Average raw throughput:
 
 + `dot11`: 0.93 million frames per second.
-+ `pcap`: 0.57 million frames per second.
-+ `pcap-stream`: 0.21 million frames per second.
++ [`pcap`][node_pcap]: 0.57 million frames per second.
++ [`pcap-stream`][pcap-stream]: 0.21 million frames per second.
 
 Note that in order to reduce the setup and teardown costs the capture files are
 replicated to reach a size of a few megabytes. This way only the marginal frame
 processing time matters.
 
 [captures]: http://wiki.wireshark.org/SampleCaptures
+[node_pcap]: https://github.com/mranney/node_pcap
+[pcap-stream]: https://github.com/wanderview/node-pcap-stream

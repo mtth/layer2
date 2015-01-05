@@ -10,11 +10,9 @@ var dot11 = require('dot11');
 var capture = new dot11.capture.Live('en0', {monitor: true});
 var decoder = new dot11.Decoder();
 
-capture                     // Stream of buffers (frames' raw bytes).
-  .pipe(decoder)            // Stream of objects (decoded frames).
-  .on('data', function (frame) {
-    console.log(JSON.stringify(frame));
-  });
+capture           // Stream of buffers (frames' raw bytes).
+  .pipe(decoder)  // Stream of objects (decoded frames).
+  .on('data', function (frame) { console.log(JSON.stringify(frame)); });
 ```
 
 
@@ -34,6 +32,13 @@ captures as root.
 
 
 ## Benchmarks
+
+`dot11` is built with both ease of use and performance in mind. This means you
+can both benefit from the productivity gains of writing JavaScript and handle
+throughputs higher than any network you will likely encounter.
+
+The chart below gives an idea of the achievable raw frame throughput (also
+compared to two other node capture libraries).
 
 [![Capture benchmark](doc/img/capture.png)](doc/benchmarks.md#capture)
 
