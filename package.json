@@ -1,6 +1,6 @@
 {
-  "name": "dot11",
-  "version": "0.3.3",
+  "name": "level2",
+  "version": "0.1.0",
   "description": "A streaming API for Wi-Fi traffic monitoring.",
   "keywords": [
     "wifi",
@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mtth/dot11.git"
+    "url": "https://github.com/mtth/level2.git"
   },
   "author": {
     "name": "Matthieu Monsch",

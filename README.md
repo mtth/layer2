@@ -1,14 +1,14 @@
-# Dot11 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/dot11) [![Build Status](https://travis-ci.org/mtth/dot11.svg?branch=master)](https://travis-ci.org/mtth/dot11)
+# Level2 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/level2) [![Build Status](https://travis-ci.org/mtth/level2.svg?branch=master)](https://travis-ci.org/mtth/level2)
 
-`dot11` leverages Node.js' built-in [streams][] to provide an intuitive and
+`level2` leverages Node.js' built-in [streams][] to provide an intuitive and
 efficient interface for frame capture and injection. It also provides decoders
 for various link types.
 
 ```javascript
-var dot11 = require('dot11');
+var level2 = require('level2');
 
-var capture = new dot11.capture.Live('en0', {monitor: true});
-var decoder = new dot11.Decoder();
+var capture = new level2.capture.Live('en0', {monitor: true});
+var decoder = new level2.Decoder();
 
 capture           // Stream of buffers (frames' raw bytes).
   .pipe(decoder)  // Stream of objects (decoded frames).
@@ -19,10 +19,10 @@ capture           // Stream of buffers (frames' raw bytes).
 ## Installation
 
 ```bash
-$ npm install dot11
+$ npm install level2
 ```
 
-`dot11` depends on [libpcap][]. Note that you might also need to run live
+`level2` depends on [libpcap][]. Note that you might also need to run live
 captures as root.
 
 
@@ -33,7 +33,7 @@ captures as root.
 
 ## Benchmarks
 
-`dot11` is built with both ease of use and performance in mind. This means you
+`level2` is built with both ease of use and performance in mind. This means you
 can benefit from the productivity gains of writing JavaScript and still handle
 throughput rates higher than any network you will likely encounter.
 

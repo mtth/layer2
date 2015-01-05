@@ -7,16 +7,16 @@
       path = require('path'),
       tmp = require('tmp'),
       utils = require('./utils'),
-      dot11 = require('../src/js'),
+      level2 = require('../src/js'),
       pcap = require('pcap'),
       PcapStream = require('pcap-stream');
 
   tmp.setGracefulCleanup();
 
   var benchmark = new utils.Benchmark()
-    .addFn('dot11', function (cb, opts) {
+    .addFn('level2', function (cb, opts) {
       var nFrames = 0;
-      var capture = new dot11.capture.Replay(opts.fpath);
+      var capture = new level2.capture.Replay(opts.fpath);
       capture
         .on('data', function () { nFrames++; })
         .on('end', function () { cb(); });

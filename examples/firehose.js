@@ -3,10 +3,10 @@
 (function () {
   'use strict';
 
-  var dot11 = require('../src/js');
+  var level2 = require('../src/js');
 
-  var capture = new dot11.capture.Live(null, {monitor: true});
-  var decoder = new dot11.Decoder();
+  var capture = new level2.capture.Live(null, {monitor: true});
+  var decoder = new level2.Decoder();
 
   capture
     .pipe(decoder)

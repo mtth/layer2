@@ -5,15 +5,15 @@
 
 This module contains the following 3 streams:
 
-+ [`Live`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturelive)
++ [`Live`](https://github.com/mtth/level2/blob/master/doc/api.md#class-level2capturelive)
   A duplex stream of frames from a live network interface.
-+ [`Replay`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturereplay)
++ [`Replay`](https://github.com/mtth/level2/blob/master/doc/api.md#class-level2capturereplay)
   A readable stream of frames from a saved capture file.
-+ [`Save`](https://github.com/mtth/dot11/blob/master/doc/api.md#class-dot11capturesave)
++ [`Save`](https://github.com/mtth/level2/blob/master/doc/api.md#class-level2capturesave)
   A writable stream of frames to write to a capture file.
 
 
-### Class: dot11.capture.Live
+### Class: level2.capture.Live
 
 The `Live` class is a duplex (i.e. readable and writable) stream of frames. An
 instance of this class will listen to a given network interface (e.g. `'en0'`)
@@ -82,7 +82,7 @@ This event is guaranteed to be emitted after both `'end'` and `'finish'`
 events. This is useful as it lets us use methods such as `getStats` from these
 events' handlers.
 
-#### new dot11.capture.Live([dev], [opts])
+#### new level2.capture.Live([dev], [opts])
 
 Create a new readable stream from a network interface.
 
@@ -167,7 +167,7 @@ Get underlying snapshot length.
 Also useful for creating saves.
 
 
-### Class: dot11.capture.Replay
+### Class: level2.capture.Replay
 
 Readable frame stream from a saved file.
 
@@ -219,7 +219,7 @@ Emitted when the underlying device is closed.
 
 This event is guaranteed to be emitted after the `'end'` event.
 
-#### new dot11.capture.Replay(fpath, [opts])
+#### new level2.capture.Replay(fpath, [opts])
 
 + `fpath` {String} Path to a saved capture file (PCAP format).
 + `opts` {Object} Various options:
@@ -259,7 +259,7 @@ Also useful for saves.
 + return {Number}
 
 
-### Class: dot11.capture.Save
+### Class: level2.capture.Save
 
 A writable stream useful to store captures for later. The format used is
 compatible with Wireshark and Tcpdump and can be read normally by them.
@@ -282,7 +282,7 @@ Emitted after the underlying device is closed.
 
 Most methods on the stream will be unavailable at this point.
 
-#### new dot11.capture.Save(fpath, [opts])
+#### new level2.capture.Save(fpath, [opts])
 
 Writable stream to save frames to the `.pcap` format (compatible with
 Wireshark and Tcpdump).
@@ -301,7 +301,7 @@ as this class is only used to store the output of a Capture class here
 defined (as truncated frames do not get carried over).
 
 
-### dot11.capture.summarize(fpath, cb)
+### level2.capture.summarize(fpath, cb)
 
 Retrieve information about a PCAP file.
 
@@ -313,11 +313,11 @@ Retrieve information about a PCAP file.
 
 ## Decode
 
-### Class: dot11.Decoder([opts])
+### Class: level2.Decoder([opts])
 
 A duplex stream used to transform raw frames (i.e. buffers) to parsed objects.
 
-`dot11` currently supports decoding the following link types:
+`level2` currently supports decoding the following link types:
 
 + `IEEE802_11_RADIO` (Radiotap).
 + `IEEE802_11` (raw 802.11).
@@ -355,11 +355,11 @@ Emitted when there are no more frames to read.
 
 Emitted when something fatal happened (e.g. invalid link type).
 
-#### new dot11.Decoder([opts])
+#### new level2.Decoder([opts])
 
 + `opts` {Object} Various options:
   + `linkType` {String} The data link type to be decoded. If the stream is
-    piped to from another `dot11` stream, this will be inferred automatically.
+    piped to from another `level2` stream, this will be inferred automatically.
 
 #### decoder.getLinkType()
 

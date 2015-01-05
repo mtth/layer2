@@ -5,7 +5,7 @@
 
   var assert = require('assert'),
       diff = require('deep-diff'),
-      dot11 = require('../src/js');
+      level2 = require('../src/js');
 
   var savedCapture = {
     path: './test/dat/mixed.pcap',
@@ -14,13 +14,13 @@
 
   describe('Decoder', function () {
 
-    var Decoder = dot11.Decoder;
+    var Decoder = level2.Decoder;
 
     describe('stream', function () {
 
       it('can be piped to and read from', function (done) {
 
-        var capture = new dot11.capture.Replay(savedCapture.path);
+        var capture = new level2.capture.Replay(savedCapture.path);
         var decoder = new Decoder({linkType: capture.getLinkType()});
 
         capture
@@ -35,7 +35,7 @@
 
       it('can be piped to and listened to', function (done) {
 
-        var capture = new dot11.capture.Replay(savedCapture.path);
+        var capture = new level2.capture.Replay(savedCapture.path);
         var decoder = new Decoder();
         var nFrames = 0;
 
@@ -55,7 +55,7 @@
 
       it('emits end when the writable side finished', function (done) {
 
-        var capture = new dot11.capture.Replay(savedCapture.path);
+        var capture = new level2.capture.Replay(savedCapture.path);
         var decoder = new Decoder({linkType: capture.getLinkType()});
         var nFrames = 0;
 
@@ -74,7 +74,7 @@
 
       it('emits events when a frame fails to decode', function (done) {
 
-        var capture = new dot11.capture.Replay(savedCapture.path);
+        var capture = new level2.capture.Replay(savedCapture.path);
         var decoder = new Decoder();
         var nValidFrames = 0;
         var nInvalidFrames = 0;
@@ -479,7 +479,7 @@
       };
 
       this.save = function (path) {
-        var save = new dot11.capture.Save(path, {linkType: linkType});
+        var save = new level2.capture.Save(path, {linkType: linkType});
         var i;
         for (i = 0; i < buffers.length; i++) {
           save.write(buffers[i]);
