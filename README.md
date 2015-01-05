@@ -2,7 +2,7 @@
 
 `layer2` leverages Node.js' built-in [streams][] to provide an intuitive and
 efficient interface to the [data link layer][wiki]. It supports frame capture
-and injection and provides decoders for various link types.
+and injection, and provides decoders for various link types.
 
 ```javascript
 var layer2 = require('layer2');
@@ -35,11 +35,9 @@ captures as root.
 
 `layer2` is built with both ease of use and performance in mind. This means you
 can benefit from the productivity gains of writing JavaScript and still handle
-very high throughput rates.
-
-Currently `layer2` can sustain throughput rates of several hundred thousand
-frames per second (upwards of a million when processing raw frames). You can
-read more about this on the [benchmarks page](doc/benchmarks.md).
+throughput rates of several hundred thousand frames per second (upwards of a
+million when streaming raw frames). You can read more about this on the
+[benchmarks page](doc/benchmarks.md).
 
 
 ## Tests

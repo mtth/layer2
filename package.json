@@ -1,6 +1,6 @@
 {
   "name": "layer2",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A streaming API for the data link layer",
   "keywords": [
     "wifi",
