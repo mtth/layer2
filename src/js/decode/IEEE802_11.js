@@ -13,10 +13,10 @@
 
   function decode(buf, opts) {
 
-    var assumeValid = opts && opts.assumeValid;
+    var assumeValid = opts.assumeValid;
 
     if (!assumeValid) {
-    // Validate checksum.
+      // Validate checksum.
       var actualFcs = buf.readUInt32LE(buf.length - 4);
       var computedFcs = utils.crc32(buf.slice(0, buf.length - 4));
       if (actualFcs !== computedFcs) {

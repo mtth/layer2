@@ -34,8 +34,8 @@ captures as root.
 ## Benchmarks
 
 `dot11` is built with both ease of use and performance in mind. This means you
-can both benefit from the productivity gains of writing JavaScript and handle
-throughputs higher than any network you will likely encounter.
+can benefit from the productivity gains of writing JavaScript and still handle
+throughput rates higher than any network you will likely encounter.
 
 The chart below gives an idea of the achievable raw frame throughput (also
 compared to two other node capture libraries).
