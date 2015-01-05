@@ -1,8 +1,8 @@
 # Layer2 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/layer2) [![Build Status](https://travis-ci.org/mtth/layer2.svg?branch=master)](https://travis-ci.org/mtth/layer2)
 
 `layer2` leverages Node.js' built-in [streams][] to provide an intuitive and
-efficient interface to the [data link layer][wiki]. In particular it supports
-both frame capture and injection and provides decoders for various link types.
+efficient interface to the [data link layer][wiki]. It supports frame capture
+and injection and provides decoders for various link types.
 
 ```javascript
 var layer2 = require('layer2');
