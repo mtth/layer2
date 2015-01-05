@@ -16,9 +16,9 @@
 
   var utils = require('../utils');
 
-  function decode(buf, opts) {
+  function decode(buf, assumeValid) {
 
-    if (!opts.assumeValid) {
+    if (!assumeValid) {
       // Validate checksum.
       var actualFcs = buf.readUInt32LE(buf.length - 4);
       var computedFcs = utils.crc32(buf.slice(0, buf.length - 4));

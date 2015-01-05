@@ -29,10 +29,6 @@
 
     var s = buf.toString('hex', offset, offset + 6);
 
-    if (s.length < 12) {
-      throw new Error('Truncated MAC address at offset ' + offset);
-    }
-
     return [
       s.slice(0, 2),
       s.slice(2, 4),

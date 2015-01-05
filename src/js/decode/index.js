@@ -6,9 +6,8 @@
  *
  * A decoder is a function that abides by the following contract:
  *
- * + Its signature is `decode(buf, opts)`, where `buf` is the buffer to decode
- *   and `opts` is an object containing various options. Both are guaranteed to
- *   be non null.
+ * + Its signature is `decode(buf, assumeValid)`, where `buf` is the buffer to
+ *   decode and `assumeValid` is a flag to skip the CRC check.
  * + It should return `null` when a frame is invalid. Throwing errors should be
  *   avoided (e.g. only happen on actual parsing error).
  *
@@ -34,6 +33,7 @@
 
     opts = opts || {};
     var linkType = opts.linkType || null; // Inferred below.
+    var assumeValid = opts.assumeValid || false;
 
     stream.Transform.call(this, {objectMode: true});
 
@@ -61,7 +61,7 @@
 
       var decodeFn;
       try {
-        decodeFn = getDecodeFn(linkType);
+        decodeFn = getDecodeFn(linkType, assumeValid);
       } catch (err) {
         return self.emit('error', err);
       }
@@ -72,6 +72,7 @@
         try {
           frame = decodeFn(data, opts);
         } catch (err) {
+          err.data = data;
           return callback(err);
         }
         if (frame === null) {

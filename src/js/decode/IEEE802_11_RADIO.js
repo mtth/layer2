@@ -13,12 +13,12 @@
 
   var IEEE802_11 = require('./IEEE802_11');
 
-  function decode(buf, opts) {
+  function decode(buf, assumeValid) {
     // Note that Radiocap frames are assumed to always be valid (they are added
     // locally, so aren't subject to corruption from transmission over the
     // noisy network).
 
-    if (!opts.assumeValid) {
+    if (!assumeValid) {
       var presentFlags = buf.readUInt32LE(4);
       var offset = 8;
       if (presentFlags & 0x01) { // TSFT.
@@ -30,13 +30,13 @@
         if (badFcs) {
           return null;
         } else {
-          opts.assumeValid = true; // The FCS has already been checked.
+          assumeValid = true; // The FCS has already been checked.
         }
       }
     }
 
     var headerLength = buf.readUInt16LE(2);
-    var body = IEEE802_11(buf.slice(headerLength, buf.length), opts);
+    var body = IEEE802_11(buf.slice(headerLength, buf.length), assumeValid);
     if (body === null) {
       return null;
     } else {
