@@ -27,7 +27,7 @@
           .pipe(decoder)
           .once('readable', function () {
             assert.equal(this.getLinkType(), 'IEEE802_11');
-            assert(this.read());
+            assert.ok(this.read());
             done();
           });
 

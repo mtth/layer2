@@ -61,7 +61,7 @@
 
       var decodeFn;
       try {
-        decodeFn = getDecodeFn(linkType, assumeValid);
+        decodeFn = getDecodeFn(linkType);
       } catch (err) {
         return self.emit('error', err);
       }
@@ -70,7 +70,7 @@
 
         var frame;
         try {
-          frame = decodeFn(data, opts);
+          frame = decodeFn(data, assumeValid);
         } catch (err) {
           err.data = data;
           return callback(err);
@@ -89,10 +89,10 @@
   }
   util.inherits(Decoder, stream.Transform);
 
-  Decoder.decode = function (linkType, buf, opts) {
+  Decoder.decode = function (linkType, buf) {
 
     var decodeFn = getDecodeFn(linkType);
-    return decodeFn(buf, opts || {});
+    return decodeFn(buf);
 
   };
 
