@@ -37,17 +37,9 @@ captures as root.
 can benefit from the productivity gains of writing JavaScript and still handle
 throughput rates higher than any network you will likely encounter.
 
-The chart below gives an idea of the achievable raw frame throughput (also
-compared to two other node capture libraries).
-
-[![Capture benchmark](doc/img/capture.png)](doc/benchmarks.md#capture)
-
-Raw frames can also be decoded into JavaScript objects at the rates shown in
-the next chart.
-
-[![Decoding benchmark](doc/img/decoding.png)](doc/benchmarks.md#decoding)
-
-See [here](doc/benchmarks.md) for more details.
+Currently `layer2` can sustain throughput rates upwards of a hundred thousand
+frames per second (over a million when processing raw frames). You can read
+more about this on the [benchmarks](doc/benchmarks.md).
 
 
 ## Tests

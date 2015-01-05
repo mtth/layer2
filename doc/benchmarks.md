@@ -87,7 +87,7 @@ $ npm run benchmark-capture
 2077.85 ms (±5.99)       0.16 f/us       24.06 B/us             layer2
 ```
 
-![Decoding benchmark](img/decoding.png)
+![Decoding benchmark](img/decode.png)
 
 Note that it doesn't make as much sense to benchmark against the previous
 libraries since they focus on the upper layers rather than decode information
