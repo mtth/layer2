@@ -18,34 +18,34 @@ $ npm run benchmark-capture
 # ...
 
 # airtunes-1 (62543 frames, 20 runs)
-77.49 ms (±0.50)         0.81 f/us       645.23 B/us            layer2
-117.04 ms (±0.34)        0.53 f/us       427.20 B/us    -34%    pcap
-322.25 ms (±2.89)        0.19 f/us       155.16 B/us    -76%    pcap-stream
+73.91 ms (±0.62)         0.85 f/us       676.45 B/us            layer2
+122.48 ms (±1.14)        0.51 f/us       408.23 B/us    -40%    pcap
+347.56 ms (±6.95)        0.18 f/us       143.86 B/us    -79%    pcap-stream
 
 # arp-storm (833333 frames, 20 runs)
-788.61 ms (±2.12)        1.06 f/us       63.40 B/us             layer2
-1379.88 ms (±8.28)       0.60 f/us       36.24 B/us     -43%    pcap
-3647.55 ms (±14.98)      0.23 f/us       13.71 B/us     -78%    pcap-stream
+778.32 ms (±15.47)       1.07 f/us       64.24 B/us             layer2
+1340.60 ms (±6.07)       0.62 f/us       37.30 B/us     -42%    pcap
+3870.05 ms (±35.60)      0.22 f/us       12.92 B/us     -80%    pcap-stream
 
 # dns-remoteshell (286218 frames, 20 runs)
-302.12 ms (±1.98)        0.95 f/us       165.50 B/us            layer2
-484.74 ms (±2.52)        0.59 f/us       103.15 B/us    -38%    pcap
-1315.02 ms (±2.65)       0.22 f/us       38.02 B/us     -77%    pcap-stream
+296.29 ms (±3.62)        0.97 f/us       168.75 B/us            layer2
+510.71 ms (±5.06)        0.56 f/us       97.90 B/us     -42%    pcap
+1368.78 ms (±12.89)      0.21 f/us       36.53 B/us     -78%    pcap-stream
 
 # mesh (328613 frames, 20 runs)
-351.54 ms (±2.57)        0.93 f/us       142.23 B/us            layer2
-562.23 ms (±2.55)        0.58 f/us       88.93 B/us     -37%    pcap
-1517.33 ms (±2.60)       0.22 f/us       32.95 B/us     -77%    pcap-stream
+338.98 ms (±2.43)        0.97 f/us       147.50 B/us            layer2
+562.77 ms (±2.69)        0.58 f/us       88.85 B/us     -40%    pcap
+1506.16 ms (±4.20)       0.22 f/us       33.20 B/us     -77%    pcap-stream
 
 # vnc-sample (494136 frames, 20 runs)
-522.92 ms (±2.69)        0.94 f/us       95.62 B/us             layer2
-879.60 ms (±5.13)        0.56 f/us       56.84 B/us     -41%    pcap
-2209.95 ms (±5.08)       0.22 f/us       22.62 B/us     -76%    pcap-stream
+493.79 ms (±7.06)        1.00 f/us       101.26 B/us            layer2
+814.54 ms (±2.43)        0.61 f/us       61.38 B/us     -39%    pcap
+2355.64 ms (±34.33)      0.21 f/us       21.23 B/us     -79%    pcap-stream
 
 # wpa-Induction (337787 frames, 20 runs)
-375.63 ms (±5.27)        0.90 f/us       133.11 B/us            layer2
-638.59 ms (±11.52)       0.53 f/us       78.30 B/us     -41%    pcap
-1609.47 ms (±15.00)      0.21 f/us       31.07 B/us     -77%    pcap-stream
+373.25 ms (±7.89)        0.90 f/us       133.96 B/us            layer2
+614.10 ms (±8.46)        0.55 f/us       81.42 B/us     -39%    pcap
+1674.25 ms (±21.48)      0.20 f/us       29.86 B/us     -78%    pcap-stream
 ```
 
 ![Capture benchmark](img/capture.png)
