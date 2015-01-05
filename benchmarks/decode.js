@@ -7,17 +7,17 @@
       path = require('path'),
       tmp = require('tmp'),
       utils = require('./utils'),
-      level2 = require('../src/js'),
+      layer2 = require('../src/js'),
       pcap = require('pcap');
 
   tmp.setGracefulCleanup();
   pcap.decode.logicalLinkControl = function () {}; // Patch this.
 
   var benchmark = new utils.Benchmark()
-    .addFn('level2', function (cb, opts) {
+    .addFn('layer2', function (cb, opts) {
       var nFrames = 0;
-      var capture = new level2.capture.Replay(opts.fpath);
-      var decoder = new level2.Decoder();
+      var capture = new layer2.capture.Replay(opts.fpath);
+      var decoder = new layer2.Decoder();
       capture
         .pipe(decoder)
         .on('data', function (frame) {
@@ -26,10 +26,10 @@
         })
         .on('end', function () { cb(); });
     })
-    .addFn('level2 no-crc', function (cb, opts) {
+    .addFn('layer2 no-crc', function (cb, opts) {
       var nFrames = 0;
-      var capture = new level2.capture.Replay(opts.fpath);
-      var decoder = new level2.Decoder({assumeValid: true});
+      var capture = new layer2.capture.Replay(opts.fpath);
+      var decoder = new layer2.Decoder({assumeValid: true});
       capture
         .pipe(decoder)
         .on('data', function (frame) {

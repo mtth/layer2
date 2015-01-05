@@ -13,11 +13,11 @@
 (function () {
   'use strict';
 
-  var level2 = require('../src/js'),
+  var layer2 = require('../src/js'),
       util = require('util');
 
-  var capture = new level2.capture.Live(null, {monitor: true});
-  var decoder = new level2.Decoder();
+  var capture = new layer2.capture.Live(null, {monitor: true});
+  var decoder = new layer2.Decoder();
   var nValid = 0;
   var nInvalid = 0;
 

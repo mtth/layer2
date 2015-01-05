@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var level2 = require('../src/js'),
+  var layer2 = require('../src/js'),
       assert = require('assert'),
       crypto = require('crypto'),
       fs = require('fs'),
@@ -27,7 +27,7 @@
 
     it('can summarize saved captures', function (done) {
 
-      level2.capture.summarize(captures.large.path, function (err, summary) {
+      layer2.capture.summarize(captures.large.path, function (err, summary) {
         assert.deepEqual(summary, {
           linkType: 'IEEE802_11_RADIO',
           maxFrameSize: 65535,
@@ -43,7 +43,7 @@
 
     describe('Replay', function () {
 
-      var Replay = level2.capture.Replay;
+      var Replay = layer2.capture.Replay;
 
       it('returns the correct maximum frame size', function () {
 
@@ -293,7 +293,7 @@
           491: new Buffer('000020006708040059b76f2500000000220cd8a001000000400100003c14241188020000ffffffffffff00037f07a0160019e3d35352208f00002001011f540500000019e3d35352aaaa03000000080600010800060400010019e3d35352a9fef7000000000000004f673238', 'hex')
         };
 
-        new level2.capture.Replay(captures.large.path)
+        new layer2.capture.Replay(captures.large.path)
           .on('data', function (data) {
             var original = frames[index++];
             if (original) {
@@ -345,7 +345,7 @@
 
     describe('Save', function () {
 
-      var Save = level2.capture.Save;
+      var Save = layer2.capture.Save;
 
       it('returns the correct maximum frame size', function () {
 
@@ -388,7 +388,7 @@
       it('can be written to', function (done) {
 
         var savePath = fromName('write.pcap');
-        var replay = new level2.capture.Replay(captures.small.path);
+        var replay = new layer2.capture.Replay(captures.small.path);
         var save = new Save(savePath, {
           linkType: replay.getLinkType()
         });
@@ -409,7 +409,7 @@
       it('can be piped to', function (done) {
 
         var savePath = fromName('pipe.pcap');
-        var replay = new level2.capture.Replay(captures.small.path);
+        var replay = new layer2.capture.Replay(captures.small.path);
         var save = new Save(savePath, {linkType: replay.getLinkType()});
 
         replay
@@ -424,7 +424,7 @@
       it('can be piped to and infer the link type', function (done) {
 
         var savePath = fromName('pipe_infer.pcap');
-        var replay = new level2.capture.Replay(captures.small.path);
+        var replay = new layer2.capture.Replay(captures.small.path);
         var save = new Save(savePath);
 
         replay
@@ -439,13 +439,13 @@
       it('truncates frames if necessary', function (done) {
 
         var savePath = fromName('truncate.pcap');
-        var replay = new level2.capture.Replay(captures.small.path);
+        var replay = new layer2.capture.Replay(captures.small.path);
         var save = new Save(savePath, {maxFrameSize: 50});
 
         replay
           .pipe(save)
           .on('close', function () {
-            new level2.capture.Replay(savePath)
+            new layer2.capture.Replay(savePath)
               .on('data', function (buf) { assert.ok(buf.length <= 50); })
               .on('error', function () {}) // Skip frame overflow errors.
               .on('end', function () { done(); });
@@ -456,7 +456,7 @@
       it('closes after finish', function (done) {
 
         var savePath = fromName('close.pcap');
-        var replay = new level2.capture.Replay(captures.small.path);
+        var replay = new layer2.capture.Replay(captures.small.path);
         var save = new Save(savePath, {linkType: replay.getLinkType()});
         var finished = false;
 
@@ -475,7 +475,7 @@
 
         save
           .on('close', function () {
-            level2.capture.summarize(savePath, function (err, summary) {
+            layer2.capture.summarize(savePath, function (err, summary) {
               assert.equal(summary.nFrames, 9);
               done();
             });
@@ -483,7 +483,7 @@
 
         (function saveOnce() {
 
-          new level2.capture.Replay(captures.small.path)
+          new layer2.capture.Replay(captures.small.path)
             .on('end', function () {
               if (--loop) {
                 saveOnce(save);
@@ -511,8 +511,8 @@
       // Check that two replay files are equal.
       function checkEqual(pathA, pathB) {
 
-        var replayA = new level2.capture.Replay(pathA);
-        var replayB = new level2.capture.Replay(pathB);
+        var replayA = new layer2.capture.Replay(pathA);
+        var replayB = new layer2.capture.Replay(pathB);
 
         var a, b;
         while ((a = replayA.read()) !== null || (b = replayB.read()) !== null) {
@@ -527,7 +527,7 @@
 
     maybe(describe, hasActiveDevice())('Live', function () {
 
-      var Live = level2.capture.Live;
+      var Live = layer2.capture.Live;
 
       beforeEach(function () {
         // Make sure there are some frames to listen to.
@@ -741,7 +741,7 @@
 
     var device;
     try {
-      device = level2.capture.Live.getDefaultDevice();
+      device = layer2.capture.Live.getDefaultDevice();
     } catch (err) {
       device = null;
     }

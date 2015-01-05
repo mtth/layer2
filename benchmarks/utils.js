@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
 
-  var level2 = require('../src/js'),
+  var layer2 = require('../src/js'),
       fs = require('fs'),
       path = require('path'),
       tmp = require('tmp');
@@ -40,15 +40,15 @@
 
       var finished = false;
 
-      new level2.capture.Replay(srcPath)
+      new layer2.capture.Replay(srcPath)
         .once('readable', function () {
           if (save === null) {
-            save = new level2.capture.Save(fpath, {
+            save = new layer2.capture.Save(fpath, {
               linkType: this.getLinkType()
             })
               .on('close', function () {
                 if (cb) {
-                  level2.capture.summarize(fpath, function (err, summary) {
+                  layer2.capture.summarize(fpath, function (err, summary) {
                     cb(err, summary, fpath);
                   });
                 }

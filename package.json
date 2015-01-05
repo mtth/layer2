@@ -1,10 +1,12 @@
 {
-  "name": "level2",
+  "name": "layer2",
   "version": "0.1.0",
-  "description": "A streaming API for Wi-Fi traffic monitoring.",
+  "description": "A streaming API for the data link layer.",
   "keywords": [
     "wifi",
     "802.11",
+    "ethernet",
+    "mac",
     "frame",
     "packet",
     "stream",
@@ -35,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mtth/level2.git"
+    "url": "https://github.com/mtth/layer2.git"
   },
   "author": {
     "name": "Matthieu Monsch",

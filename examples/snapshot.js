@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var level2 = require('../src/js');
+  var layer2 = require('../src/js');
 
   if (process.argv.length != 3) {
     console.error('Usage: node snapshot.js PATH');
@@ -19,8 +19,8 @@
   }
 
   var fpath = process.argv[2];
-  var liveStream = new level2.capture.Live();
-  var saveStream = new level2.capture.Save(fpath);
+  var liveStream = new layer2.capture.Live();
+  var saveStream = new layer2.capture.Save(fpath);
 
   liveStream
     .close(10000)

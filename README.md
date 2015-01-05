@@ -1,14 +1,14 @@
-# Level2 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/level2) [![Build Status](https://travis-ci.org/mtth/level2.svg?branch=master)](https://travis-ci.org/mtth/level2)
+# Layer2 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/layer2) [![Build Status](https://travis-ci.org/mtth/layer2.svg?branch=master)](https://travis-ci.org/mtth/layer2)
 
-`level2` leverages Node.js' built-in [streams][] to provide an intuitive and
+`layer2` leverages Node.js' built-in [streams][] to provide an intuitive and
 efficient interface for frame capture and injection. It also provides decoders
 for various link types.
 
 ```javascript
-var level2 = require('level2');
+var layer2 = require('layer2');
 
-var capture = new level2.capture.Live('en0', {monitor: true});
-var decoder = new level2.Decoder();
+var capture = new layer2.capture.Live('en0', {monitor: true});
+var decoder = new layer2.Decoder();
 
 capture           // Stream of buffers (frames' raw bytes).
   .pipe(decoder)  // Stream of objects (decoded frames).
@@ -19,10 +19,10 @@ capture           // Stream of buffers (frames' raw bytes).
 ## Installation
 
 ```bash
-$ npm install level2
+$ npm install layer2
 ```
 
-`level2` depends on [libpcap][]. Note that you might also need to run live
+`layer2` depends on [libpcap][]. Note that you might also need to run live
 captures as root.
 
 
@@ -33,7 +33,7 @@ captures as root.
 
 ## Benchmarks
 
-`level2` is built with both ease of use and performance in mind. This means you
+`layer2` is built with both ease of use and performance in mind. This means you
 can benefit from the productivity gains of writing JavaScript and still handle
 throughput rates higher than any network you will likely encounter.
 
