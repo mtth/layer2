@@ -20,6 +20,7 @@
   var decoder = new layer2.Decoder();
   var nValid = 0;
   var nInvalid = 0;
+  var startTime;
 
   capture
     .once('readable', function () {
@@ -27,6 +28,7 @@
         '\nListening on device %s (link type: %s).\n',
         this.getDevice(), this.getLinkType()
       ));
+      startTime = process.hrtime();
     })
     .pipe(decoder)
     .on('data', function () {
@@ -41,9 +43,11 @@
   process.on('SIGINT', function () {
     capture
       .on('close', function () {
+        var runTime = process.hrtime(startTime);
         console.log(util.format(
-          '\n\nTotal frames captured: %s (%s%% invalid).',
+          '\n\n %s frames captured in %s seconds (%s%% invalid).',
           (nValid + nInvalid),
+          (runTime[0] + 1e-9 * runTime[1]).toFixed(1),
           (100 * nInvalid / (nValid + nInvalid)).toFixed(1)
         ));
       })
