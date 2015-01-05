@@ -42,6 +42,11 @@ compared to two other node capture libraries).
 
 [![Capture benchmark](doc/img/capture.png)](doc/benchmarks.md#capture)
 
+Raw frames can also be decoded into JavaScript objects at the rates shown in
+the next chart.
+
+[![Decoding benchmark](doc/img/decoding.png)](doc/benchmarks.md#decoding)
+
 See [here](doc/benchmarks.md) for more details.
 
 

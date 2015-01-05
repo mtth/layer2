@@ -18,18 +18,20 @@
     // locally, so aren't subject to corruption from transmission over the
     // noisy network).
 
-    var presentFlags = buf.readUInt32LE(4);
-    var offset = 8;
-    if (presentFlags & 0x01) { // TSFT.
-      offset += 8;
-    }
-    if (presentFlags & 0x02) { // Flags.
-      var flags = buf[offset];
-      var badFcs = (flags >>> 6) & 0x01;
-      if (badFcs) {
-        return null;
-      } else {
-        opts.assumeValid = true; // The FCS has already been checked.
+    if (!opts.assumeValid) {
+      var presentFlags = buf.readUInt32LE(4);
+      var offset = 8;
+      if (presentFlags & 0x01) { // TSFT.
+        offset += 8;
+      }
+      if (presentFlags & 0x02) { // Flags.
+        var flags = buf[offset];
+        var badFcs = (flags >>> 6) & 0x01;
+        if (badFcs) {
+          return null;
+        } else {
+          opts.assumeValid = true; // The FCS has already been checked.
+        }
       }
     }
 

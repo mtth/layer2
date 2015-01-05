@@ -18,9 +18,7 @@
 
   function decode(buf, opts) {
 
-    var assumeValid = opts.assumeValid;
-
-    if (!assumeValid) {
+    if (!opts.assumeValid) {
       // Validate checksum.
       var actualFcs = buf.readUInt32LE(buf.length - 4);
       var computedFcs = utils.crc32(buf.slice(0, buf.length - 4));
@@ -37,7 +35,7 @@
 
     // Add type.
     var type = buf.readUInt16BE(12);
-    if (type <= 0x05DC) {
+    if (type <= 0x05dc) {
       frame.length = type;
     } else {
       switch (type) {

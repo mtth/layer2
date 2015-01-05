@@ -60,6 +60,40 @@ Note that in order to reduce the setup and teardown costs the capture files are
 replicated to reach a size of a few megabytes. This way only the marginal frame
 processing time matters.
 
+
+## Decoding
+
+This benchmark estimates the rates at which raw frames can be decoded into
+JavaScript objects.
+
+```bash
+$ npm run benchmark-capture
+
+# ...
+
+# airtunes-1 (62543 frames, 20 runs)
+293.64 ms (±2.08)        0.21 f/us       170.27 B/us            layer2
+
+# arp-storm (833333 frames, 20 runs)
+3954.15 ms (±37.66)      0.21 f/us       12.64 B/us             layer2
+
+# dns-remoteshell (286218 frames, 20 runs)
+1425.97 ms (±4.64)       0.20 f/us       35.06 B/us             layer2
+
+# mesh (328613 frames, 20 runs)
+2029.56 ms (±6.17)       0.16 f/us       24.64 B/us             layer2
+
+# wpa-Induction (337787 frames, 20 runs)
+2077.85 ms (±5.99)       0.16 f/us       24.06 B/us             layer2
+```
+
+![Decoding benchmark](img/decoding.png)
+
+Note that it doesn't make as much sense to benchmark against the previous
+libraries since they focus on the upper layers rather than decode information
+from the data link layer.
+
+
 [captures]: http://wiki.wireshark.org/SampleCaptures
 [node_pcap]: https://github.com/mranney/node_pcap
 [pcap-stream]: https://github.com/wanderview/node-pcap-stream
