@@ -229,7 +229,7 @@
           this.push(this._getFrame());
         } else {
           // Try again later.
-          this._read.bind(this);
+          setImmediate(this._read.bind(this));
         }
       });
     } else {
