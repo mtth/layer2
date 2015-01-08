@@ -235,7 +235,7 @@
     switch (frame.type) {
 
       case 'ctrl':
-        frame.ra = addon.addon.readMacAddr(buf, 4);
+        frame.ra = addon.readMacAddr(buf, 4);
         switch (frame.subType) {
           case 'rts':
           case 'block-ack':
