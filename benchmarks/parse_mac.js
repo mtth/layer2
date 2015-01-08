@@ -7,7 +7,8 @@
 (function () {
   'use strict';
 
-  var utils = require('./utils');
+  var utils = require('./utils'),
+      addon = require('../build/Release');
 
   var benchmark = new utils.Benchmark();
 
@@ -57,6 +58,11 @@
       s.slice(8, 10),
       s.slice(10, 12)
     ].join(':');
+
+  }))
+  .addFn('cpp function', wrap(function (buf, offset) {
+
+    return addon.readMacAddr(buf, offset);
 
   }))
   .run(1e2, function (stats) {

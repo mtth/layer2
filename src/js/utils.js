@@ -23,23 +23,6 @@
 
   }
 
-  function readMacAddr(buf, offset) {
-    // MAC address parser.
-    // Returns a formatted address such as 00:01:02:03:04:05.
-
-    var s = buf.toString('hex', offset, offset + 6);
-
-    return [
-      s.slice(0, 2),
-      s.slice(2, 4),
-      s.slice(4, 6),
-      s.slice(6, 8),
-      s.slice(8, 10),
-      s.slice(10, 12)
-    ].join(':');
-
-  }
-
   function makeCrc32() {
     // Checksum computation.
     // http://stackoverflow.com/questions/18638900/javascript-crc32
@@ -86,7 +69,6 @@
 
   root.exports = {
     Packet: Packet,
-    readMacAddr: readMacAddr,
     crc32: makeCrc32(),
     requireDirectory: requireDirectory
   };

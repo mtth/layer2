@@ -408,9 +408,9 @@ void PcapWrapper::on_packet(
 
 // Registration.
 
-void wrapper_expose(Handle<Object> exports) {
+void pcap_wrapper_expose(Handle<Object> exports) {
 
-  char className[] = "Wrapper";
+  char className[] = "PcapWrapper";
 
   // Prepare constructor template
   Local<FunctionTemplate> tpl = FunctionTemplate::New(PcapWrapper::init);

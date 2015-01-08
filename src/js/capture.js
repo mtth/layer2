@@ -8,7 +8,7 @@
   'use strict';
 
   var util = require('util'),
-      pcap = require('../../build/Release/pcap'),
+      addon = require('../../build/Release'),
       stream = require('stream');
 
   /**
@@ -162,7 +162,7 @@
     var ended = false;
     var finished = false;
     var buffer = new Buffer(bufferSize);
-    var wrapper = new pcap.Wrapper(buffer)
+    var wrapper = new addon.PcapWrapper(buffer)
       .fromDevice(dev)
       .setMonitor(monitor)
       .setPromisc(promisc)
@@ -247,7 +247,7 @@
 
   Live.getDefaultDevice = function () {
 
-    return pcap.getDefaultDevice();
+    return addon.getDefaultDevice();
 
   };
 
@@ -261,7 +261,7 @@
     var bufferSize = opts.bufferSize || 1024 * 1024; // 1 MB
 
     var buffer = new Buffer(bufferSize);
-    var wrapper = new pcap.Wrapper(buffer).fromSavefile(fpath);
+    var wrapper = new addon.PcapWrapper(buffer).fromSavefile(fpath);
 
     stream.Readable.call(this, {objectMode: true, highWaterMark: 1});
 
@@ -348,7 +348,7 @@
         if (linkType === null) {
           return callback(new Error('No link type specified.'));
         }
-        wrapper = new pcap.Wrapper(new Buffer(0)) // Unused buffer.
+        wrapper = new addon.PcapWrapper(new Buffer(0)) // Unused buffer.
           .fromDead(linkType, maxFrameSize)
           .toSavefile(fpath);
       }

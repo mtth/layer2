@@ -5,7 +5,7 @@
 #include <pcap/pcap.h>
 
 
-void wrapper_expose(v8::Handle<v8::Object> exports);
+void pcap_wrapper_expose(v8::Handle<v8::Object> exports);
 
 /**
  * Class for reading packets (either live or from a save file).
@@ -15,7 +15,7 @@ class PcapWrapper : public node::ObjectWrap {
 
 private:
 
-  friend void wrapper_expose(v8::Handle<v8::Object> exports);
+  friend void pcap_wrapper_expose(v8::Handle<v8::Object> exports);
 
   FILE *dump_file_p;
   char *buffer_data;

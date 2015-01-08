@@ -9,7 +9,8 @@
 (function (root) {
   'use strict';
 
-  var utils = require('../utils');
+  var utils = require('../utils'),
+      addon = require('../../../build/Release');
 
   function decode(buf, assumeValid) {
 
@@ -234,20 +235,20 @@
     switch (frame.type) {
 
       case 'ctrl':
-        frame.ra = utils.readMacAddr(buf, 4);
+        frame.ra = addon.addon.readMacAddr(buf, 4);
         switch (frame.subType) {
           case 'rts':
           case 'block-ack':
           case 'block-ack-req':
-            frame.ta = utils.readMacAddr(buf, 10);
+            frame.ta = addon.readMacAddr(buf, 10);
             break;
           case 'ps-poll':
             frame.bssid = frame.ra;
-            frame.ta = utils.readMacAddr(buf, 10);
+            frame.ta = addon.readMacAddr(buf, 10);
             break;
           case 'cf-end':
           case 'cf-end cf-ack':
-            frame.ta = frame.bssid = utils.readMacAddr(buf, 10);
+            frame.ta = frame.bssid = addon.readMacAddr(buf, 10);
             break;
           case 'ctrl-wrapper':
             var carriedBuf = new Buffer(buf.length - 10);
@@ -268,8 +269,8 @@
         var hasData = ~(frameControl >>> 6) & 0x01;
 
         // First two addresses are easy.
-        frame.ra = utils.readMacAddr(buf, 4);
-        frame.ta = utils.readMacAddr(buf, 10);
+        frame.ra = addon.readMacAddr(buf, 4);
+        frame.ta = addon.readMacAddr(buf, 10);
 
         // Sequence control things.
         var seqControl = buf.readUInt16LE(22);
@@ -284,32 +285,32 @@
           case 0:
             frame.da = frame.ra;
             frame.sa = frame.ta;
-            frame.bssid = utils.readMacAddr(buf, 16);
+            frame.bssid = addon.readMacAddr(buf, 16);
             break;
           case 1: // toDs
             frame.bssid = frame.ra;
             frame.sa = frame.ta;
             if (hasAmsdu) {
-              frame.bssid = utils.readMacAddr(buf, 16);
+              frame.bssid = addon.readMacAddr(buf, 16);
             } else {
-              frame.da = utils.readMacAddr(buf, 16);
+              frame.da = addon.readMacAddr(buf, 16);
             }
             break;
           case 2: // fromDs
             frame.da = frame.ra;
             frame.bssid = frame.ta;
             if (hasAmsdu) {
-              frame.bssid = utils.readMacAddr(buf, 16);
+              frame.bssid = addon.readMacAddr(buf, 16);
             } else {
-              frame.sa = utils.readMacAddr(buf, 16);
+              frame.sa = addon.readMacAddr(buf, 16);
             }
             break;
           default: // fromDs toDs
             if (hasAmsdu) {
-              frame.bssid = utils.readMacAddr(buf, 16);
+              frame.bssid = addon.readMacAddr(buf, 16);
             } else {
-              frame.da = utils.readMacAddr(buf, 16);
-              frame.sa = utils.readMacAddr(buf, 24);
+              frame.da = addon.readMacAddr(buf, 16);
+              frame.sa = addon.readMacAddr(buf, 24);
             }
         }
         // TODO: Implement A-MSDU parsing.
@@ -349,9 +350,9 @@
 
         // Addresses are straightforward (except in the case of multihop
         // actions, which we are not considering here).
-        frame.da = frame.ra = utils.readMacAddr(buf, 4);
-        frame.sa = frame.ta = utils.readMacAddr(buf, 10);
-        frame.bssid = utils.readMacAddr(buf, 16);
+        frame.da = frame.ra = addon.readMacAddr(buf, 4);
+        frame.sa = frame.ta = addon.readMacAddr(buf, 10);
+        frame.bssid = addon.readMacAddr(buf, 16);
 
         // Sequence control things.
         seqControl = buf.readUInt16LE(22);

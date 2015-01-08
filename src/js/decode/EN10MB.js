@@ -14,7 +14,8 @@
 (function (root) {
   'use strict';
 
-  var utils = require('../utils');
+  var utils = require('../utils'),
+      addon = require('../../../build/Release');
 
   function decode(buf, assumeValid) {
 
@@ -29,8 +30,8 @@
 
     // Parse addresses.
     var frame = {
-      da: utils.readMacAddr(buf, 0),
-      sa: utils.readMacAddr(buf, 6)
+      da: addon.readMacAddr(buf, 0),
+      sa: addon.readMacAddr(buf, 6)
     };
 
     // Add type.
