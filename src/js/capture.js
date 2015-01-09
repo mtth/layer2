@@ -9,8 +9,7 @@
 
   var util = require('util'),
       stream = require('stream'),
-      utils = require('./utils'),
-      addon = utils.requireAddon();
+      addon = require('./utils').requireAddon();
 
   /**
    * Base capture class.

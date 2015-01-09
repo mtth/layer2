@@ -6,11 +6,11 @@
   var utils = require('../src/js/utils'),
       assert = require('assert');
 
-  describe('Addon', function () {
+  describe('Utils', function () {
 
-    var addon = utils.requireAddon();
+    describe('Addon', function () {
 
-    describe('Utils', function () {
+      var addon = utils.requireAddon();
 
       it('can parse MAC addresses', function () {
 

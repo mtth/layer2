@@ -17,9 +17,7 @@
 
   var stream = require('stream'),
       util = require('util'),
-      utils = require('../utils');
-
-  var decoders = utils.requireDirectory(__dirname);
+      decoders = require('../utils').requireDirectory(__dirname);
 
   /**
    * Decoder stream class.

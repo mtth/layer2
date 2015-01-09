@@ -12,14 +12,6 @@
   var fs = require('fs'),
       path = require('path');
 
-  function requireAddon() {
-    // Either debug or release (depending on environment variable).
-
-    var folder = process.env.LAYER2_DEBUG ? 'Debug' : 'Release';
-    return require('../../build/' + folder);
-
-  }
-
   function makeCrc32() {
     // Checksum computation.
     // http://stackoverflow.com/questions/18638900/javascript-crc32
@@ -45,6 +37,14 @@
       }
       return ~crc >>> 0;
     };
+
+  }
+
+  function requireAddon() {
+    // Either debug or release (depending on environment variable).
+
+    var folder = process.env.LAYER2_DEBUG ? 'Debug' : 'Release';
+    return require(path.join(__dirname, '..', '..', 'build', folder));
 
   }
 
