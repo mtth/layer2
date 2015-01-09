@@ -1,25 +1,22 @@
 #include "util.hpp"
 #include <node_buffer.h>
+#include <pcap/pcap.h>
 
-#define precondition(b) \
-  if (!(b)) \
-  return ThrowException(Exception::TypeError(String::New("Illegal arguments.")))
-
+#define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
 
 using namespace v8;
-
 
 static const char hex[] = "0123456789abcdef";
 
 // Parse MAC address.
-v8::Handle<v8::Value> read_mac_addr(const v8::Arguments& args) {
+NAN_METHOD(read_mac_addr) {
 
+  NanScope();
   precondition(
     args.Length() == 2 &&
     node::Buffer::HasInstance(args[0]) &&
     args[1]->IsInt32()
   );
-  HandleScope scope;
 
   Local<Object> buf = args[0]->ToObject();
   register unsigned int offset = args[1]->Int32Value();
@@ -41,20 +38,18 @@ v8::Handle<v8::Value> read_mac_addr(const v8::Arguments& args) {
   }
   *cp = '\0';
 
-  Local<Value> wrapped = String::New(addr);
-  return scope.Close(wrapped);
+  NanReturnValue(NanNew<String>(addr));
 
 }
 
 // Get the first device with an address, pcap_lookupdev() just returns the
 // first non-loopback device.
-v8::Handle<v8::Value> get_default_dev(const v8::Arguments& args) {
+NAN_METHOD(get_default_dev) {
 
+  NanScope();
   precondition(args.Length() == 0);
-  HandleScope scope;
 
   char errbuf[PCAP_ERRBUF_SIZE];
-  Local<Value> ret;
   pcap_if_t *alldevs, *dev;
   pcap_addr_t *addr;
   bool found = false;
@@ -71,7 +66,6 @@ v8::Handle<v8::Value> get_default_dev(const v8::Arguments& args) {
     if (dev->addresses != NULL && !(dev->flags & PCAP_IF_LOOPBACK)) {
       for (addr = dev->addresses; addr != NULL; addr = addr->next) {
         if (addr->addr->sa_family == AF_INET) {
-          ret = String::New(dev->name);
           found = true;
           break;
         }
@@ -82,8 +76,12 @@ v8::Handle<v8::Value> get_default_dev(const v8::Arguments& args) {
     }
   }
 
+  if (found) {
+    NanReturnValue(NanNew<String>(dev->name));
+  } else {
+    NanReturnNull();
+  }
   pcap_freealldevs(alldevs);
-  return scope.Close(ret);
 
 }
 
@@ -93,8 +91,8 @@ v8::Handle<v8::Value> get_default_dev(const v8::Arguments& args) {
 void util_expose(Handle<Object> exports) {
 
   exports->Set(
-    String::NewSymbol("getDefaultDevice"),
-    FunctionTemplate::New(get_default_dev)->GetFunction()
+    NanNew<String>("getDefaultDevice"),
+    NanNew<FunctionTemplate>(get_default_dev)->GetFunction()
   );
 
   exports->Set(

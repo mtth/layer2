@@ -45,5 +45,8 @@
     "name": "Matthieu Monsch",
     "email": "monsch@alum.mit.edu"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^1.4.1"
+  }
 }
