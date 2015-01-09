@@ -19,12 +19,13 @@
   ],
   "main": "./src/js",
   "scripts": {
+    "preinstall": "node-gyp rebuild --release",
     "build": "node-gyp configure && node-gyp build",
     "clean": "rm -rf build node_modules",
     "debug": "LAYER2_DEBUG=1 lldb -- node $(npm bin)/_mocha --no-timeouts",
     "test": "$(npm bin)/mocha",
     "benchmark-capture": "cd benchmarks && make && node capture.js",
-    "benchmark-decode": "cd benchmarks && node decode.js"
+    "benchmark-decode": "cd benchmarks && make && node decode.js"
   },
   "engines": {
     "node": "0.10.x"

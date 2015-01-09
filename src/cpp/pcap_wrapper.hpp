@@ -1,5 +1,5 @@
-#ifndef LAYER2_PCAP_WRAPPER_H
-#define LAYER2_PCAP_WRAPPER_H
+#ifndef LAYER2_PCAP_WRAPPER_HPP
+#define LAYER2_PCAP_WRAPPER_HPP
 
 #include <node.h>
 #include <pcap/pcap.h>

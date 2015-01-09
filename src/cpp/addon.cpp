@@ -1,5 +1,5 @@
-#include "util.h"
-#include "pcap_wrapper.h"
+#include "pcap_wrapper.hpp"
+#include "util.hpp"
 
 
 void init(v8::Handle<v8::Object> exports) {

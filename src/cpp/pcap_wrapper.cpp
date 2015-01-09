@@ -1,4 +1,4 @@
-#include "pcap_wrapper.h"
+#include "pcap_wrapper.hpp"
 #include <cstring>
 #include <node_buffer.h>
 #include <sys/ioctl.h>
