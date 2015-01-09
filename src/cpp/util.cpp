@@ -55,7 +55,7 @@ NAN_METHOD(get_default_dev) {
   bool found = false;
 
   if (pcap_findalldevs(&alldevs, errbuf) == -1) {
-    return ThrowException(Exception::Error(String::New(errbuf)));
+    return NanThrowError(errbuf);
   }
 
   if (alldevs == NULL) {

@@ -228,9 +228,9 @@ NAN_METHOD(PcapWrapper::get_stats) {
   }
 
   Local<Object> stats_obj = Object::New();
-  stats_obj->Set(String::New("psRecv"), Integer::NewFromUnsigned(ps.ps_recv));
-  stats_obj->Set(String::New("psDrop"), Integer::NewFromUnsigned(ps.ps_drop));
-  stats_obj->Set(String::New("psIfDrop"), Integer::NewFromUnsigned(ps.ps_ifdrop));
+  stats_obj->Set(NanNew<String>("psRecv"), NanNew<Integer>(ps.ps_recv));
+  stats_obj->Set(NanNew<String>("psDrop"), NanNew<Integer>(ps.ps_drop));
+  stats_obj->Set(NanNew<String>("psIfDrop"), NanNew<Integer>(ps.ps_ifdrop));
   // ps_ifdrop may not be supported on this platform, but there's no good way
   // to tell, is there?
 
@@ -338,7 +338,7 @@ NAN_METHOD(PcapWrapper::dump) {
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
 
   if (wrapper->dump_handle == NULL) {
-      return ThrowException(Exception::Error(String::New("No writable savefile active.")));
+    return NanThrowError("No writable savefile active.");
   }
 
   struct timeval tv;
@@ -383,9 +383,9 @@ void PcapWrapper::on_packet(
   TryCatch try_catch;
 
   Local<Value> argv[3] = {
-    Integer::New(wrapper->buffer_offset), // New offset.
-    Integer::New(overflow), // Buffer overflow.
-    Integer::New(packet_overflow) // Frame overflow.
+    NanNew<Integer>(wrapper->buffer_offset), // New offset.
+    NanNew<Integer>(overflow), // Buffer overflow.
+    NanNew<Integer>(packet_overflow) // Frame overflow.
   };
   wrapper->on_packet_callback->Call(Context::GetCurrent()->Global(), 3, argv);
 
@@ -433,9 +433,6 @@ void pcap_wrapper_expose(Handle<Object> exports) {
   add_to_prototype(tpl, "toSavefile", PcapWrapper::to_savefile);
   #undef add_to_prototype
 
-  exports->Set(
-    NanNew<String>(className),
-    Persistent<Function>::New(tpl->GetFunction())
-  );
+  exports->Set(NanNew<String>(className), tpl->GetFunction());
 
 }
