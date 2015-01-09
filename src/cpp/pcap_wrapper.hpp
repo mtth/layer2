@@ -25,7 +25,7 @@ private:
   size_t buffer_length;
   size_t buffer_offset;
   struct bpf_program filter;
-  v8::Persistent<v8::Function> on_packet_callback;
+  NanCallback *on_packet_callback;
 
   PcapWrapper();
   ~PcapWrapper();

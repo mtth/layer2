@@ -13,6 +13,7 @@ PcapWrapper::PcapWrapper() {
   buffer_data = NULL;
   dump_handle = NULL;
   handle = NULL;
+  on_packet_callback = NULL;
 
 }
 
@@ -227,7 +228,7 @@ NAN_METHOD(PcapWrapper::get_stats) {
     return NanThrowError(pcap_geterr(wrapper->handle));
   }
 
-  Local<Object> stats_obj = Object::New();
+  Local<Object> stats_obj = NanNew<Object>();
   stats_obj->Set(NanNew<String>("psRecv"), NanNew<Integer>(ps.ps_recv));
   stats_obj->Set(NanNew<String>("psDrop"), NanNew<Integer>(ps.ps_drop));
   stats_obj->Set(NanNew<String>("psIfDrop"), NanNew<Integer>(ps.ps_ifdrop));
@@ -272,7 +273,9 @@ NAN_METHOD(PcapWrapper::dispatch) {
   NanScope();
   precondition(args.Length() == 2 && args[0]->IsInt32() && args[1]->IsFunction());
   PcapWrapper *wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
-  wrapper->on_packet_callback = Persistent<Function>::New(Handle<Function>::Cast(args[1]));
+
+  Local<Function> fn = args[1].As<Function>();
+  wrapper->on_packet_callback = new NanCallback(fn);
 
   wrapper->buffer_offset = 0;
   int n = pcap_dispatch(wrapper->handle, args[0]->Int32Value(), on_packet, (u_char *) wrapper);
@@ -304,7 +307,9 @@ NAN_METHOD(PcapWrapper::close) {
   if (wrapper->dump_handle != NULL) {
     pcap_dump_close(wrapper->dump_handle);
   }
-  wrapper->on_packet_callback.Dispose();
+  if (wrapper->on_packet_callback != NULL) {
+    delete wrapper->on_packet_callback;
+  }
 
   NanReturnUndefined();
 
@@ -387,7 +392,7 @@ void PcapWrapper::on_packet(
     NanNew<Integer>(overflow), // Buffer overflow.
     NanNew<Integer>(packet_overflow) // Frame overflow.
   };
-  wrapper->on_packet_callback->Call(Context::GetCurrent()->Global(), 3, argv);
+  wrapper->on_packet_callback->Call(3, argv);
 
   if (try_catch.HasCaught())  {
     node::FatalException(try_catch);
