@@ -19,7 +19,8 @@
   ],
   "main": "./src/js",
   "scripts": {
-    "preinstall": "node-gyp rebuild --release",
+    "preinstall": "",
+    "postinstall": "node-gyp rebuild --release",
     "build": "node-gyp configure && node-gyp build",
     "clean": "rm -rf build node_modules",
     "debug": "LAYER2_DEBUG=1 lldb -- node $(npm bin)/_mocha --no-timeouts",
