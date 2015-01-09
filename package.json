@@ -20,9 +20,9 @@
   "main": "./src/js",
   "scripts": {
     "build": "node-gyp configure && node-gyp build",
-    "build-debug": "node-gyp configure && node-gyp build --debug",
     "clean": "rm -rf build node_modules",
-    "test": "LAYER2_DEBUG=1 $(npm bin)/mocha",
+    "debug": "LAYER2_DEBUG=1 lldb -- node $(npm bin)/_mocha --no-timeouts",
+    "test": "$(npm bin)/mocha",
     "benchmark-capture": "cd benchmarks && make && node capture.js",
     "benchmark-decode": "cd benchmarks && node decode.js"
   },
