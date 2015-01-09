@@ -28,10 +28,9 @@
     "benchmark-decode": "cd benchmarks && make && node decode.js"
   },
   "engines": {
-    "node": "0.10.x"
+    "node": ">= 0.10.0"
   },
   "devDependencies": {
-    "deep-diff": "^0.3.0",
     "mocha": "^2.0.1"
   },
   "repository": {

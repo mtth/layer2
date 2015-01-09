@@ -4,7 +4,6 @@
   'use strict';
 
   var assert = require('assert'),
-      diff = require('deep-diff'),
       layer2 = require('../src/js');
 
   var savedCapture = {
@@ -502,8 +501,7 @@
         var actualObject = this.decode(buf);
         assert.deepEqual(
           actualObject,
-          expectedObject,
-          JSON.stringify(diff(actualObject, expectedObject), null, 2)
+          expectedObject
         );
       };
 
