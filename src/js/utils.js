@@ -12,14 +12,11 @@
   var fs = require('fs'),
       path = require('path');
 
-  /**
-   * Ha.
-   *
-   */
-  function Packet(type, contents) {
+  function requireAddon() {
+    // Either debug or release (depending on environment variable).
 
-    this.type = type;
-    this.contents = contents;
+    var folder = process.env.LAYER2_DEBUG ? 'Debug' : 'Release';
+    return require('../../build/' + folder);
 
   }
 
@@ -68,8 +65,8 @@
   }
 
   root.exports = {
-    Packet: Packet,
     crc32: makeCrc32(),
+    requireAddon: requireAddon,
     requireDirectory: requireDirectory
   };
 

@@ -1,5 +1,5 @@
-#ifndef NODE_UTIL_H
-#define NODE_UTIL_H
+#ifndef LAYER2_UTIL_H
+#define LAYER2_UTIL_H
 
 #include <node.h>
 #include <pcap/pcap.h>

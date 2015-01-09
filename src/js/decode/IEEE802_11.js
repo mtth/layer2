@@ -10,7 +10,7 @@
   'use strict';
 
   var utils = require('../utils'),
-      addon = require('../../../build/Release');
+      addon = utils.requireAddon();
 
   function decode(buf, assumeValid) {
 

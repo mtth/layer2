@@ -8,8 +8,9 @@
   'use strict';
 
   var util = require('util'),
-      addon = require('../../build/Release'),
-      stream = require('stream');
+      stream = require('stream'),
+      utils = require('./utils'),
+      addon = utils.requireAddon();
 
   /**
    * Base capture class.
