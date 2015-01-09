@@ -19,8 +19,7 @@
   ],
   "main": "./src/js",
   "scripts": {
-    "preinstall": "",
-    "postinstall": "node-gyp rebuild --release",
+    "install": "node-gyp rebuild --release",
     "build": "node-gyp configure && node-gyp build",
     "clean": "rm -rf build node_modules",
     "debug": "LAYER2_DEBUG=1 lldb -- node $(npm bin)/_mocha --no-timeouts",
@@ -33,10 +32,7 @@
   },
   "devDependencies": {
     "deep-diff": "^0.3.0",
-    "mocha": "^2.0.1",
-    "pcap": "^1.2.0",
-    "pcap-stream": "^0.1.1",
-    "tmp": "0.0.24"
+    "mocha": "^2.0.1"
   },
   "repository": {
     "type": "git",
