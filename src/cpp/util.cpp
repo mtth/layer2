@@ -21,7 +21,7 @@ NAN_METHOD(read_mac_addr) {
   Local<Object> buf = args[0]->ToObject();
   register unsigned int offset = args[1]->Int32Value();
   if (offset > node::Buffer::Length(buf) - 6) {
-    return ThrowException(Exception::Error(String::New("Truncated address.")));
+    return NanThrowError("Truncated address.");
   }
 
   register int i = 5;
@@ -59,29 +59,30 @@ NAN_METHOD(get_default_dev) {
   }
 
   if (alldevs == NULL) {
-    return Null();
-  }
-
-  for (dev = alldevs; dev != NULL; dev = dev->next) {
-    if (dev->addresses != NULL && !(dev->flags & PCAP_IF_LOOPBACK)) {
-      for (addr = dev->addresses; addr != NULL; addr = addr->next) {
-        if (addr->addr->sa_family == AF_INET) {
-          found = true;
+    NanReturnNull();
+  } else {
+    // Can't return because node methods have different return types, so we use
+    // an else block.
+    for (dev = alldevs; dev != NULL; dev = dev->next) {
+      if (dev->addresses != NULL && !(dev->flags & PCAP_IF_LOOPBACK)) {
+        for (addr = dev->addresses; addr != NULL; addr = addr->next) {
+          if (addr->addr->sa_family == AF_INET) {
+            found = true;
+            break;
+          }
+        }
+        if (found) {
           break;
         }
       }
-      if (found) {
-        break;
-      }
     }
+    if (found) {
+      NanReturnValue(NanNew<String>(dev->name));
+    } else {
+      NanReturnNull();
+    }
+    pcap_freealldevs(alldevs);
   }
-
-  if (found) {
-    NanReturnValue(NanNew<String>(dev->name));
-  } else {
-    NanReturnNull();
-  }
-  pcap_freealldevs(alldevs);
 
 }
 
@@ -96,8 +97,8 @@ void util_expose(Handle<Object> exports) {
   );
 
   exports->Set(
-    String::NewSymbol("readMacAddr"),
-    FunctionTemplate::New(read_mac_addr)->GetFunction()
+    NanNew<String>("readMacAddr"),
+    NanNew<FunctionTemplate>(read_mac_addr)->GetFunction()
   );
 
 }
