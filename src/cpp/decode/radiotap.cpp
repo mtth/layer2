@@ -20,7 +20,17 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "macros.hpp"
+#include "radiotap.hpp"
 #include <string.h>
+
+using v8::Boolean;
+using v8::FunctionTemplate;
+using v8::Integer;
+using v8::Handle;
+using v8::Local;
+using v8::Object;
+using v8::String;
 
 enum ieee80211_radiotap_type {
   IEEE80211_RADIOTAP_TSFT = 0,
@@ -550,7 +560,7 @@ static const float ieee80211_float_htrates[MAX_MCS_INDEX+1][2][2] = {
   },
 };
 
-static const char *auth_alg_text[]={"Open System","Shared Key","EAP"};
+static const char *auth_alg_text[] = {"Open System", "Shared Key", "EAP"};
 #define NUM_AUTH_ALGS (sizeof auth_alg_text / sizeof auth_alg_text[0])
 
 static const char *status_text[] = {
@@ -703,16 +713,11 @@ static const char *reason_text[] = {
 };
 #define NUM_REASONS (sizeof reason_text / sizeof reason_text[0])
 
-#define IEEE80211_CHAN_FHSS \
-  (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_GFSK)
-#define IEEE80211_CHAN_A \
-  (IEEE80211_CHAN_5GHZ | IEEE80211_CHAN_OFDM)
-#define IEEE80211_CHAN_B \
-  (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_CCK)
-#define IEEE80211_CHAN_PUREG \
-  (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_OFDM)
-#define IEEE80211_CHAN_G \
-  (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_DYN)
+#define IEEE80211_CHAN_FHSS (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_GFSK)
+#define IEEE80211_CHAN_A (IEEE80211_CHAN_5GHZ | IEEE80211_CHAN_OFDM)
+#define IEEE80211_CHAN_B (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_CCK)
+#define IEEE80211_CHAN_PUREG (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_OFDM)
+#define IEEE80211_CHAN_G (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_DYN)
 
 #define IS_CHAN_FHSS(flags) \
   ((flags & IEEE80211_CHAN_FHSS) == IEEE80211_CHAN_FHSS)
@@ -726,12 +731,6 @@ static const char *reason_text[] = {
   ((flags & IEEE80211_CHAN_G) == IEEE80211_CHAN_G)
 #define IS_CHAN_ANYG(flags) \
   (IS_CHAN_PUREG(flags) || IS_CHAN_G(flags))
-
-
-#include "macros.hpp"
-#include "radiotap.hpp"
-
-using namespace v8;
 
 NAN_METHOD(decode_radiotap) {
 
