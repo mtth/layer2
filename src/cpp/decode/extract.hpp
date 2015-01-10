@@ -21,6 +21,7 @@
 #ifndef LAYER2_DECODE_MACROS_HPP
 #define LAYER2_DECODE_MACROS_HPP
 
+#include "stdinc.h"
 #include <node.h>
 
 #define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
