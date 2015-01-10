@@ -50,6 +50,15 @@ public:
       on_packet,
       (u_char *) this
     );
+    if (n == -2) {
+      // Previous loop was broken, needed to clear flag. We try again.
+      n = pcap_dispatch(
+        _pcap_handle,
+        _batch_size,
+        on_packet,
+        (u_char *) this
+      );
+    }
 
     if (n == -1) {
       SetErrorMessage(pcap_geterr(_pcap_handle));
@@ -459,6 +468,19 @@ NAN_METHOD(PcapWrapper::dispatch) {
   ));
 
   NanReturnUndefined();
+
+}
+
+NAN_METHOD(PcapWrapper::break_loop) {
+
+  NanScope();
+  precondition(args.Length() == 0);
+  PcapWrapper *wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
+
+  pcap_breakloop(wrapper->handle);
+
+  NanReturnThis();
 
 }
 

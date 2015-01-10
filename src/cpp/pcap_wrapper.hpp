@@ -14,6 +14,7 @@ class PcapWrapper : public node::ObjectWrap {
 public:
 
   static NAN_METHOD(activate);
+  static NAN_METHOD(break_loop);
   static NAN_METHOD(close);
   static NAN_METHOD(dispatch);
   static NAN_METHOD(dump);

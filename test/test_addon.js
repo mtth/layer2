@@ -123,6 +123,66 @@
 
       });
 
+      it('dispatches after a break', function (done) {
+
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
+
+        var buf = new Buffer(wrapper.getMaxFrameSize());
+
+        wrapper
+          .dispatch(3, buf, function (err, headers, broke) {
+            assert.ok(err === null);
+            assert.equal(headers.length, 1);
+            assert.ok(broke);
+            wrapper.dispatch(1, buf, function (err, headers, broke) {
+              assert.ok(err === null);
+              assert.equal(headers.length, 1);
+              assert.ok(broke);
+              done();
+            });
+          });
+
+      });
+
+      it('dispatches all frames from a save file', function (done) {
+
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
+
+        var buf = new Buffer(10 * wrapper.getMaxFrameSize());
+
+        wrapper
+          .dispatch(1000, buf, function (err, headers, broke) {
+            assert.ok(err === null);
+            assert.equal(headers.length, 780);
+            assert.ok(!broke);
+            done();
+          });
+
+      });
+
+      it('dispatches no frames after finishing a save file', function (done) {
+
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
+
+        var buf = new Buffer(10 * wrapper.getMaxFrameSize());
+
+        wrapper
+          .dispatch(1000, buf, function (err, headers, broke) {
+            assert.ok(err === null);
+            assert.equal(headers.length, 780);
+            assert.ok(!broke);
+            wrapper.dispatch(1, buf, function (err, headers) {
+              assert.ok(err === null);
+              assert.equal(headers.length, 0);
+              done();
+            });
+          });
+
+      });
+
     });
 
   });
