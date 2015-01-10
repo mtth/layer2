@@ -29,6 +29,7 @@
 
 #include "cpack.hpp"
 #include "extract.hpp"
+#include <string.h>
 
 uint8_t *cpack_next_boundary(uint8_t *buf, uint8_t *p, size_t alignment) {
 
