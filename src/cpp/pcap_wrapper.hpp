@@ -5,30 +5,13 @@
 #include <node.h>
 #include <pcap/pcap.h>
 
-
-void pcap_wrapper_expose(v8::Handle<v8::Object> exports);
-
 /**
  * Class for reading packets (either live or from a save file).
  *
  */
 class PcapWrapper : public node::ObjectWrap {
 
-private:
-
-  friend void pcap_wrapper_expose(v8::Handle<v8::Object> exports);
-
-  FILE *dump_file_p;
-  char *buffer_data;
-  pcap_dumper_t *dump_handle;
-  pcap_t *handle;
-  size_t buffer_length;
-  size_t buffer_offset;
-  struct bpf_program filter;
-  NanCallback *on_packet_callback;
-
-  PcapWrapper();
-  ~PcapWrapper();
+public:
 
   static NAN_METHOD(activate);
   static NAN_METHOD(break_loop);
@@ -49,6 +32,21 @@ private:
   static NAN_METHOD(set_rfmon);
   static NAN_METHOD(set_snaplen);
   static NAN_METHOD(to_savefile);
+
+private:
+
+  FILE *dump_file_p;
+  char *buffer_data;
+  pcap_dumper_t *dump_handle;
+  pcap_t *handle;
+  size_t buffer_length;
+  size_t buffer_offset;
+  struct bpf_program filter;
+  NanCallback *on_packet_callback;
+
+  PcapWrapper();
+  ~PcapWrapper();
+
   static void on_packet(u_char *reader_p, const struct pcap_pkthdr* pkthdr, const u_char* packet);
 
 };

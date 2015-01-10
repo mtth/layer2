@@ -85,20 +85,3 @@ NAN_METHOD(get_default_dev) {
   }
 
 }
-
-
-// Registration.
-
-void util_expose(Handle<Object> exports) {
-
-  exports->Set(
-    NanNew<String>("getDefaultDevice"),
-    NanNew<FunctionTemplate>(get_default_dev)->GetFunction()
-  );
-
-  exports->Set(
-    NanNew<String>("readMacAddr"),
-    NanNew<FunctionTemplate>(read_mac_addr)->GetFunction()
-  );
-
-}

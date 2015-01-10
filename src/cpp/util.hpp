@@ -4,9 +4,6 @@
 #include <nan.h>
 #include <node.h>
 
-
-void util_expose(v8::Handle<v8::Object> exports);
-
 /**
  * Various utilities.
  *
