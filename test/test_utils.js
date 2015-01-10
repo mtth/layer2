@@ -21,6 +21,12 @@
 
       });
 
+      it('can pretend decode', function () {
+
+        assert.ok(addon.decoders.IEEE802_11_RADIO(new Buffer(0), 0));
+
+      });
+
     });
 
   });
