@@ -17,7 +17,7 @@
 
   var stream = require('stream'),
       util = require('util'),
-      decoders = require('../utils').requireDirectory(__dirname);
+      decoders = require('./utils').requireAddon().decoders;
 
   /**
    * Decoder stream class.
@@ -31,7 +31,6 @@
 
     opts = opts || {};
     var linkType = opts.linkType || null; // Inferred below.
-    var assumeValid = opts.assumeValid || false;
 
     stream.Transform.call(this, {objectMode: true});
 
@@ -68,7 +67,7 @@
 
         var frame;
         try {
-          frame = decodeFn(data, assumeValid);
+          frame = decodeFn(data, 0);
         } catch (err) {
           err.data = data;
           return callback(err);

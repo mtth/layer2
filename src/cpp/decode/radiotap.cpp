@@ -23,7 +23,7 @@
 #include "cpack.hpp"
 #include "extract.hpp"
 #include "radiotap.hpp"
-// #include <string.h>
+#include <string.h>
 
 using v8::Boolean;
 using v8::FunctionTemplate;
@@ -826,6 +826,14 @@ static int add_field(
 
 NAN_METHOD(decode_radiotap) {
 
+#define BITNO_32(x) (((x) >> 16) ? 16 + BITNO_16((x) >> 16) : BITNO_16((x)))
+#define BITNO_16(x) (((x) >> 8) ? 8 + BITNO_8((x) >> 8) : BITNO_8((x)))
+#define BITNO_8(x) (((x) >> 4) ? 4 + BITNO_4((x) >> 4) : BITNO_4((x)))
+#define BITNO_4(x) (((x) >> 2) ? 2 + BITNO_2((x) >> 2) : BITNO_2((x)))
+#define BITNO_2(x) (((x) & 2) ? 1 : 0)
+#define BIT(n)  (1U << n)
+#define IS_EXTENDED(__p) (EXTRACT_LE_32BITS(__p) & BIT(RTAP_EXT)) != 0
+
   NanScope();
   precondition(
     args.Length() == 2 &&
@@ -837,19 +845,6 @@ NAN_METHOD(decode_radiotap) {
   Local<Object> packet = args[0]->ToObject();
   u_char *p = (u_char *) node::Buffer::Data(packet);
   // u_int length = node::Buffer::Length(packet);
-
-  // SET_BOOL(frame, "b", false);
-  // SET_INT(frame, "i", 123);
-  // SET_STR(frame, "s", "hello");
-  // SET_NULL(frame, "n");
-
-#define BITNO_32(x) (((x) >> 16) ? 16 + BITNO_16((x) >> 16) : BITNO_16((x)))
-#define BITNO_16(x) (((x) >> 8) ? 8 + BITNO_8((x) >> 8) : BITNO_8((x)))
-#define BITNO_8(x) (((x) >> 4) ? 4 + BITNO_4((x) >> 4) : BITNO_4((x)))
-#define BITNO_4(x) (((x) >> 2) ? 2 + BITNO_2((x) >> 2) : BITNO_2((x)))
-#define BITNO_2(x) (((x) & 2) ? 1 : 0)
-#define BIT(n)  (1U << n)
-#define IS_EXTENDED(__p) (EXTRACT_LE_32BITS(__p) & BIT(RTAP_EXT)) != 0
 
   struct cpack_state cpacker;
   struct ieee80211_radiotap_header *hdr;
@@ -922,6 +917,5 @@ NAN_METHOD(decode_radiotap) {
 #undef BITNO_4
 #undef BITNO_2
 #undef BIT
-
 
 }

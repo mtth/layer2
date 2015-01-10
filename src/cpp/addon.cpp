@@ -18,30 +18,24 @@ void init(v8::Handle<v8::Object> exports) {
   tpl->SetClassName(NanNew<String>(className));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  #define add_to_prototype(t, s, m) NanSetPrototypeTemplate( \
-    (t), \
-    (s), \
-    NanNew<FunctionTemplate>((m))->GetFunction() \
-  )
-  add_to_prototype(tpl, "activate", PcapWrapper::activate);
-  add_to_prototype(tpl, "breakLoop", PcapWrapper::break_loop);
-  add_to_prototype(tpl, "close", PcapWrapper::close);
-  add_to_prototype(tpl, "dispatch", PcapWrapper::dispatch);
-  add_to_prototype(tpl, "dumpFrame", PcapWrapper::dump);
-  add_to_prototype(tpl, "fromDead", PcapWrapper::from_dead);
-  add_to_prototype(tpl, "fromDevice", PcapWrapper::from_device);
-  add_to_prototype(tpl, "fromSavefile", PcapWrapper::from_savefile);
-  add_to_prototype(tpl, "getLinkType", PcapWrapper::get_datalink);
-  add_to_prototype(tpl, "getMaxFrameSize", PcapWrapper::get_snaplen);
-  add_to_prototype(tpl, "getStats", PcapWrapper::get_stats);
-  add_to_prototype(tpl, "injectFrame", PcapWrapper::inject);
-  add_to_prototype(tpl, "setBufferSize", PcapWrapper::set_buffersize);
-  add_to_prototype(tpl, "setFilter", PcapWrapper::set_filter);
-  add_to_prototype(tpl, "setPromisc", PcapWrapper::set_promisc);
-  add_to_prototype(tpl, "setMonitor", PcapWrapper::set_rfmon);
-  add_to_prototype(tpl, "setMaxFrameSize", PcapWrapper::set_snaplen);
-  add_to_prototype(tpl, "toSavefile", PcapWrapper::to_savefile);
-  #undef add_to_prototype
+  NODE_SET_PROTOTYPE_METHOD(tpl, "activate", PcapWrapper::activate);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "breakLoop", PcapWrapper::break_loop);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "close", PcapWrapper::close);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "dispatch", PcapWrapper::dispatch);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "dumpFrame", PcapWrapper::dump);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "fromDead", PcapWrapper::from_dead);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "fromDevice", PcapWrapper::from_device);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "fromSavefile", PcapWrapper::from_savefile);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getLinkType", PcapWrapper::get_datalink);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getMaxFrameSize", PcapWrapper::get_snaplen);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getStats", PcapWrapper::get_stats);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "injectFrame", PcapWrapper::inject);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setBufferSize", PcapWrapper::set_buffersize);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setFilter", PcapWrapper::set_filter);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setPromisc", PcapWrapper::set_promisc);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setMonitor", PcapWrapper::set_rfmon);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setMaxFrameSize", PcapWrapper::set_snaplen);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "toSavefile", PcapWrapper::to_savefile);
 
   exports->Set(NanNew<String>(className), tpl->GetFunction());
 
