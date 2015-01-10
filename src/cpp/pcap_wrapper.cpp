@@ -5,6 +5,8 @@
 #include <vector>
 
 #define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
+#define check_handle_not_null(w) if ((w)->handle == NULL) \
+  return NanThrowError("Inactive wrapper.")
 
 using namespace v8;
 
@@ -19,8 +21,8 @@ public:
     pcap_t *pcap_handle,
     int batch_size, // Positive only here (for headers initialization).
     u_char *data,
-    u_int break_len, // _After_ which dispatcher will break (0 for no break).
-    u_int len, // Throws an error if would write past this.
+    int break_len, // _After_ which dispatcher will break (-1 for no break).
+    int len, // Throws an error if would write past this.
     bool *running // Flag to signal end of dispatching.
   ) : NanAsyncWorker(callback) {
 
@@ -30,7 +32,7 @@ public:
     _pcap_handle = pcap_handle;
     _batch_size = batch_size;
     _cur = data;
-    _break = break_len ? data + break_len : NULL;
+    _break = break_len >= 0 ? data + break_len : NULL;
     _end = data + len;
     _i = 0;
     _broke = false;
@@ -60,7 +62,7 @@ public:
     NanScope();
 
     // Create packet header objects.
-    u_int i;
+    int i;
     Local<Array> headers = NanNew<Array>(_i);
     for (i = 0; i < _i; i++) {
       struct pcap_pkthdr hdr = _headers[i];
@@ -97,7 +99,7 @@ public:
 
     Dispatcher *dispatcher = (Dispatcher *) etc;
     dispatcher->_headers[dispatcher->_i++] = *header;
-    u_int copy_length = header->caplen;
+    int copy_length = header->caplen;
 
     int overflow = dispatcher->_cur + copy_length - dispatcher->_end;
     if (overflow > 0) {
@@ -123,7 +125,7 @@ private:
   u_char *_cur;
   u_char *_break;
   u_char *_end;
-  u_int _i;
+  int _i;
   bool _broke;
   bool *_running;
   std::vector<struct pcap_pkthdr> _headers;
@@ -247,6 +249,7 @@ NAN_METHOD(PcapWrapper::set_snaplen) {
   NanScope();
   precondition(args.Length() == 1 && args[0]->IsInt32());
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
 
   if (pcap_set_snaplen(wrapper->handle, args[0]->Int32Value())) {
     return NanThrowError(pcap_geterr(wrapper->handle));
@@ -261,6 +264,7 @@ NAN_METHOD(PcapWrapper::set_rfmon) {
   NanScope();
   precondition(args.Length() == 1 && args[0]->IsBoolean());
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
 
   if (pcap_set_rfmon(wrapper->handle, args[0]->Int32Value())) {
     return NanThrowError(pcap_geterr(wrapper->handle));
@@ -274,6 +278,7 @@ NAN_METHOD(PcapWrapper::set_promisc) {
   NanScope();
   precondition(args.Length() == 1 && args[0]->IsBoolean());
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
 
   if (pcap_set_promisc(wrapper->handle, args[0]->Int32Value())) {
     return NanThrowError(pcap_geterr(wrapper->handle));
@@ -287,6 +292,7 @@ NAN_METHOD(PcapWrapper::set_buffersize) {
   NanScope();
   precondition(args.Length() == 1 && args[0]->IsInt32());
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
   int buffer_size = args[0]->Int32Value();
 
   if (pcap_set_buffer_size(wrapper->handle, buffer_size) != 0) {
@@ -302,6 +308,7 @@ NAN_METHOD(PcapWrapper::set_filter) {
   NanScope();
   precondition(args.Length() == 1 && args[0]->IsString());
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
   String::Utf8Value filter(args[0]->ToString());
 
   if (filter.length() != 0) {
@@ -324,6 +331,7 @@ NAN_METHOD(PcapWrapper::get_snaplen) {
   NanScope();
   precondition(args.Length() == 0);
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
 
   int snaplen = pcap_snapshot(wrapper->handle);
   NanReturnValue(NanNew<Integer>(snaplen));
@@ -335,6 +343,7 @@ NAN_METHOD(PcapWrapper::get_datalink) {
   NanScope();
   precondition(args.Length() == 0);
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
 
   int link = pcap_datalink(wrapper->handle);
   const char *name = pcap_datalink_val_to_name(link);
@@ -345,9 +354,10 @@ NAN_METHOD(PcapWrapper::get_datalink) {
 NAN_METHOD(PcapWrapper::get_stats) {
 
   NanScope();
-
-  struct pcap_stat ps;
+  precondition(args.Length() == 0);
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
+  struct pcap_stat ps;
 
   if (pcap_stats(wrapper->handle, &ps) == -1) {
     return NanThrowError(pcap_geterr(wrapper->handle));
@@ -371,6 +381,7 @@ NAN_METHOD(PcapWrapper::activate) {
   NanScope();
   precondition(args.Length() == 0);
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
 
   if (wrapper->buffer_size == 0) {
     return NanThrowError("Buffer size not set.");
@@ -406,8 +417,8 @@ NAN_METHOD(PcapWrapper::dispatch) {
     node::Buffer::HasInstance(args[1]) &&
     args[2]->IsFunction()
   );
-
   PcapWrapper *wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
 
   if (wrapper->dispatching) {
     return NanThrowError("Already dispatching.");
@@ -420,17 +431,17 @@ NAN_METHOD(PcapWrapper::dispatch) {
 
   Local<Object> buffer_obj = args[1]->ToObject();
   u_char *data = (u_char *) node::Buffer::Data(buffer_obj);
-  u_int length = node::Buffer::Length(buffer_obj);
+  int length = node::Buffer::Length(buffer_obj);
   NanCallback *callback = new NanCallback(args[2].As<Function>());
 
-  u_int break_length;
+  int break_length;
   if (pcap_file(wrapper->handle) == NULL) { // Live capture.
     if (length < wrapper->buffer_size) {
       return NanThrowError("Live dispatch buffer too small.");
     }
-    break_length = 0; // We are guaranteed to not fill buffer.
+    break_length = -1; // We are guaranteed to not fill buffer.
   } else { // Offline capture.
-    u_int snaplen = pcap_snapshot(wrapper->handle);
+    int snaplen = pcap_snapshot(wrapper->handle);
     if (length < snaplen) {
       return NanThrowError("Offline dispatch buffer too small.");
     }

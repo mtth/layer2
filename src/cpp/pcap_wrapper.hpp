@@ -39,14 +39,12 @@ private:
   FILE *dump_file_p;
   pcap_dumper_t *dump_handle;
   pcap_t *handle;
-  u_int buffer_size;
+  int buffer_size;
   struct bpf_program filter;
   bool dispatching;
 
   PcapWrapper();
   ~PcapWrapper();
-
-  bool is_live();
 
 };
 
