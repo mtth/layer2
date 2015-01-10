@@ -20,9 +20,10 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "macros.hpp"
+#include "cpack.hpp"
+#include "extract.hpp"
 #include "radiotap.hpp"
-#include <string.h>
+// #include <string.h>
 
 using v8::Boolean;
 using v8::FunctionTemplate;
@@ -32,147 +33,104 @@ using v8::Local;
 using v8::Object;
 using v8::String;
 
+struct ieee80211_radiotap_header {
+  uint8_t it_version;
+  uint8_t it_pad;
+  uint16_t it_len;
+  uint32_t  it_present;
+};
+
 enum ieee80211_radiotap_type {
-  IEEE80211_RADIOTAP_TSFT = 0,
-  IEEE80211_RADIOTAP_FLAGS = 1,
-  IEEE80211_RADIOTAP_RATE = 2,
-  IEEE80211_RADIOTAP_CHANNEL = 3,
-  IEEE80211_RADIOTAP_FHSS = 4,
-  IEEE80211_RADIOTAP_DBM_ANTSIGNAL = 5,
-  IEEE80211_RADIOTAP_DBM_ANTNOISE = 6,
-  IEEE80211_RADIOTAP_LOCK_QUALITY = 7,
-  IEEE80211_RADIOTAP_TX_ATTENUATION = 8,
-  IEEE80211_RADIOTAP_DB_TX_ATTENUATION = 9,
-  IEEE80211_RADIOTAP_DBM_TX_POWER = 10,
-  IEEE80211_RADIOTAP_ANTENNA = 11,
-  IEEE80211_RADIOTAP_DB_ANTSIGNAL = 12,
-  IEEE80211_RADIOTAP_DB_ANTNOISE = 13,
-  IEEE80211_RADIOTAP_RX_FLAGS = 14,
+  RTAP_TSFT = 0,
+  RTAP_FLAGS = 1,
+  RTAP_RATE = 2,
+  RTAP_CHANNEL = 3,
+  RTAP_FHSS = 4,
+  RTAP_DBM_ANTSIGNAL = 5,
+  RTAP_DBM_ANTNOISE = 6,
+  RTAP_LOCK_QUALITY = 7,
+  RTAP_TX_ATTENUATION = 8,
+  RTAP_DB_TX_ATTENUATION = 9,
+  RTAP_DBM_TX_POWER = 10,
+  RTAP_ANTENNA = 11,
+  RTAP_DB_ANTSIGNAL = 12,
+  RTAP_DB_ANTNOISE = 13,
+  RTAP_RX_FLAGS = 14,
   /* NB: gap for netbsd definitions */
-  IEEE80211_RADIOTAP_XCHANNEL = 18,
-  IEEE80211_RADIOTAP_MCS = 19,
-  IEEE80211_RADIOTAP_NAMESPACE = 29,
-  IEEE80211_RADIOTAP_VENDOR_NAMESPACE = 30,
-  IEEE80211_RADIOTAP_EXT = 31
+  RTAP_XCHANNEL = 18,
+  RTAP_MCS = 19,
+  RTAP_NAMESPACE = 29,
+  RTAP_VENDOR_NAMESPACE = 30,
+  RTAP_EXT = 31
+};
+
+struct radiotap_state {
+  uint32_t present;
+  uint8_t rate;
 };
 
 /* channel attributes */
-#define IEEE80211_CHAN_TURBO  0x00010 /* Turbo channel */
-#define IEEE80211_CHAN_CCK  0x00020 /* CCK channel */
-#define IEEE80211_CHAN_OFDM 0x00040 /* OFDM channel */
-#define IEEE80211_CHAN_2GHZ 0x00080 /* 2 GHz spectrum channel. */
-#define IEEE80211_CHAN_5GHZ 0x00100 /* 5 GHz spectrum channel */
-#define IEEE80211_CHAN_PASSIVE  0x00200 /* Only passive scan allowed */
-#define IEEE80211_CHAN_DYN  0x00400 /* Dynamic CCK-OFDM channel */
-#define IEEE80211_CHAN_GFSK 0x00800 /* GFSK channel (FHSS PHY) */
-#define IEEE80211_CHAN_GSM  0x01000 /* 900 MHz spectrum channel */
-#define IEEE80211_CHAN_STURBO 0x02000 /* 11a static turbo channel only */
-#define IEEE80211_CHAN_HALF 0x04000 /* Half rate channel */
-#define IEEE80211_CHAN_QUARTER  0x08000 /* Quarter rate channel */
-#define IEEE80211_CHAN_HT20 0x10000 /* HT 20 channel */
-#define IEEE80211_CHAN_HT40U  0x20000 /* HT 40 channel w/ ext above */
-#define IEEE80211_CHAN_HT40D  0x40000 /* HT 40 channel w/ ext below */
+#define CHAN_TURBO  0x00010 /* Turbo channel */
+#define CHAN_CCK  0x00020 /* CCK channel */
+#define CHAN_OFDM 0x00040 /* OFDM channel */
+#define CHAN_2GHZ 0x00080 /* 2 GHz spectrum channel. */
+#define CHAN_5GHZ 0x00100 /* 5 GHz spectrum channel */
+#define CHAN_PASSIVE  0x00200 /* Only passive scan allowed */
+#define CHAN_DYN  0x00400 /* Dynamic CCK-OFDM channel */
+#define CHAN_GFSK 0x00800 /* GFSK channel (FHSS PHY) */
+#define CHAN_GSM  0x01000 /* 900 MHz spectrum channel */
+#define CHAN_STURBO 0x02000 /* 11a static turbo channel only */
+#define CHAN_HALF 0x04000 /* Half rate channel */
+#define CHAN_QUARTER  0x08000 /* Quarter rate channel */
+#define CHAN_HT20 0x10000 /* HT 20 channel */
+#define CHAN_HT40U  0x20000 /* HT 40 channel w/ ext above */
+#define CHAN_HT40D  0x40000 /* HT 40 channel w/ ext below */
 
 /* Useful combinations of channel characteristics, borrowed from Ethereal */
-#define IEEE80211_CHAN_A \
-        (IEEE80211_CHAN_5GHZ | IEEE80211_CHAN_OFDM)
-#define IEEE80211_CHAN_B \
-        (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_CCK)
-#define IEEE80211_CHAN_G \
-        (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_DYN)
-#define IEEE80211_CHAN_TA \
-        (IEEE80211_CHAN_5GHZ | IEEE80211_CHAN_OFDM | IEEE80211_CHAN_TURBO)
-#define IEEE80211_CHAN_TG \
-        (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_DYN  | IEEE80211_CHAN_TURBO)
+#define CHAN_A (CHAN_5GHZ | CHAN_OFDM)
+#define CHAN_B (CHAN_2GHZ | CHAN_CCK)
+#define CHAN_G (CHAN_2GHZ | CHAN_DYN)
+#define CHAN_TA (CHAN_5GHZ | CHAN_OFDM | CHAN_TURBO)
+#define CHAN_TG (CHAN_2GHZ | CHAN_DYN  | CHAN_TURBO)
 
+/* For RTAP_FLAGS */
+#define RTAP_F_CFP  0x01  /* sent/received during CFP */
+#define RTAP_F_SHORTPRE 0x02  /* sent/received with short preamble */
+#define RTAP_F_WEP  0x04  /* sent/received with WEP encryption */
+#define RTAP_F_FRAG 0x08  /* sent/received with fragmentation */
+#define RTAP_F_FCS  0x10  /* frame includes FCS */
+#define RTAP_F_DATAPAD  0x20  /* frame has padding */
+#define RTAP_F_BADFCS 0x40  /* does not pass FCS check */
 
-/* For IEEE80211_RADIOTAP_FLAGS */
-#define IEEE80211_RADIOTAP_F_CFP  0x01  /* sent/received
-             * during CFP
-             */
-#define IEEE80211_RADIOTAP_F_SHORTPRE 0x02  /* sent/received
-             * with short
-             * preamble
-             */
-#define IEEE80211_RADIOTAP_F_WEP  0x04  /* sent/received
-             * with WEP encryption
-             */
-#define IEEE80211_RADIOTAP_F_FRAG 0x08  /* sent/received
-             * with fragmentation
-             */
-#define IEEE80211_RADIOTAP_F_FCS  0x10  /* frame includes FCS */
-#define IEEE80211_RADIOTAP_F_DATAPAD  0x20  /* frame has padding between
-             * 802.11 header and payload
-             * (to 32-bit boundary)
-             */
-#define IEEE80211_RADIOTAP_F_BADFCS 0x40  /* does not pass FCS check */
+/* For RTAP_RX_FLAGS */
+#define RTAP_F_RX_BADFCS  0x0001  /* frame failed crc check */
+#define RTAP_F_RX_PLCP_CRC  0x0002  /* frame failed PLCP CRC check */
 
-/* For IEEE80211_RADIOTAP_RX_FLAGS */
-#define IEEE80211_RADIOTAP_F_RX_BADFCS  0x0001  /* frame failed crc check */
-#define IEEE80211_RADIOTAP_F_RX_PLCP_CRC  0x0002  /* frame failed PLCP CRC check */
+/* For RTAP_MCS known */
+#define RTAP_MCS_BANDWIDTH_KNOWN    0x01
+#define RTAP_MCS_MCS_INDEX_KNOWN    0x02  /* MCS index field */
+#define RTAP_MCS_GUARD_INTERVAL_KNOWN 0x04
+#define RTAP_MCS_HT_FORMAT_KNOWN    0x08
+#define RTAP_MCS_FEC_TYPE_KNOWN   0x10
+#define RTAP_MCS_STBC_KNOWN   0x20
 
-/* For IEEE80211_RADIOTAP_MCS known */
-#define IEEE80211_RADIOTAP_MCS_BANDWIDTH_KNOWN    0x01
-#define IEEE80211_RADIOTAP_MCS_MCS_INDEX_KNOWN    0x02  /* MCS index field */
-#define IEEE80211_RADIOTAP_MCS_GUARD_INTERVAL_KNOWN 0x04
-#define IEEE80211_RADIOTAP_MCS_HT_FORMAT_KNOWN    0x08
-#define IEEE80211_RADIOTAP_MCS_FEC_TYPE_KNOWN   0x10
-#define IEEE80211_RADIOTAP_MCS_STBC_KNOWN   0x20
-
-/* For IEEE80211_RADIOTAP_MCS flags */
-#define IEEE80211_RADIOTAP_MCS_BANDWIDTH_MASK 0x03
-#define IEEE80211_RADIOTAP_MCS_BANDWIDTH_20 0
-#define IEEE80211_RADIOTAP_MCS_BANDWIDTH_40 1
-#define IEEE80211_RADIOTAP_MCS_BANDWIDTH_20L  2
-#define IEEE80211_RADIOTAP_MCS_BANDWIDTH_20U  3
-#define IEEE80211_RADIOTAP_MCS_SHORT_GI   0x04 /* short guard interval */
-#define IEEE80211_RADIOTAP_MCS_HT_GREENFIELD  0x08
-#define IEEE80211_RADIOTAP_MCS_FEC_LDPC   0x10
-#define IEEE80211_RADIOTAP_MCS_STBC_MASK  0x60
-#define   IEEE80211_RADIOTAP_MCS_STBC_1 1
-#define   IEEE80211_RADIOTAP_MCS_STBC_2 2
-#define   IEEE80211_RADIOTAP_MCS_STBC_3 3
-#define IEEE80211_RADIOTAP_MCS_STBC_SHIFT 5
-
-#define PRINT_SSID(p) \
-  if (p.ssid_present) { \
-    ND_PRINT((ndo, " (")); \
-    fn_print(ndo, p.ssid.ssid, NULL); \
-    ND_PRINT((ndo, ")")); \
-  }
-
-#define PRINT_RATE(_sep, _r, _suf) \
-  ND_PRINT((ndo, "%s%2.1f%s", _sep, (.5 * ((_r) & 0x7f)), _suf))
-#define PRINT_RATES(p) \
-  if (p.rates_present) { \
-    int z; \
-    const char *sep = " ["; \
-    for (z = 0; z < p.rates.length ; z++) { \
-      PRINT_RATE(sep, p.rates.rate[z], \
-        (p.rates.rate[z] & 0x80 ? "*" : "")); \
-      sep = " "; \
-    } \
-    if (p.rates.length != 0) \
-      ND_PRINT((ndo, " Mbit]")); \
-  }
-
-#define PRINT_DS_CHANNEL(p) \
-  if (p.ds_present) \
-    ND_PRINT((ndo, " CH: %u", p.ds.channel)); \
-  ND_PRINT((ndo, "%s", \
-      CAPABILITY_PRIVACY(p.capability_info) ? ", PRIVACY" : ""));
+/* For RTAP_MCS flags */
+#define RTAP_MCS_BANDWIDTH_MASK 0x03
+#define RTAP_MCS_BANDWIDTH_20 0
+#define RTAP_MCS_BANDWIDTH_40 1
+#define RTAP_MCS_BANDWIDTH_20L  2
+#define RTAP_MCS_BANDWIDTH_20U  3
+#define RTAP_MCS_SHORT_GI   0x04 /* short guard interval */
+#define RTAP_MCS_HT_GREENFIELD  0x08
+#define RTAP_MCS_FEC_LDPC   0x10
+#define RTAP_MCS_STBC_MASK  0x60
+#define RTAP_MCS_STBC_1 1
+#define RTAP_MCS_STBC_2 2
+#define RTAP_MCS_STBC_3 3
+#define RTAP_MCS_STBC_SHIFT 5
 
 #define MAX_MCS_INDEX 76
 
-/*
- * Indices are:
- *
- *  the MCS index (0-76);
- *
- *  0 for 20 MHz, 1 for 40 MHz;
- *
- *  0 for a long guard interval, 1 for a short guard interval.
- */
 static const float ieee80211_float_htrates[MAX_MCS_INDEX+1][2][2] = {
   /* MCS  0  */
   { /* 20 Mhz */ {    6.5,    /* SGI */    7.2, },
@@ -560,177 +518,311 @@ static const float ieee80211_float_htrates[MAX_MCS_INDEX+1][2][2] = {
   },
 };
 
-static const char *auth_alg_text[] = {"Open System", "Shared Key", "EAP"};
-#define NUM_AUTH_ALGS (sizeof auth_alg_text / sizeof auth_alg_text[0])
+#define CHAN_FHSS (CHAN_2GHZ | CHAN_GFSK)
+#define CHAN_A (CHAN_5GHZ | CHAN_OFDM)
+#define CHAN_B (CHAN_2GHZ | CHAN_CCK)
+#define CHAN_PUREG (CHAN_2GHZ | CHAN_OFDM)
+#define CHAN_G (CHAN_2GHZ | CHAN_DYN)
 
-static const char *status_text[] = {
-  "Successful",           /*  0 */
-  "Unspecified failure",          /*  1 */
-  "Reserved",           /*  2 */
-  "Reserved",           /*  3 */
-  "Reserved",           /*  4 */
-  "Reserved",           /*  5 */
-  "Reserved",           /*  6 */
-  "Reserved",           /*  7 */
-  "Reserved",           /*  8 */
-  "Reserved",           /*  9 */
-  "Cannot Support all requested capabilities in the Capability "
-    "Information field",            /* 10 */
-  "Reassociation denied due to inability to confirm that association "
-    "exists",           /* 11 */
-  "Association denied due to reason outside the scope of the "
-    "standard",           /* 12 */
-  "Responding station does not support the specified authentication "
-    "algorithm ",           /* 13 */
-  "Received an Authentication frame with authentication transaction "
-    "sequence number out of expected sequence",   /* 14 */
-  "Authentication rejected because of challenge failure", /* 15 */
-  "Authentication rejected due to timeout waiting for next frame in "
-    "sequence",             /* 16 */
-  "Association denied because AP is unable to handle additional"
-    "associated stations",          /* 17 */
-  "Association denied due to requesting station not supporting all of "
-    "the data rates in BSSBasicRateSet parameter",  /* 18 */
-  "Association denied due to requesting station not supporting "
-    "short preamble operation",       /* 19 */
-  "Association denied due to requesting station not supporting "
-    "PBCC encoding",          /* 20 */
-  "Association denied due to requesting station not supporting "
-    "channel agility",          /* 21 */
-  "Association request rejected because Spectrum Management "
-    "capability is required",       /* 22 */
-  "Association request rejected because the information in the "
-    "Power Capability element is unacceptable",   /* 23 */
-  "Association request rejected because the information in the "
-    "Supported Channels element is unacceptable",   /* 24 */
-  "Association denied due to requesting station not supporting "
-    "short slot operation",       /* 25 */
-  "Association denied due to requesting station not supporting "
-    "DSSS-OFDM operation",        /* 26 */
-  "Association denied because the requested STA does not support HT "
-    "features",           /* 27 */
-  "Reserved",           /* 28 */
-  "Association denied because the requested STA does not support "
-    "the PCO transition time required by the AP",   /* 29 */
-  "Reserved",           /* 30 */
-  "Reserved",           /* 31 */
-  "Unspecified, QoS-related failure",     /* 32 */
-  "Association denied due to QAP having insufficient bandwidth "
-    "to handle another QSTA",       /* 33 */
-  "Association denied due to excessive frame loss rates and/or "
-    "poor conditions on current operating channel", /* 34 */
-  "Association (with QBSS) denied due to requesting station not "
-    "supporting the QoS facility",      /* 35 */
-  "Association denied due to requesting station not supporting "
-    "Block Ack",            /* 36 */
-  "The request has been declined",      /* 37 */
-  "The request has not been successful as one or more parameters "
-    "have invalid values",        /* 38 */
-  "The TS has not been created because the request cannot be honored. "
-    "Try again with the suggested changes to the TSPEC",  /* 39 */
-  "Invalid Information Element",        /* 40 */
-  "Group Cipher is not valid",        /* 41 */
-  "Pairwise Cipher is not valid",       /* 42 */
-  "AKMP is not valid",          /* 43 */
-  "Unsupported RSN IE version",       /* 44 */
-  "Invalid RSN IE Capabilities",        /* 45 */
-  "Cipher suite is rejected per security policy",   /* 46 */
-  "The TS has not been created. However, the HC may be capable of "
-    "creating a TS, in response to a request, after the time indicated "
-    "in the TS Delay element",        /* 47 */
-  "Direct Link is not allowed in the BSS by policy",  /* 48 */
-  "Destination STA is not present within this QBSS.", /* 49 */
-  "The Destination STA is not a QSTA.",     /* 50 */
+#define IS_CHAN_FHSS(flags) ((flags & CHAN_FHSS) == CHAN_FHSS)
+#define IS_CHAN_A(flags) ((flags & CHAN_A) == CHAN_A)
+#define IS_CHAN_B(flags) ((flags & CHAN_B) == CHAN_B)
+#define IS_CHAN_PUREG(flags) ((flags & CHAN_PUREG) == CHAN_PUREG)
+#define IS_CHAN_G(flags) ((flags & CHAN_G) == CHAN_G)
+#define IS_CHAN_ANYG(flags) (IS_CHAN_PUREG(flags) || IS_CHAN_G(flags))
 
-};
-#define NUM_STATUSES  (sizeof status_text / sizeof status_text[0])
+static void add_chaninfo(Local<Object> obj, int freq, int flags) {
 
-static const char *reason_text[] = {
-  "Reserved",           /* 0 */
-  "Unspecified reason",         /* 1 */
-  "Previous authentication no longer valid",      /* 2 */
-  "Deauthenticated because sending station is leaving (or has left) "
-    "IBSS or ESS",          /* 3 */
-  "Disassociated due to inactivity",      /* 4 */
-  "Disassociated because AP is unable to handle all currently "
-    " associated stations",       /* 5 */
-  "Class 2 frame received from nonauthenticated station", /* 6 */
-  "Class 3 frame received from nonassociated station",  /* 7 */
-  "Disassociated because sending station is leaving "
-    "(or has left) BSS",          /* 8 */
-  "Station requesting (re)association is not authenticated with "
-    "responding station",         /* 9 */
-  "Disassociated because the information in the Power Capability "
-    "element is unacceptable",        /* 10 */
-  "Disassociated because the information in the SupportedChannels "
-    "element is unacceptable",        /* 11 */
-  "Invalid Information Element",        /* 12 */
-  "Reserved",           /* 13 */
-  "Michael MIC failure",          /* 14 */
-  "4-Way Handshake timeout",        /* 15 */
-  "Group key update timeout",       /* 16 */
-  "Information element in 4-Way Handshake different from (Re)Association"
-    "Request/Probe Response/Beacon",      /* 17 */
-  "Group Cipher is not valid",        /* 18 */
-  "AKMP is not valid",          /* 20 */
-  "Unsupported RSN IE version",       /* 21 */
-  "Invalid RSN IE Capabilities",        /* 22 */
-  "IEEE 802.1X Authentication failed",      /* 23 */
-  "Cipher suite is rejected per security policy",   /* 24 */
-  "Reserved",           /* 25 */
-  "Reserved",           /* 26 */
-  "Reserved",           /* 27 */
-  "Reserved",           /* 28 */
-  "Reserved",           /* 29 */
-  "Reserved",           /* 30 */
-  "TS deleted because QoS AP lacks sufficient bandwidth for this "
-    "QoS STA due to a change in BSS service characteristics or "
-    "operational mode (e.g. an HT BSS change from 40 MHz channel "
-    "to 20 MHz channel)",         /* 31 */
-  "Disassociated for unspecified, QoS-related reason",  /* 32 */
-  "Disassociated because QoS AP lacks sufficient bandwidth for this "
-    "QoS STA",            /* 33 */
-  "Disassociated because of excessive number of frames that need to be "
-          "acknowledged, but are not acknowledged for AP transmissions "
-    "and/or poor channel conditions",     /* 34 */
-  "Disassociated because STA is transmitting outside the limits "
-    "of its TXOPs",         /* 35 */
-  "Requested from peer STA as the STA is leaving the BSS "
-    "(or resetting)",         /* 36 */
-  "Requested from peer STA as it does not want to use the "
-    "mechanism",            /* 37 */
-  "Requested from peer STA as the STA received frames using the "
-    "mechanism for which a set up is required",   /* 38 */
-  "Requested from peer STA due to time out",    /* 39 */
-  "Reserved",           /* 40 */
-  "Reserved",           /* 41 */
-  "Reserved",           /* 42 */
-  "Reserved",           /* 43 */
-  "Reserved",           /* 44 */
-  "Peer STA does not support the requested cipher suite", /* 45 */
-  "Association denied due to requesting STA not supporting HT "
-    "features",           /* 46 */
-};
-#define NUM_REASONS (sizeof reason_text / sizeof reason_text[0])
+  // TODO: use array for flags
 
-#define IEEE80211_CHAN_FHSS (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_GFSK)
-#define IEEE80211_CHAN_A (IEEE80211_CHAN_5GHZ | IEEE80211_CHAN_OFDM)
-#define IEEE80211_CHAN_B (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_CCK)
-#define IEEE80211_CHAN_PUREG (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_OFDM)
-#define IEEE80211_CHAN_G (IEEE80211_CHAN_2GHZ | IEEE80211_CHAN_DYN)
+  SET_INT(obj, "channelFreqMHz", freq);
 
-#define IS_CHAN_FHSS(flags) \
-  ((flags & IEEE80211_CHAN_FHSS) == IEEE80211_CHAN_FHSS)
-#define IS_CHAN_A(flags) \
-  ((flags & IEEE80211_CHAN_A) == IEEE80211_CHAN_A)
-#define IS_CHAN_B(flags) \
-  ((flags & IEEE80211_CHAN_B) == IEEE80211_CHAN_B)
-#define IS_CHAN_PUREG(flags) \
-  ((flags & IEEE80211_CHAN_PUREG) == IEEE80211_CHAN_PUREG)
-#define IS_CHAN_G(flags) \
-  ((flags & IEEE80211_CHAN_G) == IEEE80211_CHAN_G)
-#define IS_CHAN_ANYG(flags) \
-  (IS_CHAN_PUREG(flags) || IS_CHAN_G(flags))
+  std::string s = "";
+  if (IS_CHAN_FHSS(flags))
+    s += "FHSS";
+  if (IS_CHAN_A(flags)) {
+    if (flags & CHAN_HALF)
+      s +=  " 11a/10Mhz";
+    else if (flags & CHAN_QUARTER)
+      s +=  " 11a/5Mhz";
+    else
+      s +=  " 11a";
+  }
+  if (IS_CHAN_ANYG(flags)) {
+    if (flags & CHAN_HALF)
+      s += "11g/10Mhz";
+    else if (flags & CHAN_QUARTER)
+      s += "11g/5Mhz";
+    else
+      s += "11g";
+  } else if (IS_CHAN_B(flags))
+    s += "11b";
+  if (flags & CHAN_TURBO)
+    s += "Turbo";
+  if (flags & CHAN_HT20)
+    s += "ht/20";
+  else if (flags & CHAN_HT40D)
+    s += "ht/40-";
+  else if (flags & CHAN_HT40U)
+    s += "ht/40+";
+
+  SET_STR(obj, "channelFlags", s);
+
+}
+
+static int add_field(
+  Local<Object> obj,
+  struct cpack_state *s,
+  uint32_t bit,
+  uint8_t *flags,
+  struct radiotap_state *state,
+  uint32_t presentflags
+) {
+
+  union {
+    int8_t    i8;
+    uint8_t   u8;
+    int16_t   i16;
+    uint16_t  u16;
+    uint32_t  u32;
+    uint64_t  u64;
+  } u, u2, u3, u4;
+  int rc;
+
+  switch (bit) {
+  case RTAP_FLAGS:
+    rc = cpack_uint8(s, &u.u8);
+    if (rc != 0)
+      break;
+    *flags = u.u8;
+    break;
+  case RTAP_RATE:
+    rc = cpack_uint8(s, &u.u8);
+    if (rc != 0)
+      break;
+
+    /* Save state rate */
+    state->rate = u.u8;
+    break;
+  case RTAP_DB_ANTSIGNAL:
+  case RTAP_DB_ANTNOISE:
+  case RTAP_ANTENNA:
+    rc = cpack_uint8(s, &u.u8);
+    break;
+  case RTAP_DBM_ANTSIGNAL:
+  case RTAP_DBM_ANTNOISE:
+    rc = cpack_int8(s, &u.i8);
+    break;
+  case RTAP_CHANNEL:
+    rc = cpack_uint16(s, &u.u16);
+    if (rc != 0)
+      break;
+    rc = cpack_uint16(s, &u2.u16);
+    break;
+  case RTAP_FHSS:
+  case RTAP_LOCK_QUALITY:
+  case RTAP_TX_ATTENUATION:
+  case RTAP_RX_FLAGS:
+    rc = cpack_uint16(s, &u.u16);
+    break;
+  case RTAP_DB_TX_ATTENUATION:
+    rc = cpack_uint8(s, &u.u8);
+    break;
+  case RTAP_DBM_TX_POWER:
+    rc = cpack_int8(s, &u.i8);
+    break;
+  case RTAP_TSFT:
+    rc = cpack_uint64(s, &u.u64);
+    break;
+  case RTAP_XCHANNEL:
+    rc = cpack_uint32(s, &u.u32);
+    if (rc != 0)
+      break;
+    rc = cpack_uint16(s, &u2.u16);
+    if (rc != 0)
+      break;
+    rc = cpack_uint8(s, &u3.u8);
+    if (rc != 0)
+      break;
+    rc = cpack_uint8(s, &u4.u8);
+    break;
+  case RTAP_MCS:
+    rc = cpack_uint8(s, &u.u8);
+    if (rc != 0)
+      break;
+    rc = cpack_uint8(s, &u2.u8);
+    if (rc != 0)
+      break;
+    rc = cpack_uint8(s, &u3.u8);
+    break;
+  case RTAP_VENDOR_NAMESPACE: {
+    uint8_t vns[3];
+    uint16_t length;
+    uint8_t subspace;
+
+    if ((cpack_align_and_reserve(s, 2)) == NULL) {
+      rc = -1;
+      break;
+    }
+
+    rc = cpack_uint8(s, &vns[0]);
+    if (rc != 0)
+      break;
+    rc = cpack_uint8(s, &vns[1]);
+    if (rc != 0)
+      break;
+    rc = cpack_uint8(s, &vns[2]);
+    if (rc != 0)
+      break;
+    rc = cpack_uint8(s, &subspace);
+    if (rc != 0)
+      break;
+    rc = cpack_uint16(s, &length);
+    if (rc != 0)
+      break;
+
+    /* Skip up to length */
+    s->c_next += length;
+    break;
+  }
+  default:
+    /* this bit indicates a field whose
+     * size we do not know, so we cannot
+     * proceed.  Just print the bit number.
+     */
+    return -1;
+  }
+
+  if (rc != 0) {
+    return rc;
+  }
+
+  /* Preserve the state present flags */
+  state->present = presentflags;
+
+  switch (bit) {
+  case RTAP_CHANNEL:
+    /*
+     * If CHANNEL and XCHANNEL are both present, skip
+     * CHANNEL.
+     */
+    if (presentflags & (1 << RTAP_XCHANNEL))
+      break;
+    add_chaninfo(obj, u.u16, u2.u16);
+    break;
+  case RTAP_FHSS:
+    SET_INT(obj, "fhset", u.u16 & 0xff);
+    SET_INT(obj, "fhpat", (u.u16 >> 8) & 0xff);
+    break;
+  case RTAP_RATE:
+    if (u.u8 >= 0x80 && u.u8 <= 0x8f) {
+      SET_INT(obj, "mcs", u.u8 & 0x7f);
+    } else
+      // ND_PRINT((ndo, "%2.1f Mb/s ", .5 * u.u8)); TODO
+    break;
+  case RTAP_DBM_ANTSIGNAL:
+    SET_INT(obj, "signalDb", u.i8);
+    break;
+  case RTAP_DBM_ANTNOISE:
+    SET_INT(obj, "noiseDb", u.i8);
+    break;
+  case RTAP_DB_ANTSIGNAL:
+    SET_INT(obj, "signalDb", u.u8);
+    break;
+  case RTAP_DB_ANTNOISE:
+    SET_INT(obj, "noiseDb", u.u8);
+    break;
+  case RTAP_LOCK_QUALITY:
+    SET_INT(obj, "sq", u.u16);
+    break;
+  case RTAP_TX_ATTENUATION:
+    SET_INT(obj, "txPower", -(int) u.u16);
+    break;
+  case RTAP_DB_TX_ATTENUATION:
+    SET_INT(obj, "txPowerDb", -(int) u.u8);
+    break;
+  case RTAP_DBM_TX_POWER:
+    SET_INT(obj, "txPowerDbm", u.i8);
+    break;
+  case RTAP_FLAGS:
+    SET_BOOL(obj, "cfp", u.u8 & RTAP_F_CFP);
+    SET_BOOL(obj, "shortPreamble", u.u8 & RTAP_F_SHORTPRE);
+    SET_BOOL(obj, "wep", u.u8 & RTAP_F_WEP);
+    SET_BOOL(obj, "fragmented", u.u8 & RTAP_F_FRAG);
+    SET_BOOL(obj, "badFcs", u.u8 & RTAP_F_BADFCS);
+    break;
+  case RTAP_ANTENNA:
+    SET_INT(obj, "antenna", u.u8);
+    break;
+  case RTAP_TSFT:
+    // ND_PRINT((ndo, "%" PRIu64 "us tsft ", u.u64)); TODO
+    break;
+  case RTAP_RX_FLAGS:
+    /* Do nothing for now */
+    break;
+  case RTAP_XCHANNEL:
+    add_chaninfo(obj, u2.u16, u.u32);
+    break;
+  /*
+  case RTAP_MCS: { // TODO;
+    static const char *bandwidth[4] = {
+      "20 MHz",
+      "40 MHz",
+      "20 MHz (L)",
+      "20 MHz (U)"
+    };
+    float htrate;
+
+    if (u.u8 & RTAP_MCS_MCS_INDEX_KNOWN) {
+      if (u3.u8 <= MAX_MCS_INDEX) {
+        if (u.u8 & (RTAP_MCS_BANDWIDTH_KNOWN|RTAP_MCS_GUARD_INTERVAL_KNOWN)) {
+          htrate =
+            ieee80211_float_htrates \
+              [u3.u8] \
+              [((u2.u8 & RTAP_MCS_BANDWIDTH_MASK) == RTAP_MCS_BANDWIDTH_40 ? 1 : 0)] \
+              [((u2.u8 & RTAP_MCS_SHORT_GI) ? 1 : 0)];
+        } else {
+          htrate = 0.0;
+        }
+      } else {
+        htrate = 0.0;
+      }
+      if (htrate != 0.0) {
+        ND_PRINT((ndo, "%.1f Mb/s MCS %u ", htrate, u3.u8));
+      } else {
+        ND_PRINT((ndo, "MCS %u ", u3.u8));
+      }
+    }
+    if (u.u8 & RTAP_MCS_BANDWIDTH_KNOWN) {
+      ND_PRINT((ndo, "%s ",
+        bandwidth[u2.u8 & RTAP_MCS_BANDWIDTH_MASK]));
+    }
+    if (u.u8 & RTAP_MCS_GUARD_INTERVAL_KNOWN) {
+      ND_PRINT((ndo, "%s GI ",
+        (u2.u8 & RTAP_MCS_SHORT_GI) ?
+        "short" : "lon"));
+    }
+    if (u.u8 & RTAP_MCS_HT_FORMAT_KNOWN) {
+      ND_PRINT((ndo, "%s ",
+        (u2.u8 & RTAP_MCS_HT_GREENFIELD) ?
+        "greenfield" : "mixed"));
+    }
+    if (u.u8 & RTAP_MCS_FEC_TYPE_KNOWN) {
+      ND_PRINT((ndo, "%s FEC ",
+        (u2.u8 & RTAP_MCS_FEC_LDPC) ?
+        "LDPC" : "BCC"));
+    }
+    if (u.u8 & RTAP_MCS_STBC_KNOWN) {
+      ND_PRINT((ndo, "RX-STBC%u ",
+        (u2.u8 & RTAP_MCS_STBC_MASK) >> RTAP_MCS_STBC_SHIFT));
+    }
+
+    break;
+    } */
+  }
+  return 0;
+
+}
 
 NAN_METHOD(decode_radiotap) {
 
@@ -742,11 +834,93 @@ NAN_METHOD(decode_radiotap) {
   );
 
   Local<Object> frame = NanNew<Object>();
+  Local<Object> packet = args[0]->ToObject();
+  u_char *p = (u_char *) node::Buffer::Data(packet);
+  // u_int length = node::Buffer::Length(packet);
 
-  SET_BOOL(frame, "b", false);
-  SET_INT(frame, "i", 123);
-  SET_STR(frame, "s", "hello");
-  SET_NULL(frame, "n");
+  // SET_BOOL(frame, "b", false);
+  // SET_INT(frame, "i", 123);
+  // SET_STR(frame, "s", "hello");
+  // SET_NULL(frame, "n");
+
+#define BITNO_32(x) (((x) >> 16) ? 16 + BITNO_16((x) >> 16) : BITNO_16((x)))
+#define BITNO_16(x) (((x) >> 8) ? 8 + BITNO_8((x) >> 8) : BITNO_8((x)))
+#define BITNO_8(x) (((x) >> 4) ? 4 + BITNO_4((x) >> 4) : BITNO_4((x)))
+#define BITNO_4(x) (((x) >> 2) ? 2 + BITNO_2((x) >> 2) : BITNO_2((x)))
+#define BITNO_2(x) (((x) & 2) ? 1 : 0)
+#define BIT(n)  (1U << n)
+#define IS_EXTENDED(__p) (EXTRACT_LE_32BITS(__p) & BIT(RTAP_EXT)) != 0
+
+  struct cpack_state cpacker;
+  struct ieee80211_radiotap_header *hdr;
+  uint32_t present, next_present;
+  uint32_t presentflags = 0;
+  uint32_t *presentp, *last_presentp;
+  enum ieee80211_radiotap_type bit;
+  int bit0;
+  u_int len;
+  uint8_t flags;
+  int pad;
+  u_int fcslen;
+  struct radiotap_state state;
+
+  hdr = (struct ieee80211_radiotap_header *) p;
+  len = EXTRACT_LE_16BITS(&hdr->it_len);
+
+  cpack_init(&cpacker, (uint8_t *)hdr, len); /* align against header start */
+  cpack_advance(&cpacker, sizeof(*hdr)); /* includes the 1st bitmap */
+  for (last_presentp = &hdr->it_present;
+       IS_EXTENDED(last_presentp) &&
+       (u_char*)(last_presentp + 1) <= p + len;
+       last_presentp++)
+    cpack_advance(&cpacker, sizeof(hdr->it_present)); /* more bitmaps */
+
+  /* are there more bitmap extensions than bytes in header? */
+  if (IS_EXTENDED(last_presentp)) {
+    return NanNull();
+  }
+
+  /* Assume no flags */
+  flags = 0;
+  /* Assume no Atheros padding between 802.11 header and body */
+  pad = 0;
+  /* Assume no FCS at end of frame */
+  fcslen = 0;
+  for (bit0 = 0, presentp = &hdr->it_present; presentp <= last_presentp;
+       presentp++, bit0 += 32) {
+    presentflags = EXTRACT_LE_32BITS(presentp);
+
+    /* Clear state. */
+    memset(&state, 0, sizeof(state));
+
+    for (present = EXTRACT_LE_32BITS(presentp); present;
+         present = next_present) {
+      /* clear the least significant bit that is set */
+      next_present = present & (present - 1);
+
+      /* extract the least significant bit that is set */
+      bit = (enum ieee80211_radiotap_type)
+          (bit0 + BITNO_32(present ^ next_present));
+
+      if (add_field(frame, &cpacker, bit, &flags, &state, presentflags) != 0)
+        break;
+    }
+  }
+
+  if (flags & RTAP_F_DATAPAD)
+    pad = 1;  /* Atheros padding */
+  if (flags & RTAP_F_FCS)
+    fcslen = 4; /* FCS at end of packet */
+
+  // TODO: Set body as slice of original buffer.
+  // return len + ieee802_11_print(ndo, p + len, length - len, caplen - len, pad, fcslen);
+
+#undef BITNO_32
+#undef BITNO_16
+#undef BITNO_8
+#undef BITNO_4
+#undef BITNO_2
+#undef BIT
 
   NanReturnValue(frame);
 

@@ -372,8 +372,8 @@ NAN_METHOD(PcapWrapper::dump) {
 
 void PcapWrapper::on_packet(
   u_char *reader_p,
-  const struct pcap_pkthdr* pkthdr,
-  const u_char* packet
+  const struct pcap_pkthdr *pkthdr,
+  const u_char *packet
 ) {
 
   NanScope();

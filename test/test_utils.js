@@ -23,7 +23,10 @@
 
       it('can pretend decode', function () {
 
-        assert.ok(addon.decoders.IEEE802_11_RADIO(new Buffer(0), 0));
+        var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex');
+        // assert.equal(addon.decoders.IEEE802_11_RADIO(buf, 0));
+        buf = new Buffer('000019006f0800009627433d00000000560c1c164001d0a4010862', 'hex');
+        // assert.equal(addon.decoders.IEEE802_11_RADIO(buf, 0));
 
       });
 
