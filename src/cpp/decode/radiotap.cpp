@@ -877,43 +877,44 @@ NAN_METHOD(decode_radiotap) {
 
   /* are there more bitmap extensions than bytes in header? */
   if (IS_EXTENDED(last_presentp)) {
-    return NanNull();
-  }
+    NanReturnNull();
+  } else {
+    /* Assume no flags */
+    flags = 0;
+    /* Assume no Atheros padding between 802.11 header and body */
+    pad = 0;
+    /* Assume no FCS at end of frame */
+    fcslen = 0;
+    for (bit0 = 0, presentp = &hdr->it_present; presentp <= last_presentp;
+        presentp++, bit0 += 32) {
+      presentflags = EXTRACT_LE_32BITS(presentp);
 
-  /* Assume no flags */
-  flags = 0;
-  /* Assume no Atheros padding between 802.11 header and body */
-  pad = 0;
-  /* Assume no FCS at end of frame */
-  fcslen = 0;
-  for (bit0 = 0, presentp = &hdr->it_present; presentp <= last_presentp;
-       presentp++, bit0 += 32) {
-    presentflags = EXTRACT_LE_32BITS(presentp);
+      /* Clear state. */
+      memset(&state, 0, sizeof(state));
 
-    /* Clear state. */
-    memset(&state, 0, sizeof(state));
+      for (present = EXTRACT_LE_32BITS(presentp); present;
+          present = next_present) {
+        /* clear the least significant bit that is set */
+        next_present = present & (present - 1);
 
-    for (present = EXTRACT_LE_32BITS(presentp); present;
-         present = next_present) {
-      /* clear the least significant bit that is set */
-      next_present = present & (present - 1);
+        /* extract the least significant bit that is set */
+        bit = (enum ieee80211_radiotap_type)
+            (bit0 + BITNO_32(present ^ next_present));
 
-      /* extract the least significant bit that is set */
-      bit = (enum ieee80211_radiotap_type)
-          (bit0 + BITNO_32(present ^ next_present));
-
-      if (add_field(frame, &cpacker, bit, &flags, &state, presentflags) != 0)
-        break;
+        if (add_field(frame, &cpacker, bit, &flags, &state, presentflags) != 0)
+          break;
+      }
     }
+
+    if (flags & RTAP_F_DATAPAD)
+      pad = 1;  /* Atheros padding */
+    if (flags & RTAP_F_FCS)
+      fcslen = 4; /* FCS at end of packet */
+
+    // TODO: Set body as slice of original buffer.
+    // return len + ieee802_11_print(ndo, p + len, length - len, caplen - len, pad, fcslen);
+    NanReturnValue(frame);
   }
-
-  if (flags & RTAP_F_DATAPAD)
-    pad = 1;  /* Atheros padding */
-  if (flags & RTAP_F_FCS)
-    fcslen = 4; /* FCS at end of packet */
-
-  // TODO: Set body as slice of original buffer.
-  // return len + ieee802_11_print(ndo, p + len, length - len, caplen - len, pad, fcslen);
 
 #undef BITNO_32
 #undef BITNO_16
@@ -922,6 +923,5 @@ NAN_METHOD(decode_radiotap) {
 #undef BITNO_2
 #undef BIT
 
-  NanReturnValue(frame);
 
 }
