@@ -19,7 +19,6 @@ void init(v8::Handle<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "activate", PcapWrapper::activate);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "breakLoop", PcapWrapper::break_loop);
   NODE_SET_PROTOTYPE_METHOD(tpl, "close", PcapWrapper::close);
   NODE_SET_PROTOTYPE_METHOD(tpl, "dispatch", PcapWrapper::dispatch);
   NODE_SET_PROTOTYPE_METHOD(tpl, "dumpFrame", PcapWrapper::dump);
