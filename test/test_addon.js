@@ -23,7 +23,7 @@
 
     describe('Pcap Wrapper', function () {
 
-      var maybeIt = maybe(it, hasActiveDevice());
+      var maybeIt = maybe(it, hasActiveDevice()); // jshint ignore: line
 
       it('can be instantiated on a file', function () {
 
@@ -59,18 +59,26 @@
         var wrapper = new addon.PcapWrapper()
           .fromSavefile('./test/dat/mesh780.pcap');
         var buf = new Buffer(3 * wrapper.getMaxFrameSize());
+        var nFrames = 0;
 
         wrapper
-          .fetch(3, buf, function (err, headers, broke) {
+          .fetch(3, buf, function (err, start, end) {
             assert.ok(err === null);
-            assert.equal(headers.length, 3);
-            assert.deepEqual(
-              buf.slice(0, headers[0].capLen),
-              new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex')
-            );
-            assert.ok(!broke);
-            wrapper.close();
-            done();
+
+            if (end === 0) { // Flag.
+              assert.equal(start, 3);
+              return;
+            }
+
+            if (++nFrames === 3) {
+              // assert.deepEqual(
+              //   buf.slice(0, headers[0].capLen),
+              //   new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex')
+              // );
+              wrapper.close();
+              done();
+            }
+
           });
 
         setImmediate(function () { isAsync = true; });
@@ -82,16 +90,24 @@
         var wrapper = new addon.PcapWrapper()
           .fromSavefile('./test/dat/mesh780.pcap');
 
-        var buf = new Buffer(wrapper.getMaxFrameSize());
+        var buf = new Buffer(1);
+        var nFrames = 0;
         // Break after first frame.
 
         wrapper
-          .fetch(3, buf, function (err, headers, broke) {
-            assert.ok(err === null);
-            assert.equal(headers.length, 1);
-            assert.ok(broke);
-            wrapper.close();
-            done();
+          .fetch(3, buf, function (err, start, end) {
+
+            if (end === 0) {
+              assert.ok(err === null);
+              assert.equal(start, 1);
+              return;
+            }
+
+            if (++nFrames === 1) {
+              wrapper.close();
+              done();
+            }
+
           });
 
       });
@@ -102,12 +118,15 @@
         var wrapper = new addon.PcapWrapper()
           .fromSavefile('./test/dat/mesh780.pcap');
 
-        var buf = new Buffer(wrapper.getMaxFrameSize());
+        var buf = new Buffer(1e6);
+        var nFrames = 0;
 
-        wrapper.fetch(1, buf, function () {
-          wrapper.close();
-          assert.ok(ran);
-          done();
+        wrapper.fetch(-1, buf, function () {
+          if (++nFrames === 780) {
+            wrapper.close();
+            assert.ok(ran);
+            done();
+          }
         });
 
         assert.throws(function () {
@@ -131,43 +150,24 @@
 
       });
 
-      it('fetches after a break', function (done) {
-
-        var wrapper = new addon.PcapWrapper()
-          .fromSavefile('./test/dat/mesh780.pcap');
-
-        var buf = new Buffer(wrapper.getMaxFrameSize());
-
-        wrapper
-          .fetch(3, buf, function (err, headers, broke) {
-            assert.ok(err === null);
-            assert.equal(headers.length, 1);
-            assert.ok(broke);
-            wrapper.fetch(1, buf, function (err, headers, broke) {
-              assert.ok(err === null);
-              assert.equal(headers.length, 1);
-              assert.ok(broke);
-              wrapper.close();
-              done();
-            });
-          });
-
-      });
-
       it('fetches all frames from a save file', function (done) {
 
         var wrapper = new addon.PcapWrapper()
           .fromSavefile('./test/dat/mesh780.pcap');
 
-        var buf = new Buffer(10 * wrapper.getMaxFrameSize());
+        var buf = new Buffer(1e6);
+        var nFrames = 0;
 
         wrapper
-          .fetch(-1, buf, function (err, headers, broke) {
-            assert.ok(err === null);
-            assert.equal(headers.length, 780);
-            assert.ok(!broke);
-            wrapper.close();
-            done();
+          .fetch(-1, buf, function (err, start, end) {
+            if (end === 0) {
+              assert.equal(start, 780);
+              return;
+            }
+            if (++nFrames === 780) {
+              wrapper.close();
+              done();
+            }
           });
 
       });
@@ -177,51 +177,30 @@
         var wrapper = new addon.PcapWrapper()
           .fromSavefile('./test/dat/mesh780.pcap');
 
-        var buf = new Buffer(10 * wrapper.getMaxFrameSize());
+        var buf = new Buffer(1e6);
+        var nFrames = 0;
 
         wrapper
-          .fetch(1000, buf, function (err, headers, broke) {
-            assert.ok(err === null);
-            assert.equal(headers.length, 780);
-            assert.ok(!broke);
-            wrapper.fetch(1, buf, function (err, headers) {
-              assert.ok(err === null);
-              assert.equal(headers.length, 0);
-              wrapper.close();
-              done();
-            });
+          .fetch(-1, buf, function (err, start, end) {
+            if (end === 0) {
+              assert.equal(start, 780);
+              return;
+            }
+            if (++nFrames === 780) {
+              wrapper.fetch(1, buf, function (err, start, end) {
+                assert.equal(start, 0);
+                assert.equal(end, 0);
+                wrapper.close();
+                done();
+              });
+            }
           });
 
       });
 
       // Tests that require a live interface.
 
-      maybeIt('fails if activated with no buffer size', function () {
-
-        assert.throws(function () {
-          new addon.PcapWrapper()
-            .fromDevice(addon.getDefaultDevice())
-            .activate();
-        });
-
-      });
-
-      maybeIt('fails if the buffer is too small', function () {
-
-        var wrapper = new addon.PcapWrapper()
-          .fromDevice(addon.getDefaultDevice())
-          .setBufferSize(100)
-          .activate();
-
-        assert.throws(function () {
-          wrapper.dispatch(3, new Buffer(50), function () {});
-        });
-
-        assert.throws(function () {
-          wrapper.fetch(1, new Buffer(50), function () {});
-        });
-
-      });
+      // TODO: maybeIt('', function () {});
 
     });
 

@@ -43,7 +43,6 @@ private:
   char *buffer_data;
   pcap_dumper_t *dump_handle;
   pcap_t *handle;
-  int buffer_size;
   int buffer_length;
   int buffer_offset;
   struct bpf_program filter;

@@ -3,6 +3,8 @@
 #include <node_buffer.h>
 #include <sys/ioctl.h>
 
+#define MAX_FRAME_SIZE 65535
+
 #define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
 #define check_handle_not_null(w) if ((w)->handle == NULL) \
   return NanThrowError("Inactive capture handle.")
@@ -10,6 +12,12 @@
 using namespace v8;
 
 // Async dispatcher.
+
+struct safety_buffer {
+  bool valid;
+  pcap_pkthdr header;
+  u_char data[MAX_FRAME_SIZE];
+};
 
 class Dispatcher : public NanAsyncWorker {
 
@@ -20,22 +28,21 @@ public:
     pcap_t *pcap_handle,
     int batch_size,
     u_char *data,
-    int break_len, // _After_ which dispatcher will break (-1 for no break).
-    int len, // Throws an error if would write past this.
-    std::vector<struct pcap_pkthdr> &headers,
+    int len, // When to break.
+    std::vector<struct pcap_pkthdr> &headers, // Where to store headers.
     bool *running // Flag to signal end of dispatching.
   ) : NanAsyncWorker(callback) {
 
     _running = running;
     *_running = true;
 
-    _batch_size = batch_size;
     _pcap_handle = pcap_handle;
+    _batch_size = batch_size;
+    _stt = data;
     _cur = data;
-    _break = break_len >= 0 ? data + break_len : NULL;
     _end = data + len;
-    _broke = false;
     _headers = headers;
+    _saf.valid = false;
 
   }
 
@@ -79,22 +86,30 @@ public:
 
     Local<Value> argv[] = {
       NanNull(), // Error.
-      NanNew<Integer>(l), // Start offset (or total frames in first call).
-      NanNew<Integer>(0), // End offset.
-      NanFalse() // Overflow.
+      NanNew<Integer>(_saf.valid ? l + 1 : l), // Start offset.
+      NanNew<Integer>(0) // End offset.
     };
 
-    callback->Call(4, argv);
+    // Flag call (start offset means total number of frames in this case).
+    callback->Call(3, argv);
 
-    // Create packet header objects.
+    // Normal frame calls.
     int i;
     for (i = 0; i < l; i++) {
       struct pcap_pkthdr hdr = _headers[i];
       argv[1] = argv[2];
       argv[2] = NanNew<Integer>(offset + hdr.caplen);
-      argv[3] = hdr.len > hdr.caplen ? NanTrue() : NanFalse();
-      callback->Call(4, argv);
+      callback->Call(3, argv);
       offset += hdr.caplen;
+    }
+
+    if (_saf.valid) {
+      // Need to emit the last frame.
+      int copy_length = _saf.header.caplen;
+      argv[1] = NanNew<Integer>(0);
+      argv[2] = NanNew<Integer>(copy_length);
+      memcpy(_stt, _saf.data, copy_length);
+      callback->Call(3, argv);
     }
 
   }
@@ -113,21 +128,19 @@ public:
   ) {
 
     Dispatcher *dispatcher = (Dispatcher *) etc;
-    dispatcher->_headers.push_back(*header);
     int copy_length = header->caplen;
 
     int overflow = dispatcher->_cur + copy_length - dispatcher->_end;
-    if (overflow > 0) {
-      pcap_breakloop(dispatcher->_pcap_handle);
-      dispatcher->SetErrorMessage("Buffer overflow.");
-      return;
-    }
-
-    memcpy(dispatcher->_cur, packet, copy_length);
-    dispatcher->_cur += copy_length;
-
-    if (dispatcher->_break != NULL && dispatcher->_cur >= dispatcher->_break) {
-      dispatcher->_broke = true;
+    if (overflow <= 0) {
+      // Usual case.
+      dispatcher->_headers.push_back(*header);
+      memcpy(dispatcher->_cur, packet, copy_length);
+      dispatcher->_cur += copy_length;
+    } else {
+      // Buffer is full. Break loop and save this frame in our safety buffer.
+      dispatcher->_saf.valid = true;
+      dispatcher->_saf.header = *header;
+      memcpy(dispatcher->_saf.data, packet, copy_length);
       pcap_breakloop(dispatcher->_pcap_handle);
     }
 
@@ -137,12 +150,12 @@ private:
 
   pcap_t *_pcap_handle;
   int _batch_size;
+  u_char *_stt;
   u_char *_cur;
-  u_char *_break;
   u_char *_end;
-  bool _broke;
-  bool *_running;
   std::vector<struct pcap_pkthdr> _headers;
+  bool *_running;
+  struct safety_buffer _saf;
 
 };
 
@@ -155,7 +168,6 @@ PcapWrapper::PcapWrapper() {
   dump_handle = NULL;
   handle = NULL;
   on_packet_callback = NULL;
-  buffer_size = 0;
   dispatching = false;
   headers = std::vector<struct pcap_pkthdr>();
 
@@ -315,7 +327,6 @@ NAN_METHOD(PcapWrapper::set_buffersize) {
   if (pcap_set_buffer_size(wrapper->handle, buffer_size) != 0) {
     return NanThrowError(pcap_geterr(wrapper->handle));
   }
-  wrapper->buffer_size = buffer_size;
   NanReturnThis();
 
 }
@@ -400,10 +411,6 @@ NAN_METHOD(PcapWrapper::activate) {
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
   check_handle_not_null(wrapper);
 
-  if (wrapper->buffer_size == 0) {
-    return NanThrowError("Buffer size not set.");
-  }
-
   if (pcap_activate(wrapper->handle)) {
     return NanThrowError(pcap_geterr(wrapper->handle));
   }
@@ -445,7 +452,7 @@ NAN_METHOD(PcapWrapper::dispatch) {
   wrapper->buffer_length = node::Buffer::Length(buffer_obj);
   wrapper->buffer_offset = 0;
 
-  if (wrapper->buffer_length < wrapper->buffer_size) {
+  if (wrapper->buffer_length < pcap_snapshot(wrapper->handle)) {
     return NanThrowError("Dispatch buffer too small.");
   }
 
@@ -482,27 +489,12 @@ NAN_METHOD(PcapWrapper::fetch) {
   int length = node::Buffer::Length(buffer_obj);
   NanCallback *callback = new NanCallback(args[2].As<Function>());
 
-  int break_length;
-  if (pcap_file(wrapper->handle) == NULL) { // Live capture.
-    if (length < wrapper->buffer_size) {
-      return NanThrowError("Live fetch buffer too small.");
-    }
-    break_length = -1; // We are guaranteed to not fill buffer.
-  } else { // Offline capture.
-    int snaplen = pcap_snapshot(wrapper->handle);
-    if (length < snaplen) {
-      return NanThrowError("Offline fetch buffer too small.");
-    }
-    break_length = length - snaplen;
-  }
-
   wrapper->headers.clear();
   NanAsyncQueueWorker(new Dispatcher(
     callback,
     wrapper->handle,
     batch_size,
     data,
-    break_length,
     length,
     wrapper->headers,
     &wrapper->dispatching
