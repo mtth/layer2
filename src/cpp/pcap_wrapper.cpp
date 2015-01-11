@@ -72,6 +72,10 @@ public:
   void HandleOKCallback() {
 
     NanScope();
+    *_running = false;
+
+    Local<Value> caplen_key = NanNew<String>("capLen");
+    Local<Value> len_key = NanNew<String>("len");
 
     // Create packet header objects.
     int i;
@@ -81,9 +85,9 @@ public:
       struct pcap_pkthdr hdr = _headers[i];
       Local<Object> obj = NanNew<Object>();
       // obj->Set(NanNew<String>("timeVal"), NanNew<Number>(hdr.ts)); TODO
-      obj->Set(NanNew<String>("capLen"), NanNew<Number>(hdr.caplen));
-      obj->Set(NanNew<String>("len"), NanNew<Number>(hdr.len));
-      headers->Set(NanNew<Number>(i), obj);
+      obj->Set(caplen_key, NanNew<Number>(hdr.caplen));
+      obj->Set(len_key, NanNew<Number>(hdr.len));
+      headers->Set(NanNew<Integer>(i), obj);
     }
 
     Local<Value> argv[] = {
@@ -92,7 +96,6 @@ public:
       NanNew<Boolean>(_broke)
     };
 
-    *_running = false;
     callback->Call(3, argv);
 
   }
