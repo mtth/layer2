@@ -12,7 +12,7 @@
   tmp.setGracefulCleanup();
 
   var benchmark = new utils.Benchmark()
-    .addFn('dispatch no headers', function (cb, opts) {
+    .addFn('dispatch', function (cb, opts) {
       var wrapper = new addon.PcapWrapper().fromSavefile(opts.fpath);
       var buf = new Buffer(1e7); // Large-ish.
       var prevOffset = 1; // Prime loop.
@@ -28,34 +28,13 @@
       wrapper.close();
       cb();
     })
-    .addFn('dispatch with headers', function (cb, opts) {
+    .addFn('fetch', function (cb, opts) {
       var wrapper = new addon.PcapWrapper().fromSavefile(opts.fpath);
-      var buf = new Buffer(1e7); // Large-ish.
-      var prevOffset = 1; // Prime loop.
-      var dispatchCb = function (offset) {
-        var length = offset - prevOffset;
-        var frame = {
-          len: length,
-          capLen: length,
-          frame: buf.slice(prevOffset, offset)
-        };
-        prevOffset = offset;
-        processFrame(frame);
-      };
-      while (prevOffset) {
-        prevOffset = 0;
-        wrapper.dispatch(1000, buf, dispatchCb);
-      }
-      wrapper.close();
-      cb();
-    })
-    .addFn('fetch with headers', function (cb, opts) {
-      var wrapper = new addon.PcapWrapper().fromSavefile(opts.fpath);
-      var bufs = [new Buffer(1e6), new Buffer(1e6)];
+      var bufs = [new Buffer(1e6), new Buffer(1e6)]; // Very sensitive to this.
       (function loop(bucket) {
         var buf = bufs[bucket];
         wrapper
-          .fetch(-1, bufs[bucket], function (err, s, e, o) {
+          .fetch(-1, bufs[bucket], function (err, s, e) {
 
             if (e === 0) { // Flag call.
               if (s > 0) { // More frames still.
@@ -67,13 +46,7 @@
               return;
             }
 
-            var h = {
-              capLen: e - s,
-              len: e - s,
-              frame: buf.slice(s, e)
-            };
-
-            processFrame(h);
+            processFrame(buf.slice(s, e));
 
           });
       })(0);
@@ -85,7 +58,7 @@
 
   function processFrame(frame) {
 
-    var i = 5;
+    var i = 1; // Minimal work.
     frame.things = [];
     while (i--) {
       frame.things.push(i);

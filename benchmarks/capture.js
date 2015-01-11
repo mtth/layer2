@@ -21,13 +21,6 @@
         .on('data', function () { nFrames++; })
         .on('end', function () { cb(); });
     })
-    .addFn('layer2 fetch', function (cb, opts) {
-      var nFrames = 0;
-      var capture = new layer2.capture.Replay2(opts.fpath);
-      capture
-        .on('data', function () { nFrames++; })
-        .on('end', function () { cb(); });
-    })
     .addFn('pcap', function (cb, opts) {
       var nFrames = 0;
       var session = pcap.createOfflineSession(opts.fpath);
