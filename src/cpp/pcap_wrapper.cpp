@@ -74,29 +74,28 @@ public:
     NanScope();
     *_running = false;
 
-    Local<Value> caplen_key = NanNew<String>("capLen");
-    Local<Value> len_key = NanNew<String>("len");
-
-    // Create packet header objects.
-    int i;
+    int offset = 0;
     int l = _headers.size();
-    Local<Array> headers = NanNew<Array>(l);
-    for (i = 0; i < l; i++) {
-      struct pcap_pkthdr hdr = _headers[i];
-      Local<Object> obj = NanNew<Object>();
-      // obj->Set(NanNew<String>("timeVal"), NanNew<Number>(hdr.ts)); TODO
-      obj->Set(caplen_key, NanNew<Number>(hdr.caplen));
-      obj->Set(len_key, NanNew<Number>(hdr.len));
-      headers->Set(NanNew<Integer>(i), obj);
-    }
 
     Local<Value> argv[] = {
       NanNull(), // Error.
-      headers,
-      NanNew<Boolean>(_broke)
+      NanNew<Integer>(l), // Start offset (or total frames in first call).
+      NanNew<Integer>(0), // End offset.
+      NanFalse() // Overflow.
     };
 
-    callback->Call(3, argv);
+    callback->Call(4, argv);
+
+    // Create packet header objects.
+    int i;
+    for (i = 0; i < l; i++) {
+      struct pcap_pkthdr hdr = _headers[i];
+      argv[1] = argv[2];
+      argv[2] = NanNew<Integer>(offset + hdr.caplen);
+      argv[3] = hdr.len > hdr.caplen ? NanTrue() : NanFalse();
+      callback->Call(4, argv);
+      offset += hdr.caplen;
+    }
 
   }
 
