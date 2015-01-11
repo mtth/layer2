@@ -41,10 +41,28 @@
   }
 
   function requireAddon() {
-    // Either debug or release (depending on environment variable).
+    // Either debug or release depending on environment variable (defaulting to
+    // the existing one if no override).
 
-    var folder = process.env.LAYER2_DEBUG ? 'Debug' : 'Release';
-    return require(path.join(__dirname, '..', '..', 'build', folder));
+    var buildRoot = path.join(__dirname, '..', '..', 'build');
+    var override = process.env.LAYER2_DEBUG;
+    var debug;
+
+    if (override) {
+      debug = parseInt(override);
+    } else {
+      debug = fs.existsSync(path.join(buildRoot, 'Debug'));
+    }
+
+    var buildFolder = debug ?
+      path.join(buildRoot, 'Debug') :
+      path.join(buildRoot, 'Release');
+
+    if (!fs.existsSync(buildFolder)) {
+      throw new Error('No addon found at: ' + buildFolder);
+    } else {
+      return require(buildFolder);
+    }
 
   }
 

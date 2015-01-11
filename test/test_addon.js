@@ -4,12 +4,9 @@
   'use strict';
 
   var assert = require('assert'),
-      fs = require('fs'),
-      path = require('path');
+      addon = require('../src/js/utils').requireAddon();
 
   describe('Addon', function () {
-
-    var addon = requireAddon();
 
     describe('Utilities', function () {
 
@@ -197,6 +194,8 @@
 
       });
 
+      // Tests that require a live interface.
+
       maybeIt('fails if activated with no buffer size', function () {
 
         assert.throws(function () {
@@ -227,7 +226,7 @@
     });
 
     function hasActiveDevice() {
-      // Check whether there is a semi active network we can listen to.
+      // Check whether there is an active network we can listen to.
 
       var device;
       try {
@@ -240,19 +239,6 @@
     }
 
   });
-
-  function requireAddon() {
-    // Variant of utils where either Debug or Release can be used (using Debug
-    // if available).
-
-    var buildFolder = path.join(__dirname, '..', 'build');
-    return require(
-      fs.existsSync(path.join(buildFolder, 'Debug')) ?
-      path.join(buildFolder, 'Debug') :
-      path.join(buildFolder, 'Release')
-    );
-
-  }
 
   function maybe(fn, predicate) {
     // Skip test if predicate is false (fn should be `describe` or `it`).
