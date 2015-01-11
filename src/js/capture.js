@@ -98,9 +98,9 @@
         } else {
           offset = 0;
           offsets = [0];
-          if (wrapper.dispatch(batchSize, frameHandler) === -2) {
+          if (wrapper.dispatch(batchSize, buffer, frameHandler) === -2) {
             // Loop was broken, needed to clear flag.
-            wrapper.dispatch(batchSize, frameHandler);
+            wrapper.dispatch(batchSize, buffer, frameHandler);
           }
           // When reading a file, we can't rely on the output value of the
           // dispatch call so we rely on our offsets array instead.
@@ -162,7 +162,7 @@
     var ended = false;
     var finished = false;
     var buffer = new Buffer(bufferSize);
-    var wrapper = new addon.PcapWrapper(buffer)
+    var wrapper = new addon.PcapWrapper()
       .fromDevice(dev)
       .setMonitor(monitor)
       .setPromisc(promisc)
@@ -261,7 +261,7 @@
     var bufferSize = opts.bufferSize || 1024 * 1024; // 1 MB
 
     var buffer = new Buffer(bufferSize);
-    var wrapper = new addon.PcapWrapper(buffer).fromSavefile(fpath);
+    var wrapper = new addon.PcapWrapper().fromSavefile(fpath);
 
     stream.Readable.call(this, {objectMode: true, highWaterMark: 1});
 
@@ -348,7 +348,7 @@
         if (linkType === null) {
           return callback(new Error('No link type specified.'));
         }
-        wrapper = new addon.PcapWrapper(new Buffer(0)) // Unused buffer.
+        wrapper = new addon.PcapWrapper()
           .fromDead(linkType, maxFrameSize)
           .toSavefile(fpath);
       }

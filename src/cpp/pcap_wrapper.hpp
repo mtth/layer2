@@ -4,6 +4,7 @@
 #include <nan.h>
 #include <node.h>
 #include <pcap/pcap.h>
+#include <vector>
 
 /**
  * Class for reading packets (either live or from a save file).
@@ -18,6 +19,7 @@ public:
   static NAN_METHOD(close);
   static NAN_METHOD(dispatch);
   static NAN_METHOD(dump);
+  static NAN_METHOD(fetch);
   static NAN_METHOD(from_dead);
   static NAN_METHOD(from_device);
   static NAN_METHOD(from_savefile);
@@ -38,14 +40,21 @@ public:
 private:
 
   FILE *dump_file_p;
+  char *buffer_data;
   pcap_dumper_t *dump_handle;
   pcap_t *handle;
   int buffer_size;
+  size_t buffer_length;
+  size_t buffer_offset;
   struct bpf_program filter;
   bool dispatching;
+  std::vector<struct pcap_pkthdr> headers;
+  NanCallback *on_packet_callback;
 
   PcapWrapper();
   ~PcapWrapper();
+
+  static void on_packet(u_char *reader_p, const struct pcap_pkthdr* pkthdr, const u_char* packet);
 
 };
 

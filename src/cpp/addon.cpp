@@ -23,6 +23,7 @@ void init(v8::Handle<v8::Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "close", PcapWrapper::close);
   NODE_SET_PROTOTYPE_METHOD(tpl, "dispatch", PcapWrapper::dispatch);
   NODE_SET_PROTOTYPE_METHOD(tpl, "dumpFrame", PcapWrapper::dump);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "fetch", PcapWrapper::fetch);
   NODE_SET_PROTOTYPE_METHOD(tpl, "fromDead", PcapWrapper::from_dead);
   NODE_SET_PROTOTYPE_METHOD(tpl, "fromDevice", PcapWrapper::from_device);
   NODE_SET_PROTOTYPE_METHOD(tpl, "fromSavefile", PcapWrapper::from_savefile);

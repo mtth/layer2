@@ -2,11 +2,10 @@
 #include <cstring>
 #include <node_buffer.h>
 #include <sys/ioctl.h>
-#include <vector>
 
 #define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
 #define check_handle_not_null(w) if ((w)->handle == NULL) \
-  return NanThrowError("Inactive wrapper.")
+  return NanThrowError("Inactive capture handle.")
 
 using namespace v8;
 
@@ -19,28 +18,28 @@ public:
   Dispatcher(
     NanCallback *callback,
     pcap_t *pcap_handle,
-    int batch_size, // Positive only here (for headers initialization).
+    int batch_size,
     u_char *data,
     int break_len, // _After_ which dispatcher will break (-1 for no break).
     int len, // Throws an error if would write past this.
+    std::vector<struct pcap_pkthdr> &headers,
     bool *running // Flag to signal end of dispatching.
   ) : NanAsyncWorker(callback) {
 
     _running = running;
     *_running = true;
 
-    _pcap_handle = pcap_handle;
     _batch_size = batch_size;
+    _pcap_handle = pcap_handle;
     _cur = data;
     _break = break_len >= 0 ? data + break_len : NULL;
     _end = data + len;
-    _i = 0;
     _broke = false;
-    _headers = std::vector<struct pcap_pkthdr>(batch_size);
+    _headers = headers;
 
   }
 
-  ~Dispatcher() {} // TODO: do we need to free `_headers`?
+  ~Dispatcher() {}
 
   void Execute() {
 
@@ -60,6 +59,10 @@ public:
       );
     }
 
+    // Note that we don't propagate the return value of the dispatch call. When
+    // reading a file, we can't rely on the output value of it anyway so we
+    // always rely on the length of the headers vector instead.
+
     if (n == -1) {
       SetErrorMessage(pcap_geterr(_pcap_handle));
     }
@@ -72,8 +75,9 @@ public:
 
     // Create packet header objects.
     int i;
-    Local<Array> headers = NanNew<Array>(_i);
-    for (i = 0; i < _i; i++) {
+    int l = _headers.size();
+    Local<Array> headers = NanNew<Array>(l);
+    for (i = 0; i < l; i++) {
       struct pcap_pkthdr hdr = _headers[i];
       Local<Object> obj = NanNew<Object>();
       // obj->Set(NanNew<String>("timeVal"), NanNew<Number>(hdr.ts)); TODO
@@ -107,7 +111,7 @@ public:
   ) {
 
     Dispatcher *dispatcher = (Dispatcher *) etc;
-    dispatcher->_headers[dispatcher->_i++] = *header;
+    dispatcher->_headers.push_back(*header);
     int copy_length = header->caplen;
 
     int overflow = dispatcher->_cur + copy_length - dispatcher->_end;
@@ -134,7 +138,6 @@ private:
   u_char *_cur;
   u_char *_break;
   u_char *_end;
-  int _i;
   bool _broke;
   bool *_running;
   std::vector<struct pcap_pkthdr> _headers;
@@ -146,10 +149,13 @@ private:
 PcapWrapper::PcapWrapper() {
 
   dump_file_p = NULL;
+  buffer_data = NULL;
   dump_handle = NULL;
   handle = NULL;
+  on_packet_callback = NULL;
   buffer_size = 0;
   dispatching = false;
+  headers = std::vector<struct pcap_pkthdr>();
 
 }
 
@@ -427,6 +433,37 @@ NAN_METHOD(PcapWrapper::dispatch) {
     args[2]->IsFunction()
   );
   PcapWrapper *wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+
+  if (wrapper->dispatching) {
+    return NanThrowError("Already dispatching.");
+  }
+
+  Local<Object> buffer_obj = args[1]->ToObject();
+  wrapper->buffer_data = node::Buffer::Data(buffer_obj);
+  wrapper->buffer_length = node::Buffer::Length(buffer_obj);
+  wrapper->buffer_offset = 0;
+
+  Local<Function> fn = args[2].As<Function>();
+  wrapper->on_packet_callback = new NanCallback(fn);
+
+  int n = pcap_dispatch(wrapper->handle, args[0]->Int32Value(), on_packet, (u_char *) wrapper);
+  if (n == -1) {
+    return NanThrowError(pcap_geterr(wrapper->handle));
+  }
+  NanReturnValue(NanNew<Integer>(n));
+
+}
+
+NAN_METHOD(PcapWrapper::fetch) {
+
+  NanScope();
+  precondition(
+    args.Length() == 3 &&
+    args[0]->IsInt32() &&
+    node::Buffer::HasInstance(args[1]) &&
+    args[2]->IsFunction()
+  );
+  PcapWrapper *wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
   check_handle_not_null(wrapper);
 
   if (wrapper->dispatching) {
@@ -434,10 +471,6 @@ NAN_METHOD(PcapWrapper::dispatch) {
   }
 
   int batch_size = args[0]->Int32Value();
-  if (batch_size <= 0) {
-    return NanThrowError("Batch size must be positive.");
-  }
-
   Local<Object> buffer_obj = args[1]->ToObject();
   u_char *data = (u_char *) node::Buffer::Data(buffer_obj);
   int length = node::Buffer::Length(buffer_obj);
@@ -457,6 +490,7 @@ NAN_METHOD(PcapWrapper::dispatch) {
     break_length = length - snaplen;
   }
 
+  wrapper->headers.clear();
   NanAsyncQueueWorker(new Dispatcher(
     callback,
     wrapper->handle,
@@ -464,6 +498,7 @@ NAN_METHOD(PcapWrapper::dispatch) {
     data,
     break_length,
     length,
+    wrapper->headers,
     &wrapper->dispatching
   ));
 
@@ -491,8 +526,13 @@ NAN_METHOD(PcapWrapper::close) {
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
 
   pcap_close(wrapper->handle);
+  wrapper->handle = NULL;
   if (wrapper->dump_handle != NULL) {
     pcap_dump_close(wrapper->dump_handle);
+    wrapper->dump_handle = NULL;
+  }
+  if (wrapper->on_packet_callback != NULL) {
+    delete wrapper->on_packet_callback;
   }
 
   NanReturnUndefined();
@@ -551,5 +591,35 @@ NAN_METHOD(PcapWrapper::dump) {
   pcap_dump((u_char *) wrapper->dump_handle, &pktheader, (u_char *) packet_data);
 
   NanReturnThis();
+
+}
+
+void PcapWrapper::on_packet(
+  u_char *reader_p,
+  const struct pcap_pkthdr *pkthdr,
+  const u_char *packet
+) {
+
+  NanScope();
+  PcapWrapper *wrapper = (PcapWrapper *) reader_p;
+
+  int packet_overflow = pkthdr->len - pkthdr->caplen;
+  int overflow = wrapper->buffer_offset + pkthdr->caplen - wrapper->buffer_length;
+  size_t copy_length = pkthdr->caplen - (overflow > 0 ? overflow : 0);
+  memcpy(wrapper->buffer_data + wrapper->buffer_offset, packet, copy_length);
+  wrapper->buffer_offset += copy_length;
+
+  TryCatch try_catch;
+
+  Local<Value> argv[3] = {
+    NanNew<Integer>(wrapper->buffer_offset), // New offset.
+    NanNew<Integer>(overflow), // Buffer overflow.
+    NanNew<Integer>(packet_overflow) // Frame overflow.
+  };
+  wrapper->on_packet_callback->Call(3, argv);
+
+  if (try_catch.HasCaught())  {
+    node::FatalException(try_catch);
+  }
 
 }
