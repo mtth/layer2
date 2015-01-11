@@ -22,18 +22,11 @@
 
       });
 
-      it('can pretend decode', function () {
-
-        var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex');
-        // assert.equal(addon.decoders.IEEE802_11_RADIO(buf, 0));
-        buf = new Buffer('000019006f0800009627433d00000000560c1c164001d0a4010862', 'hex');
-        // assert.equal(addon.decoders.IEEE802_11_RADIO(buf, 0));
-
-      });
-
     });
 
     describe('Pcap Wrapper', function () {
+
+      var maybeIt = maybe(it, hasActiveDevice());
 
       it('can be instantiated on a file', function () {
 
@@ -204,7 +197,47 @@
 
       });
 
+      maybeIt('fails if activated with no buffer size', function () {
+
+        assert.throws(function () {
+          new addon.PcapWrapper()
+            .fromDevice(addon.getDefaultDevice())
+            .activate();
+        });
+
+      });
+
+      maybeIt('fails if the buffer is too small', function () {
+
+        var wrapper = new addon.PcapWrapper()
+          .fromDevice(addon.getDefaultDevice())
+          .setBufferSize(100)
+          .activate();
+
+        assert.throws(function () {
+          wrapper.dispatch(3, new Buffer(50), function () {});
+        });
+
+        assert.throws(function () {
+          wrapper.fetch(1, new Buffer(50), function () {});
+        });
+
+      });
+
     });
+
+    function hasActiveDevice() {
+      // Check whether there is a semi active network we can listen to.
+
+      var device;
+      try {
+        device = addon.getDefaultDevice();
+      } catch (err) {
+        device = null;
+      }
+      return !!device;
+
+    }
 
   });
 
@@ -218,6 +251,13 @@
       path.join(buildFolder, 'Debug') :
       path.join(buildFolder, 'Release')
     );
+
+  }
+
+  function maybe(fn, predicate) {
+    // Skip test if predicate is false (fn should be `describe` or `it`).
+
+    return predicate ? fn : fn.skip;
 
   }
 

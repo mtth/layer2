@@ -44,8 +44,8 @@ private:
   pcap_dumper_t *dump_handle;
   pcap_t *handle;
   int buffer_size;
-  size_t buffer_length;
-  size_t buffer_offset;
+  int buffer_length;
+  int buffer_offset;
   struct bpf_program filter;
   bool dispatching;
   std::vector<struct pcap_pkthdr> headers;

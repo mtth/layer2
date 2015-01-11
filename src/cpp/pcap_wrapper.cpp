@@ -443,6 +443,10 @@ NAN_METHOD(PcapWrapper::dispatch) {
   wrapper->buffer_length = node::Buffer::Length(buffer_obj);
   wrapper->buffer_offset = 0;
 
+  if (wrapper->buffer_length < wrapper->buffer_size) {
+    return NanThrowError("Dispatch buffer too small.");
+  }
+
   Local<Function> fn = args[2].As<Function>();
   wrapper->on_packet_callback = new NanCallback(fn);
 
@@ -479,13 +483,13 @@ NAN_METHOD(PcapWrapper::fetch) {
   int break_length;
   if (pcap_file(wrapper->handle) == NULL) { // Live capture.
     if (length < wrapper->buffer_size) {
-      return NanThrowError("Live dispatch buffer too small.");
+      return NanThrowError("Live fetch buffer too small.");
     }
     break_length = -1; // We are guaranteed to not fill buffer.
   } else { // Offline capture.
     int snaplen = pcap_snapshot(wrapper->handle);
     if (length < snaplen) {
-      return NanThrowError("Offline dispatch buffer too small.");
+      return NanThrowError("Offline fetch buffer too small.");
     }
     break_length = length - snaplen;
   }
