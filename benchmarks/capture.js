@@ -14,9 +14,16 @@
   tmp.setGracefulCleanup();
 
   var benchmark = new utils.Benchmark()
-    .addFn('layer2', function (cb, opts) {
+    .addFn('layer2 dispatch', function (cb, opts) {
       var nFrames = 0;
       var capture = new layer2.capture.Replay(opts.fpath);
+      capture
+        .on('data', function () { nFrames++; })
+        .on('end', function () { cb(); });
+    })
+    .addFn('layer2 fetch', function (cb, opts) {
+      var nFrames = 0;
+      var capture = new layer2.capture.Replay2(opts.fpath);
       capture
         .on('data', function () { nFrames++; })
         .on('end', function () { cb(); });

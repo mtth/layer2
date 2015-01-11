@@ -384,11 +384,119 @@
 
   }
 
+  function Replay2(fpath, opts) {
+
+    opts = opts || {};
+    var batchSize = opts.batchSize || -1;
+    var bufferSize = opts.bufferSize || 2e6;
+
+    var wrapper = new addon.PcapWrapper().fromSavefile(fpath);
+    var buffers = [new Buffer(bufferSize / 2), new Buffer(bufferSize / 2)];
+    var bucket = 0;
+    var fullHalves = 0;
+    var fetching = false;
+    var closed = false;
+
+    stream.Readable.call(this, {objectMode: true, highWaterMark: bufferSize});
+
+    // "Public" methods (they are not attached to the prototype so as not to
+    // have to expose the PCAP wrapper).
+
+    this.getLinkType = function () { return wrapper.getLinkType(); };
+
+    this.getMaxFrameSize = function () { return wrapper.getMaxFrameSize(); };
+
+    this.close = function (timeout) {
+
+      var self = this;
+      setTimeout(function () { self.push(null); }, timeout || 0);
+      return this;
+
+    };
+
+    // "Private" methods (to be used by subclasses). Similarly to above we
+    // don't attach them to the prototype (which actually also lets us have a
+    // small performance gain by speeding up method calls).
+
+    this._sendFrame = function (buf) {
+
+      if (closed) {
+        return this.emit('error', new Error('Cannot send after close.'));
+      }
+      wrapper.injectFrame(buf);
+
+    };
+
+    this._fetchFrames = function (fetchedBucket) {
+
+      if (fullHalves === 2 || fetching) {
+        return this.emit('error', new Error('Full.'));
+      }
+
+      fetching = true;
+      var self = this;
+      var buf = buffers[fetchedBucket];
+      var nFrames;
+
+      wrapper.fetch(batchSize, buf, function (err, s, e) {
+
+        if (err) {
+          self.emit('error', err);
+          return;
+        }
+
+        if (e === 0) {
+          fetching = false;
+          nFrames = s;
+          if (nFrames) {
+            if (++fullHalves < 2) {
+              self._fetchFrames(fetchedBucket ^ 1);
+            }
+          } else {
+            self.push(null);
+          }
+        } else {
+          self.push(buf.slice(s, e));
+          if (--nFrames === 0) {
+            fullHalves--;
+          }
+        }
+
+      });
+
+    };
+
+    this._closeWrapper = function () {
+
+      closed = true;
+      wrapper.close(); // Free PCAP resources.
+      this.emit('close');
+
+    };
+
+    this.once('end', function () {
+
+      process.nextTick(this._closeWrapper.bind(this));
+
+    });
+
+    this._read = function () {
+
+      if (!fetching) {
+        this._fetchFrames(bucket);
+      }
+
+    };
+
+  }
+  util.inherits(Replay2, stream.Readable);
+
   // Export things.
 
   root.exports = {
     Live: Live,
     Replay: Replay,
+    Replay2: Replay2,
     Save: Save,
     summarize: summarize
   };
