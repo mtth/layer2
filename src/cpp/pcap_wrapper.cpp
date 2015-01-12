@@ -375,7 +375,7 @@ NAN_METHOD(PcapWrapper::get_datalink) {
 
   int link = pcap_datalink(wrapper->handle);
   const char *name = pcap_datalink_val_to_name(link);
-  NanReturnValue(NanNew<String>(name == NULL ? "UNKNOWN" : name));
+  NanReturnValue(NanNew(name == NULL ? "UNKNOWN" : name));
 
 }
 
@@ -392,9 +392,9 @@ NAN_METHOD(PcapWrapper::get_stats) {
   }
 
   Local<Object> stats_obj = NanNew<Object>();
-  stats_obj->Set(NanNew<String>("psRecv"), NanNew<Integer>(ps.ps_recv));
-  stats_obj->Set(NanNew<String>("psDrop"), NanNew<Integer>(ps.ps_drop));
-  stats_obj->Set(NanNew<String>("psIfDrop"), NanNew<Integer>(ps.ps_ifdrop));
+  stats_obj->Set(NanNew("psRecv"), NanNew<Integer>(ps.ps_recv));
+  stats_obj->Set(NanNew("psDrop"), NanNew<Integer>(ps.ps_drop));
+  stats_obj->Set(NanNew("psIfDrop"), NanNew<Integer>(ps.ps_ifdrop));
   // ps_ifdrop may not be supported on this platform, but there's no good way
   // to tell, is there?
 

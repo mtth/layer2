@@ -15,7 +15,7 @@ void init(v8::Handle<v8::Object> exports) {
   char className[] = "PcapWrapper";
 
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(PcapWrapper::init);
-  tpl->SetClassName(NanNew<String>(className));
+  tpl->SetClassName(NanNew(className));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "activate", PcapWrapper::activate);
@@ -38,31 +38,31 @@ void init(v8::Handle<v8::Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "setMaxFrameSize", PcapWrapper::set_snaplen);
   NODE_SET_PROTOTYPE_METHOD(tpl, "toSavefile", PcapWrapper::to_savefile);
 
-  exports->Set(NanNew<String>(className), tpl->GetFunction());
+  exports->Set(NanNew(className), tpl->GetFunction());
 
   // Decoders.
 
   Local<Object> decoders = NanNew<Object>();
 
   decoders->Set(
-    NanNew<String>("IEEE802_11_RADIO"),
+    NanNew("IEEE802_11_RADIO"),
     NanNew<FunctionTemplate>(decode_radiotap)->GetFunction()
   );
 
   exports->Set(
-    NanNew<String>("decoders"),
+    NanNew("decoders"),
     decoders
   );
 
   // Utilities.
 
   exports->Set(
-    NanNew<String>("getDefaultDevice"),
+    NanNew("getDefaultDevice"),
     NanNew<FunctionTemplate>(get_default_dev)->GetFunction()
   );
 
   exports->Set(
-    NanNew<String>("readMacAddr"),
+    NanNew("readMacAddr"),
     NanNew<FunctionTemplate>(read_mac_addr)->GetFunction()
   );
 

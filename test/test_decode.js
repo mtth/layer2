@@ -11,7 +11,7 @@
     length: {valid: 48, invalid: 118}
   };
 
-  describe.skip('Decoder', function () {
+  describe('Decoder', function () {
 
     var Decoder = layer2.Decoder;
 

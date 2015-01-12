@@ -8,7 +8,6 @@ and injection, and provides decoders for various link types.
 var layer2 = require('layer2');
 
 var capture = new layer2.capture.Live('en0', {monitor: true});
-var decoder = new layer2.Decoder();
 
 capture           // Stream of buffers (frames' raw bytes).
   .pipe(decoder)  // Stream of objects (decoded frames).
