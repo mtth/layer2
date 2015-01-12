@@ -1,4 +1,4 @@
-# Layer2 [![Node Version](https://img.shields.io/node/v/gh-badges.svg?style=flat)](https://www.npmjs.com/package/layer2) [![Build Status](https://travis-ci.org/mtth/layer2.svg?branch=master)](https://travis-ci.org/mtth/layer2)
+# Layer2 [![Build Status](https://travis-ci.org/mtth/layer2.svg?branch=master)](https://travis-ci.org/mtth/layer2)
 
 `layer2` leverages Node.js' built-in [streams][] to provide an intuitive and
 efficient interface to the [data link layer][wiki]. It supports frame capture
