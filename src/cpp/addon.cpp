@@ -1,6 +1,5 @@
 #include "pcap_wrapper.hpp"
 #include "util.hpp"
-#include "decode/radiotap.hpp"
 
 using v8::FunctionTemplate;
 using v8::Handle;
@@ -39,20 +38,6 @@ void init(v8::Handle<v8::Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "toSavefile", PcapWrapper::to_savefile);
 
   exports->Set(NanNew(className), tpl->GetFunction());
-
-  // Decoders.
-
-  Local<Object> decoders = NanNew<Object>();
-
-  decoders->Set(
-    NanNew("IEEE802_11_RADIO"),
-    NanNew<FunctionTemplate>(decode_radiotap)->GetFunction()
-  );
-
-  exports->Set(
-    NanNew("decoders"),
-    decoders
-  );
 
   // Utilities.
 
