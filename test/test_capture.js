@@ -304,6 +304,20 @@
 
       });
 
+      it('supports filters', function (done) {
+
+        var nFrames = 0;
+        var filter = 'arp';
+
+        new Replay(captures.large.path, {filter: filter})
+          .on('data', function () { nFrames++; })
+          .on('end', function () {
+            assert.equal(nFrames, 131); // 131 ARP packets in file.
+            done();
+          });
+
+      });
+
       // Helpers.
 
       function testDispatching(batchSize, callback) {
@@ -673,6 +687,13 @@
           });
 
         setTimeout(function () { capture.push(null); }, 200);
+
+      });
+
+      it('supports filters', function () {
+
+        var filter = 'ether host 01:02:03:04:05:06';
+        new Live(null, {filter: filter});
 
       });
 

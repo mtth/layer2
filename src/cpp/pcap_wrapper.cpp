@@ -167,6 +167,7 @@ PcapWrapper::PcapWrapper() {
   buffer_data = NULL;
   dump_handle = NULL;
   handle = NULL;
+  device = NULL;
   on_packet_callback = NULL;
   dispatching = false;
   headers = std::vector<struct pcap_pkthdr>();
@@ -203,6 +204,7 @@ NAN_METHOD(PcapWrapper::from_device) {
   if (handle == NULL || pcap_setnonblock(handle, 1, errbuf) == -1) {
     return NanThrowError(errbuf);
   }
+  wrapper->device = (char *) *device;
   wrapper->handle = handle;
   NanReturnThis();
 
@@ -337,16 +339,24 @@ NAN_METHOD(PcapWrapper::set_filter) {
   precondition(args.Length() == 1 && args[0]->IsString());
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
   check_handle_not_null(wrapper);
+  int status;
+  bpf_u_int32 mask, net;
+  char errbuf[PCAP_ERRBUF_SIZE];
+  struct bpf_program program;
   String::Utf8Value filter(args[0]->ToString());
 
   if (filter.length() != 0) {
-    if (pcap_compile(wrapper->handle, &wrapper->filter, (char *) *filter, 1, PCAP_NETMASK_UNKNOWN) == -1) {
+    if (wrapper->device == NULL || pcap_lookupnet(wrapper->device, &net, &mask, errbuf) == -1) {
+      net = PCAP_NETMASK_UNKNOWN;
+    }
+    if (pcap_compile(wrapper->handle, &program, (char *) *filter, 1, net) == -1) {
       return NanThrowError(pcap_geterr(wrapper->handle));
     }
-    if (pcap_setfilter(wrapper->handle, &wrapper->filter) == -1) {
+    status = pcap_setfilter(wrapper->handle, &program);
+    pcap_freecode(&program);
+    if (status  == -1) {
       return NanThrowError(pcap_geterr(wrapper->handle));
     }
-    pcap_freecode(&wrapper->filter);
   }
   NanReturnThis();
 

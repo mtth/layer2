@@ -166,10 +166,10 @@
       .fromDevice(dev)
       .setMonitor(monitor)
       .setPromisc(promisc)
-      .setFilter(filter)
       .setMaxFrameSize(maxFrameSize)
       .setBufferSize(bufferSize)
-      .activate();
+      .activate()
+      .setFilter(filter);
 
     stream.Duplex.call(this, {
       allowHalfOpen: true, // But actually false (see below).
@@ -259,9 +259,12 @@
 
     opts = opts || {};
     var bufferSize = opts.bufferSize || 1024 * 1024; // 1 MB
+    var filter = opts.filter || '';
 
     var buffer = new Buffer(bufferSize);
-    var wrapper = new addon.PcapWrapper().fromSavefile(fpath);
+    var wrapper = new addon.PcapWrapper()
+      .fromSavefile(fpath)
+      .setFilter(filter);
 
     stream.Readable.call(this, {objectMode: true, highWaterMark: 1});
 

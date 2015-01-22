@@ -41,11 +41,11 @@ private:
 
   FILE *dump_file_p;
   char *buffer_data;
+  char *device;
   pcap_dumper_t *dump_handle;
   pcap_t *handle;
   int buffer_length;
   int buffer_offset;
-  struct bpf_program filter;
   bool dispatching;
   std::vector<struct pcap_pkthdr> headers;
   NanCallback *on_packet_callback;
