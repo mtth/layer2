@@ -86,26 +86,25 @@ events' handlers.
 
 Create a new readable stream from a network interface.
 
-+ `dev` {String} The device to listen to (e.g. `'en0'`). If `dev` is `null` or
-  `undefined`, the default network interface will be used. On some platforms,
-  `'any'` can be specified to listen on all interfaces.
++ `dev` {String} The device to listen to (e.g. `'en0'`). If false-ish (e.g.
+  `null` or `undefined`), the default network interface will be used. On some
+  platforms, `'any'` can be specified to listen on all interfaces.
 + `opts` {Object} Various options:
   + `monitor` {Boolean} Capture in monitor mode. [default: `false`]
   + `promisc` {Boolean} Capture in promiscuous mode. [default: `false`]
   + `maxFrameSize` {Number} Frame snapshot length (i.e. how much of each
     frame is retained). [default: `65535`]
-  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold frames.
-    Larger means more frames can be gathered in fewer dispatch calls (this
-    will effectively cap the batchSize option). [default: `1024 * 1024`]
   + `batchSize` {Number} Number of frames read during each call to PCAP. A
-    higher number here is more efficient but runs the risk of overflowing
-    internal buffers (especially in the case of replay streams, which can't
-    rely on the PCAP dispatch call returning in time). [default: `1000`]
-
-Note that a section of length `maxFrameSize` is reserved at the end of the
-temporary buffer to protect from overflows. This way, the internal mechanism
-that fetches frames by batch (for performance), has enough time to stop
-without losing any frames.
+    higher number is more efficient but won't yield to the event loop as often.
+    [default: `1000`]
+  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold frames.
+    Larger means more frames can be gathered in fewer dispatch calls (this will
+    effectively cap the batchSize option). A section of length `maxFrameSize`
+    is reserved at the end of the temporary buffer to protect from overflows so
+    that the internal mechanism that fetches frames by batch (for performance),
+    has enough time to stop without losing any frames. [default: `1024 * 1024`]
+  + `filter` {String} Optional kernel-level frame filter. See `man pcap-filter`
+    for examples of filters. [default: `''`]
 
 #### live.read()
 
@@ -223,13 +222,18 @@ This event is guaranteed to be emitted after the `'end'` event.
 
 + `fpath` {String} Path to a saved capture file (PCAP format).
 + `opts` {Object} Various options:
-  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold frames.
-    Larger means more frames can be gathered in fewer dispatch calls (this
-    will effectively cap the batchSize option). [default: `1024 * 1024` (1MB)]
   + `batchSize` {Number} Number of frames read during each call to PCAP. A
     higher number here is more efficient but runs the risk of overflowing
-    internal buffers (especially in the case of replay streams, which can't
-    rely on the PCAP dispatch call returning in time). [default: `1000`]
+    internal buffers (which, unlike live captures, cannot rely on the PCAP
+    dispatch call returning in time). [default: `1000`]
+  + `bufferSize` {Number} Size of temporary buffer used by PCAP to hold frames.
+    Larger means more frames can be gathered in fewer dispatch calls (this will
+    effectively cap the batchSize option). A section of length `maxFrameSize`
+    is reserved at the end of the temporary buffer to protect from overflows so
+    that the internal mechanism that fetches frames by batch (for performance),
+    has enough time to stop without losing any frames. [default: `1024 * 1024`]
+  + `filter` {String} Optional frame filter. See `man pcap-filter` for examples
+    of filters. [default: `''`]
 
 Note that unlike the live capture stream, this stream will automatically
 close once the end of the file read is reached.
