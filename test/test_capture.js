@@ -347,7 +347,7 @@
         new Replay(captures.small.path, {batchSize: batchSize })
           .once('readable', function () {
             assert.ok(this.read() !== null);
-            this.close();
+            this.close(10);
             callback();
           });
 
