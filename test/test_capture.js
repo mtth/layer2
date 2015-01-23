@@ -709,6 +709,36 @@
 
       });
 
+      it('can be opened many times', function (done) {
+
+        var nCaptures = 50;
+        var frameCounts = [];
+
+        var onClose = (function () {
+          var nClosed = 0;
+          return function () {
+            if (++nClosed === nCaptures) {
+              assert.ok(Math.min.apply(null, frameCounts));
+              done();
+            }
+          };
+        })();
+
+        var i;
+        for (i = 0; i < nCaptures; i++) {
+          frameCounts.push(0);
+          createCapture(i);
+        }
+
+        function createCapture(i) {
+          new Live(dev)
+            .close(1000)
+            .on('close', onClose)
+            .on('data', function () { frameCounts[i]++; });
+        }
+
+      });
+
       it.skip('can inject a frame', function (done) {
         // TODO: fix this test. Two things potentially complicate this. First,
         // this obviously requires a network card that supports emitting raw
