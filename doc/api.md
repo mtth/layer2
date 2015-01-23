@@ -38,7 +38,9 @@ Emitted when the first frame can be read.
 
 + `buf` {Buffer} A frame.
 
-Emitted each time a frame is available for reading.
+Emitted each time a frame is available for reading. Note that for efficiency
+the buffer instance is reused by the stream. If you want to store the contents
+of the buffer for later use, you should make a copy of the data.
 
 Attaching a handler to this event (and `pipe`ing) is the preferred way of
 reading this stream of frames.
@@ -86,9 +88,8 @@ events' handlers.
 
 Create a new readable stream from a network interface.
 
-+ `dev` {String} The device to listen to (e.g. `'en0'`). If false-ish (e.g.
-  `null` or `undefined`), the default network interface will be used. On some
-  platforms, `'any'` can be specified to listen on all interfaces.
++ `dev` {String} The device to listen to (e.g. `'en0'`). If false-ish (e.g. On
+  some platforms, `'any'` can be specified to listen on all interfaces.
 + `opts` {Object} Various options:
   + `monitor` {Boolean} Capture in monitor mode. [default: `false`]
   + `promisc` {Boolean} Capture in promiscuous mode. [default: `false`]
@@ -178,7 +179,9 @@ Emitted when the first frame can be read.
 
 + `buf` {Buffer} A frame.
 
-Emitted each time a frame is available for reading.
+Emitted each time a frame is available for reading. Note that for efficiency
+the buffer instance is reused by the stream. If you want to store the contents
+of the buffer for later use, you should make a copy of the data.
 
 #### Event: 'end'
 
@@ -236,17 +239,9 @@ This event is guaranteed to be emitted after the `'end'` event.
     of filters. [default: `''`]
 
 Note that unlike the live capture stream, this stream will automatically
-close once the end of the file read is reached.
-
-#### replay.close([timeout])
-
-Terminate the stream.
-
-+ `timeout` {Number} Timeout in milliseconds after which to close the stream.
-  [default: `0`]
-
-Note that even if timeout is set to 0, a few more frames might be emitted
-before the stream actually closes.
+close once the end of the file read is reached. If you are only reading part of
+the file you should still drain the stream to free the underlying resource
+(e.g. by attaching an empty handler to the `'data'` event).
 
 #### replay.getLinkType()
 

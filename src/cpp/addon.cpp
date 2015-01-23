@@ -35,6 +35,7 @@ void init(v8::Handle<v8::Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "setPromisc", PcapWrapper::set_promisc);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setMonitor", PcapWrapper::set_rfmon);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setMaxFrameSize", PcapWrapper::set_snaplen);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setTimeout", PcapWrapper::set_timeout);
   NODE_SET_PROTOTYPE_METHOD(tpl, "toSavefile", PcapWrapper::to_savefile);
 
   exports->Set(NanNew(className), tpl->GetFunction());

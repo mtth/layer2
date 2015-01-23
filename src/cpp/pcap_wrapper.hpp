@@ -33,6 +33,7 @@ public:
   static NAN_METHOD(set_promisc);
   static NAN_METHOD(set_rfmon);
   static NAN_METHOD(set_snaplen);
+  static NAN_METHOD(set_timeout);
   static NAN_METHOD(to_savefile);
 
   void done_dispatching();

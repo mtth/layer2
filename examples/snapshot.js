@@ -19,7 +19,8 @@
   }
 
   var fpath = process.argv[2];
-  var liveStream = new layer2.capture.Live();
+  var device = layer2.capture.Live.getDefaultDevice();
+  var liveStream = new layer2.capture.Live(device);
   var saveStream = new layer2.capture.Save(fpath);
 
   liveStream

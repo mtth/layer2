@@ -9,7 +9,7 @@
 
 using namespace v8;
 
-// Async dispatcher.
+// Async dispatcher (see `fetch` method below).
 
 class Dispatcher : public NanAsyncWorker {
 
@@ -307,6 +307,21 @@ NAN_METHOD(PcapWrapper::set_promisc) {
 
 }
 
+NAN_METHOD(PcapWrapper::set_timeout) {
+
+  NanScope();
+  precondition(args.Length() == 1 && args[0]->IsInt32());
+  PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
+  check_handle_not_null(wrapper);
+
+  if (pcap_set_timeout(wrapper->handle, args[0]->Int32Value())) {
+    return NanThrowError(pcap_geterr(wrapper->handle));
+  }
+
+  NanReturnThis();
+
+}
+
 NAN_METHOD(PcapWrapper::set_buffersize) {
 
   NanScope();
@@ -405,6 +420,9 @@ NAN_METHOD(PcapWrapper::get_stats) {
 
 NAN_METHOD(PcapWrapper::activate) {
 
+  // TODO: move all setters that only work before activation (and by extension
+  // only on live captures) as arguments to activate?
+
   NanScope();
   precondition(args.Length() == 0);
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
@@ -413,19 +431,6 @@ NAN_METHOD(PcapWrapper::activate) {
   if (pcap_activate(wrapper->handle)) {
     return NanThrowError(pcap_geterr(wrapper->handle));
   }
-
-#if defined(__APPLE_CC__) || defined(__APPLE__)
-  // Work around buffering bug in BPF on OSX 10.6 as of May 19, 2010 This may
-  // result in dropped packets under load because it disables the (broken)
-  // buffer
-  // http://seclists.org/tcpdump/2010/q1/110
-  #include <net/bpf.h>
-  int fd = pcap_get_selectable_fd(wrapper->handle);
-  int v = 1;
-  if (ioctl(fd, BIOCIMMEDIATE, &v) == -1) {
-    return NanThrowError("Can't set device to non-blocking mode.");
-  }
-#endif
 
   NanReturnThis();
 
@@ -472,6 +477,22 @@ NAN_METHOD(PcapWrapper::dispatch) {
 
 }
 
+/**
+ * Alternative fetch method.
+ *
+ * This implementation, currently unused, delegates frame capture to another
+ * thread and is therefore potentially more efficient than the above dispatch
+ * method (benchmarks show a 50% increase in raw throughput rate). However, it
+ * would require a significant rewrite of the JavaScript code and isn't a
+ * priority for now (especially as decoding is an order of magnitude more
+ * expensive so dispatching is not a bottleneck by any measure).
+ *
+ * Finally, this implementation could possibly be made cleaner (and the
+ * JavaScript integration simpler) by returning an "iterator" object which can
+ * be then consumed to get frame offsets rather then the current multiple calls
+ * to the same callback.
+ *
+ */
 NAN_METHOD(PcapWrapper::fetch) {
 
   NanScope();
@@ -548,6 +569,7 @@ NAN_METHOD(PcapWrapper::close) {
   }
   if (wrapper->on_packet_callback != NULL) {
     delete wrapper->on_packet_callback;
+    wrapper->on_packet_callback = NULL;
   }
 
   NanReturnUndefined();

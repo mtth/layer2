@@ -49,39 +49,32 @@ NAN_METHOD(get_default_dev) {
   NanScope();
   precondition(args.Length() == 0);
 
+  Local<Value> name;
   char errbuf[PCAP_ERRBUF_SIZE];
   pcap_if_t *alldevs, *dev;
   pcap_addr_t *addr;
-  bool found = false;
 
   if (pcap_findalldevs(&alldevs, errbuf) == -1) {
     return NanThrowError(errbuf);
   }
 
-  if (alldevs == NULL) {
-    NanReturnNull();
-  } else {
-    // Can't return because node methods have different return types, so we use
-    // an else block.
+  if (alldevs != NULL) {
     for (dev = alldevs; dev != NULL; dev = dev->next) {
       if (dev->addresses != NULL && !(dev->flags & PCAP_IF_LOOPBACK)) {
         for (addr = dev->addresses; addr != NULL; addr = addr->next) {
           if (addr->addr->sa_family == AF_INET) {
-            found = true;
-            break;
+            goto found;
           }
-        }
-        if (found) {
-          break;
         }
       }
     }
-    if (found) {
-      NanReturnValue(NanNew<String>(dev->name));
-    } else {
-      NanReturnNull();
-    }
     pcap_freealldevs(alldevs);
   }
+  NanReturnNull();
+
+found:
+  name = NanNew<String>(dev->name);
+  pcap_freealldevs(alldevs);
+  NanReturnValue(name);
 
 }

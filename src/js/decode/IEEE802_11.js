@@ -342,6 +342,8 @@
           }
           frame.body = new Buffer(buf.length - 4 - dataOffset);
           buf.copy(frame.body, 0, dataOffset, buf.length - 4);
+          // Copy is necessary as the passed buffer instance is reused (when
+          // created from a capture stream).
         }
         break;
 

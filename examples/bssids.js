@@ -11,7 +11,8 @@
 
   var layer2 = require('../src/js');
 
-  var capture = new layer2.capture.Live(null, {monitor: true});
+  var device = layer2.capture.Live.getDefaultDevice();
+  var capture = new layer2.capture.Live(device, {monitor: true});
   var decoder = new layer2.Decoder();
   var bssids = {};
 

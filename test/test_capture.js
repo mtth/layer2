@@ -169,58 +169,6 @@
 
       });
 
-      it('supports closing after a few frames', function (done) {
-
-        var nFrames = 0;
-
-        new Replay(captures.large.path, {batchSize: 1})
-          .on('data', function () {
-            if (nFrames++ === 10) this.close();
-          })
-          .on('end', function () {
-            assert.ok(nFrames < captures.large.length); // Small margin.
-            done();
-          });
-
-      });
-
-      it('supports closing after a timeout', function (done) {
-
-        var capture = new Replay(captures.large.path, {
-          batchSize: 1 // Small enough to guarantee it won't be read in one go.
-        });
-        var nFrames = 0;
-
-        capture
-          .close(1)
-          .on('data', function () { nFrames++; })
-          .on('end', function () {
-            assert.ok(nFrames > 0);
-            assert.ok(nFrames < captures.large.length);
-            done();
-          });
-
-      });
-
-      it('supports closing after a built-in timeout', function (done) {
-        // I.e. lets the event loop run after a while.
-
-        var capture = new Replay(captures.large.path, {
-          batchSize: 2 // Small enough to guarantee it won't be read in one go.
-        });
-        var nFrames = 0;
-
-        capture
-          .on('data', function () { nFrames++; })
-          .on('end', function () {
-            assert.ok(nFrames > 0);
-            assert.ok(nFrames < captures.large.length);
-            done();
-          });
-        setTimeout(function () { capture.close(); }, 1);
-
-      });
-
       it('closes after ending', function (done) {
 
         var ended = false;
@@ -344,10 +292,17 @@
 
       function testReadSingleFrame(batchSize, callback) {
 
-        new Replay(captures.small.path, {batchSize: batchSize })
+        var readFrame = false;
+
+        new Replay(captures.small.path, {batchSize: batchSize})
           .once('readable', function () {
-            assert.ok(this.read() !== null);
-            this.close(10);
+            if (this.read() !== null) {
+              readFrame = true;
+            }
+            this.on('data', function () {}); // Drain stream.
+          })
+          .on('end', function () {
+            assert.ok(readFrame);
             callback();
           });
 
@@ -474,10 +429,10 @@
         var save = new Save(savePath, {linkType: replay.getLinkType()});
         var finished = false;
 
-        save
-          .on('finish', function () { finished = true; replay.close(); })
-          .on('close', function () { assert.ok(finished); done(); })
-          .end(replay.read());
+        replay
+          .pipe(save)
+          .on('finish', function () { finished = true; })
+          .on('close', function () { assert.ok(finished); done(); });
 
       });
 
@@ -542,6 +497,7 @@
     maybe(describe, hasActiveDevice())('Live', function () {
 
       var Live = layer2.capture.Live;
+      var dev = Live.getDefaultDevice();
 
       beforeEach(function () {
         // Make sure there are some frames to listen to.
@@ -559,14 +515,13 @@
       it('can find the default device', function () {
         // We already know this will work but oh well.
 
-        var dev = Live.getDefaultDevice();
         assert.ok(dev !== null);
 
       });
 
       it('reads a single frame', function (done) {
 
-        new Live()
+        new Live(dev)
           .once('readable', function () {
             var data = this.read();
             var stats = this.getStats();
@@ -581,12 +536,14 @@
       it('throws an error on frame truncation by default', function (done) {
 
         var nErrors = 0;
+        var nFrames = 0;
 
-        new Live(null, {maxFrameSize: 10})
+        new Live(dev, {maxFrameSize: 2})
           .close(500)
           .on('error', function () { nErrors++; })
-          .on('data', function () {})
+          .on('data', function () { nFrames++; })
           .on('end', function () {
+            assert.ok(nFrames === 0);
             assert.ok(nErrors > 0);
             done();
           });
@@ -599,7 +556,7 @@
         var nFrames = 0;
         var stats;
 
-        new Live()
+        new Live(dev)
           .on('data', function (data) {
             assert.ok(data !== null);
             if (++nFrames === totalFrames) {
@@ -615,17 +572,31 @@
 
       });
 
+      it('supports closing after a few frames', function (done) {
+
+        var nFrames = 0;
+
+        new Live(dev, {batchSize: 1})
+          .on('data', function () {
+            if (nFrames++ === 10) this.close();
+          })
+          .on('end', function () {
+            done();
+          });
+
+      });
+
       it('closes after a given timeout', function (done) {
 
         var nFrames = 0;
 
-        new Live()
-          .close(10)
+        new Live(dev)
           .on('data', function () { nFrames++; })
           .on('end', function () {
             assert.ok(nFrames > 0);
             done();
-          });
+          })
+          .close(500);
 
       });
 
@@ -634,7 +605,7 @@
         var nFrames = 0;
         var ended = false;
         var finished = false;
-        var capture = new Live();
+        var capture = new Live(dev);
 
         capture
           .on('data', function () { nFrames++; })
@@ -646,13 +617,13 @@
             assert.ok(ended);
             done();
           });
-        setTimeout(function () { capture.close(); }, 1);
+        setTimeout(function () { capture.close(500); }, 1);
 
       });
 
       it('closes after the writable side finishes', function (done) {
 
-        var capture = new Live();
+        var capture = new Live(dev);
         var ended = false;
         var finished = false;
 
@@ -672,7 +643,7 @@
 
       it('closes after the readable side ends', function (done) {
 
-        var capture = new Live();
+        var capture = new Live(dev);
         var ended = false;
         var finished = false;
 
@@ -690,10 +661,51 @@
 
       });
 
-      it('supports filters', function () {
+      it('supports filters', function (done) {
 
         var filter = 'ether host 01:02:03:04:05:06';
-        new Live(null, {filter: filter});
+        new Live(dev, {filter: filter})
+          .close()
+          .on('data', function () {})
+          .on('close', done);
+
+      });
+
+      it('is consistent accross captures', function (done) {
+
+        var frames1 = [];
+        var frames2 = [];
+
+        var onClose = (function () {
+          var nClosed = 0;
+          return function () {
+            if (++nClosed === 2) {
+              assert.ok(frames2.length);
+              while (frames1.length && frames1[0] !== frames2[0]) {
+                frames1.shift();
+              }
+              var length = Math.min(frames1.length, frames2.length);
+              // We are guaranteed that 1 starts before 2, but not that 1 ends
+              // before 2, so we must truncate to shortest.
+              assert.ok(length);
+              assert.deepEqual(
+                frames1.slice(0, length),
+                frames2.slice(0, length)
+              );
+              done();
+            }
+          };
+        })();
+
+        new Live(dev)
+          .close(100)
+          .on('close', onClose)
+          .on('data', function (buf) { frames1.push(buf.toString('hex')); });
+
+        new Live(dev)
+          .close(100)
+          .on('close', onClose)
+          .on('data', function (buf) { frames2.push(buf.toString('hex')); });
 
       });
 
@@ -704,7 +716,7 @@
         // that frames emitted by the machine monitoring get captured (also
         // tested on a MacBook Air via Wireshark).
 
-        var capture = new Live();
+        var capture = new Live(dev);
         var frame = new Buffer('000019006f08000066be02f80000000012309e098004d2a400c4006e008438355f8e8a486fb74b', 'hex');
         var found = false;
 

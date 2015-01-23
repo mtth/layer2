@@ -63,7 +63,6 @@
           } else {
             if (!finished) {
               finished = true;
-              this.close();
               save.end();
             }
           }

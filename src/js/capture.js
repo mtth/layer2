@@ -46,14 +46,6 @@
 
     this.getMaxFrameSize = function () { return wrapper.getMaxFrameSize(); };
 
-    this.close = function (timeout) {
-
-      var self = this;
-      setTimeout(function () { self.push(null); }, timeout || 0);
-      return this;
-
-    };
-
     // "Private" methods (to be used by subclasses). Similarly to above we
     // don't attach them to the prototype (which actually also lets us have a
     // small performance gain by speeding up method calls).
@@ -118,8 +110,7 @@
       function frameHandler(frameOffset, bufOverflow, frameOverflow) {
 
         if (frameOverflow) {
-          self.emit('error', new Error('Frame truncation.'));
-          // Don't return though, let frame through in case this is caught.
+          return self.emit('error', new Error('Frame truncation.'));
         }
         if (bufOverflow > - maxFrameSize) {
           if (bufOverflow <= 0) { // Safety.
@@ -151,7 +142,6 @@
    */
   function Live(dev, opts) {
 
-    dev = dev || Live.getDefaultDevice();
     opts = opts || {};
     var monitor = opts.monitor || false;
     var promisc = opts.promisc || false;
@@ -168,6 +158,7 @@
       .setPromisc(promisc)
       .setMaxFrameSize(maxFrameSize)
       .setBufferSize(bufferSize)
+      .setTimeout(1) // Non-blocking doesn't work on all platforms.
       .activate()
       .setFilter(filter);
 
@@ -251,6 +242,13 @@
 
   };
 
+  Live.prototype.close = function (timeout) {
+
+    setTimeout(this.end.bind(this), timeout || 0);
+    return this;
+
+  };
+
   /**
    * Frame capture stream from saved file.
    *
@@ -289,7 +287,7 @@
           this.push(this._getFrame());
         } else {
           // We've reached EOF.
-          this.close();
+          this.push(null);
         }
       });
     } else {
