@@ -497,7 +497,7 @@
     maybe(describe, hasActiveDevice())('Live', function () {
 
       var Live = layer2.capture.Live;
-      var dev = Live.getDefaultDevice();
+      var dev = layer2.capture.getDefaultDevice();
 
       beforeEach(function () {
         // Make sure there are some frames to listen to.
@@ -804,7 +804,7 @@
 
     var device;
     try {
-      device = layer2.capture.Live.getDefaultDevice();
+      device = layer2.capture.getDefaultDevice();
     } catch (err) {
       device = null;
     }

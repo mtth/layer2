@@ -236,12 +236,6 @@
 
   };
 
-  Live.getDefaultDevice = function () {
-
-    return addon.getDefaultDevice();
-
-  };
-
   Live.prototype.close = function (timeout) {
 
     setTimeout(this.end.bind(this), timeout || 0);
@@ -385,12 +379,19 @@
 
   }
 
+  function getDefaultDevice() {
+
+    return addon.getDefaultDevice();
+
+  }
+
   // Export things.
 
   root.exports = {
     Live: Live,
     Replay: Replay,
     Save: Save,
+    getDefaultDevice: getDefaultDevice,
     summarize: summarize
   };
 
