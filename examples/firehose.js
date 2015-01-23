@@ -5,7 +5,7 @@
 
   var layer2 = require('../src/js');
 
-  var device = layer2.capture.Live.getDefaultDevice();
+  var device = layer2.capture.getDefaultDevice();
   var capture = new layer2.capture.Live(device, {monitor: true});
   var decoder = new layer2.Decoder();
 
