@@ -43,10 +43,18 @@ void init(v8::Handle<v8::Object> exports) {
 
   // Decoding.
 
-  exports->Set(
-    NanNew("decodeRadiotap"),
-    NanNew<FunctionTemplate>(decode_radiotap)->GetFunction()
-  );
+  Local<FunctionTemplate> tpl2 = NanNew<FunctionTemplate>(RadiotapDecoder::init);
+  tpl2->SetClassName(NanNew("RadiotapDecoder"));
+  tpl2->InstanceTemplate()->SetInternalFieldCount(1);
+  NODE_SET_PROTOTYPE_METHOD(tpl2, "decode", RadiotapDecoder::decode);
+  exports->Set(NanNew("RadiotapDecoder"), tpl2->GetFunction());
+
+  // RadiotapDecoder::init();
+
+  // exports->Set(
+  //   NanNew("decodeRadiotap"),
+  //   NanNew<FunctionTemplate>(RadiotapDecoder::decode)->GetFunction()
+  // );
 
   // Utilities.
 

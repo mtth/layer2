@@ -24,51 +24,6 @@
 #include "extract.hpp"
 #include "radiotap.hpp"
 
-using v8::Boolean;
-using v8::FunctionTemplate;
-using v8::Integer;
-using v8::Number;
-using v8::Handle;
-using v8::Local;
-using v8::Object;
-using v8::String;
-
-struct ieee80211_radiotap_header {
-  uint8_t it_version;
-  uint8_t it_pad;
-  uint16_t it_len;
-  uint32_t  it_present;
-};
-
-enum ieee80211_radiotap_type {
-  RTAP_TSFT = 0,
-  RTAP_FLAGS = 1,
-  RTAP_RATE = 2,
-  RTAP_CHANNEL = 3,
-  RTAP_FHSS = 4,
-  RTAP_DBM_ANTSIGNAL = 5,
-  RTAP_DBM_ANTNOISE = 6,
-  RTAP_LOCK_QUALITY = 7,
-  RTAP_TX_ATTENUATION = 8,
-  RTAP_DB_TX_ATTENUATION = 9,
-  RTAP_DBM_TX_POWER = 10,
-  RTAP_ANTENNA = 11,
-  RTAP_DB_ANTSIGNAL = 12,
-  RTAP_DB_ANTNOISE = 13,
-  RTAP_RX_FLAGS = 14,
-  /* NB: gap for netbsd definitions */
-  RTAP_XCHANNEL = 18,
-  RTAP_MCS = 19,
-  RTAP_NAMESPACE = 29,
-  RTAP_VENDOR_NAMESPACE = 30,
-  RTAP_EXT = 31
-};
-
-struct radiotap_state {
-  uint32_t present;
-  uint8_t rate;
-};
-
 /* channel attributes */
 #define CHAN_TURBO  0x00010 /* Turbo channel */
 #define CHAN_CCK  0x00020 /* CCK channel */
@@ -130,6 +85,63 @@ struct radiotap_state {
 #define RTAP_MCS_STBC_SHIFT 5
 
 #define MAX_MCS_INDEX 76
+
+#define CHAN_FHSS (CHAN_2GHZ | CHAN_GFSK)
+#define CHAN_A (CHAN_5GHZ | CHAN_OFDM)
+#define CHAN_B (CHAN_2GHZ | CHAN_CCK)
+#define CHAN_PUREG (CHAN_2GHZ | CHAN_OFDM)
+#define CHAN_G (CHAN_2GHZ | CHAN_DYN)
+
+#define IS_CHAN_FHSS(flags) ((flags & CHAN_FHSS) == CHAN_FHSS)
+#define IS_CHAN_A(flags) ((flags & CHAN_A) == CHAN_A)
+#define IS_CHAN_B(flags) ((flags & CHAN_B) == CHAN_B)
+#define IS_CHAN_PUREG(flags) ((flags & CHAN_PUREG) == CHAN_PUREG)
+#define IS_CHAN_G(flags) ((flags & CHAN_G) == CHAN_G)
+#define IS_CHAN_ANYG(flags) (IS_CHAN_PUREG(flags) || IS_CHAN_G(flags))
+
+#define BITNO_32(x) (((x) >> 16) ? 16 + BITNO_16((x) >> 16) : BITNO_16((x)))
+#define BITNO_16(x) (((x) >> 8) ? 8 + BITNO_8((x) >> 8) : BITNO_8((x)))
+#define BITNO_8(x) (((x) >> 4) ? 4 + BITNO_4((x) >> 4) : BITNO_4((x)))
+#define BITNO_4(x) (((x) >> 2) ? 2 + BITNO_2((x) >> 2) : BITNO_2((x)))
+#define BITNO_2(x) (((x) & 2) ? 1 : 0)
+#define BIT(n)  (1U << n)
+#define IS_EXTENDED(__p) (EXTRACT_LE_32BITS(__p) & BIT(RTAP_EXT)) != 0
+
+struct ieee80211_radiotap_header {
+  uint8_t it_version;
+  uint8_t it_pad;
+  uint16_t it_len;
+  uint32_t  it_present;
+};
+
+enum ieee80211_radiotap_type {
+  RTAP_TSFT = 0,
+  RTAP_FLAGS = 1,
+  RTAP_RATE = 2,
+  RTAP_CHANNEL = 3,
+  RTAP_FHSS = 4,
+  RTAP_DBM_ANTSIGNAL = 5,
+  RTAP_DBM_ANTNOISE = 6,
+  RTAP_LOCK_QUALITY = 7,
+  RTAP_TX_ATTENUATION = 8,
+  RTAP_DB_TX_ATTENUATION = 9,
+  RTAP_DBM_TX_POWER = 10,
+  RTAP_ANTENNA = 11,
+  RTAP_DB_ANTSIGNAL = 12,
+  RTAP_DB_ANTNOISE = 13,
+  RTAP_RX_FLAGS = 14,
+  /* NB: gap for netbsd definitions */
+  RTAP_XCHANNEL = 18,
+  RTAP_MCS = 19,
+  RTAP_NAMESPACE = 29,
+  RTAP_VENDOR_NAMESPACE = 30,
+  RTAP_EXT = 31
+};
+
+struct radiotap_state {
+  uint32_t present;
+  uint8_t rate;
+};
 
 static const float ieee80211_float_htrates[MAX_MCS_INDEX+1][2][2] = {
   /* MCS  0  */
@@ -518,24 +530,50 @@ static const float ieee80211_float_htrates[MAX_MCS_INDEX+1][2][2] = {
   },
 };
 
-#define CHAN_FHSS (CHAN_2GHZ | CHAN_GFSK)
-#define CHAN_A (CHAN_5GHZ | CHAN_OFDM)
-#define CHAN_B (CHAN_2GHZ | CHAN_CCK)
-#define CHAN_PUREG (CHAN_2GHZ | CHAN_OFDM)
-#define CHAN_G (CHAN_2GHZ | CHAN_DYN)
+#define PERSIST(k, n) k = Persistent<String>::New(NanNew(n))
 
-#define IS_CHAN_FHSS(flags) ((flags & CHAN_FHSS) == CHAN_FHSS)
-#define IS_CHAN_A(flags) ((flags & CHAN_A) == CHAN_A)
-#define IS_CHAN_B(flags) ((flags & CHAN_B) == CHAN_B)
-#define IS_CHAN_PUREG(flags) ((flags & CHAN_PUREG) == CHAN_PUREG)
-#define IS_CHAN_G(flags) ((flags & CHAN_G) == CHAN_G)
-#define IS_CHAN_ANYG(flags) (IS_CHAN_PUREG(flags) || IS_CHAN_G(flags))
+NAN_METHOD(RadiotapDecoder::init) {
 
-static void add_chaninfo(Local<Object> obj, int freq, int flags) {
+  NanScope();
+  precondition(args.Length() == 0);
+
+  RadiotapDecoder *decoder = new RadiotapDecoder();
+  decoder->Wrap(args.This());
+
+  PERSIST(decoder->RTAP_ANTENNA_KEY, "antenna");
+  PERSIST(decoder->RTAP_BAD_FCS_KEY, "badFcs");
+  PERSIST(decoder->RTAP_CFP_KEY, "cfp");
+  PERSIST(decoder->RTAP_CHANNEL_FLAGS_KEY, "channelFlags");
+  PERSIST(decoder->RTAP_CHANNEL_FREQ_KEY, "channelFreqMHz");
+  PERSIST(decoder->RTAP_ENCRYPTED_KEY, "encrypted");
+  PERSIST(decoder->RTAP_FH_PAT_KEY, "fhPat");
+  PERSIST(decoder->RTAP_FH_SET_KEY, "fhSet");
+  PERSIST(decoder->RTAP_FRAG_KEY, "fragmented");
+  PERSIST(decoder->RTAP_MCS_KEY, "mcs");
+  PERSIST(decoder->RTAP_MCS_BW_KEY, "mcsBandwidth");
+  PERSIST(decoder->RTAP_MCS_FEC_TYPE_KEY, "mcsFecType");
+  PERSIST(decoder->RTAP_MCS_GI_KEY, "mcsGuardInterval");
+  PERSIST(decoder->RTAP_MCS_HT_FORMAT_KEY, "mcsHtFormat");
+  PERSIST(decoder->RTAP_MCS_RX_STBC_KEY, "mcsRxStbc");
+  PERSIST(decoder->RTAP_NOISE_DB_KEY, "noiseDb");
+  PERSIST(decoder->RTAP_RATE_KEY, "rateMbPerS");
+  PERSIST(decoder->RTAP_SHORT_KEY, "shortPreamble");
+  PERSIST(decoder->RTAP_SIGNAL_DB_KEY, "signalDb");
+  PERSIST(decoder->RTAP_SQ_KEY, "sq");
+  PERSIST(decoder->RTAP_TSFT_KEY, "tsftUs");
+  PERSIST(decoder->RTAP_TX_POWER_KEY, "txPower");
+  PERSIST(decoder->RTAP_TX_POWER_DB_KEY, "txPowerDb");
+  PERSIST(decoder->RTAP_TX_POWER_DBM_KEY, "txPowerDbm");
+
+  NanReturnThis();
+
+}
+
+void RadiotapDecoder::add_chaninfo(Local<Object> obj, int freq, int flags) {
 
   // TODO: use array for flags (instead of appending to same string).
 
-  SET_INT(obj, "channelFreqMHz", freq);
+  SET_INT(obj, RTAP_CHANNEL_FREQ_KEY, freq);
 
   std::string s = "";
   if (IS_CHAN_FHSS(flags)) {
@@ -569,11 +607,11 @@ static void add_chaninfo(Local<Object> obj, int freq, int flags) {
   else if (flags & CHAN_HT40U)
     s += " ht/40+";
 
-  SET_STR(obj, "channelFlags", s);
+  SET_STR(obj, RTAP_CHANNEL_FLAGS_KEY, s);
 
 }
 
-static int add_field(
+int RadiotapDecoder::add_field(
   Local<Object> obj,
   struct cpack_state *s,
   uint32_t bit,
@@ -714,52 +752,52 @@ static int add_field(
     add_chaninfo(obj, u.u16, u2.u16);
     break;
   case RTAP_FHSS:
-    SET_INT(obj, "fhset", u.u16 & 0xff);
-    SET_INT(obj, "fhpat", (u.u16 >> 8) & 0xff);
+    SET_INT(obj, RTAP_FH_SET_KEY, u.u16 & 0xff);
+    SET_INT(obj, RTAP_FH_PAT_KEY, (u.u16 >> 8) & 0xff);
     break;
   case RTAP_RATE:
     if (u.u8 >= 0x80 && u.u8 <= 0x8f) {
-      SET_INT(obj, "mcs", u.u8 & 0x7f);
+      SET_INT(obj, RTAP_MCS_KEY, u.u8 & 0x7f);
     } else {
-      SET_NUM(obj, "rateMbPerS", 0.5 * u.u8);
+      SET_NUM(obj, RTAP_RATE_KEY, 0.5 * u.u8);
     }
     break;
   case RTAP_DBM_ANTSIGNAL:
-    SET_INT(obj, "signalDb", u.i8);
+    SET_INT(obj, RTAP_SIGNAL_DB_KEY, u.i8);
     break;
   case RTAP_DBM_ANTNOISE:
-    SET_INT(obj, "noiseDb", u.i8);
+    SET_INT(obj, RTAP_NOISE_DB_KEY, u.i8);
     break;
   case RTAP_DB_ANTSIGNAL:
-    SET_INT(obj, "signalDb", u.u8);
+    SET_INT(obj, RTAP_SIGNAL_DB_KEY, u.u8);
     break;
   case RTAP_DB_ANTNOISE:
-    SET_INT(obj, "noiseDb", u.u8);
+    SET_INT(obj, RTAP_NOISE_DB_KEY, u.u8);
     break;
   case RTAP_LOCK_QUALITY:
-    SET_INT(obj, "sq", u.u16);
+    SET_INT(obj, RTAP_SQ_KEY, u.u16);
     break;
   case RTAP_TX_ATTENUATION:
-    SET_INT(obj, "txPower", -(int) u.u16);
+    SET_INT(obj, RTAP_TX_POWER_KEY, -(int) u.u16);
     break;
   case RTAP_DB_TX_ATTENUATION:
-    SET_INT(obj, "txPowerDb", -(int) u.u8);
+    SET_INT(obj, RTAP_TX_POWER_DB_KEY, -(int) u.u8);
     break;
   case RTAP_DBM_TX_POWER:
-    SET_INT(obj, "txPowerDbm", u.i8);
+    SET_INT(obj, RTAP_TX_POWER_DBM_KEY, u.i8);
     break;
   case RTAP_FLAGS:
-    SET_BOOL(obj, "cfp", u.u8 & RTAP_F_CFP);
-    SET_BOOL(obj, "shortPreamble", u.u8 & RTAP_F_SHORTPRE);
-    SET_BOOL(obj, "encrypted", u.u8 & RTAP_F_WEP); // Official name: wep.
-    SET_BOOL(obj, "fragmented", u.u8 & RTAP_F_FRAG);
-    SET_BOOL(obj, "badFcs", u.u8 & RTAP_F_BADFCS);
+    SET_BOOL(obj, RTAP_CFP_KEY, u.u8 & RTAP_F_CFP);
+    SET_BOOL(obj, RTAP_SHORT_KEY, u.u8 & RTAP_F_SHORTPRE);
+    SET_BOOL(obj, RTAP_ENCRYPTED_KEY, u.u8 & RTAP_F_WEP); // Official name: wep.
+    SET_BOOL(obj, RTAP_FRAG_KEY, u.u8 & RTAP_F_FRAG);
+    SET_BOOL(obj, RTAP_BAD_FCS_KEY, u.u8 & RTAP_F_BADFCS);
     break;
   case RTAP_ANTENNA:
-    SET_INT(obj, "antenna", u.u8);
+    SET_INT(obj, RTAP_ANTENNA_KEY, u.u8);
     break;
   case RTAP_TSFT:
-    SET_INT(obj, "tsftUs", u.u64);
+    SET_INT(obj, RTAP_TSFT_KEY, u.u64);
     break;
   case RTAP_RX_FLAGS:
     /* Do nothing for now */
@@ -774,8 +812,7 @@ static int add_field(
     if (u.u8 & RTAP_MCS_MCS_INDEX_KNOWN) {
       if (u3.u8 <= MAX_MCS_INDEX) {
         if (u.u8 & (RTAP_MCS_BANDWIDTH_KNOWN|RTAP_MCS_GUARD_INTERVAL_KNOWN)) {
-          htrate =
-            ieee80211_float_htrates \
+          htrate = ieee80211_float_htrates \
               [u3.u8] \
               [((u2.u8 & RTAP_MCS_BANDWIDTH_MASK) == RTAP_MCS_BANDWIDTH_40 ? 1 : 0)] \
               [((u2.u8 & RTAP_MCS_SHORT_GI) ? 1 : 0)];
@@ -786,26 +823,24 @@ static int add_field(
         htrate = 0.0;
       }
       if (htrate != 0.0) {
-        SET_NUM(obj, "rateMbPerS", htrate);
-        SET_INT(obj, "mcs", u3.u8);
-      } else {
-        SET_INT(obj, "mcs", u3.u8);
+        SET_NUM(obj, RTAP_RATE_KEY, htrate);
       }
+      SET_INT(obj, RTAP_MCS_KEY, u3.u8);
     }
     if (u.u8 & RTAP_MCS_BANDWIDTH_KNOWN) {
-      SET_STR(obj, "mcsBandwidth", bandwidth[u2.u8 & RTAP_MCS_BANDWIDTH_MASK]);
+      SET_STR(obj, RTAP_MCS_BW_KEY, bandwidth[u2.u8 & RTAP_MCS_BANDWIDTH_MASK]);
     }
     if (u.u8 & RTAP_MCS_GUARD_INTERVAL_KNOWN) {
-      SET_STR(obj, "mcsGuardInterval", (u2.u8 & RTAP_MCS_SHORT_GI) ? "short" : "lon");
+      SET_STR(obj, RTAP_MCS_GI_KEY, (u2.u8 & RTAP_MCS_SHORT_GI) ? "short" : "lon");
     }
     if (u.u8 & RTAP_MCS_HT_FORMAT_KNOWN) {
-      SET_STR(obj, "mcsHtFormat", (u2.u8 & RTAP_MCS_HT_GREENFIELD) ? "greenfield" : "mixed");
+      SET_STR(obj, RTAP_MCS_HT_FORMAT_KEY, (u2.u8 & RTAP_MCS_HT_GREENFIELD) ? "greenfield" : "mixed");
     }
     if (u.u8 & RTAP_MCS_FEC_TYPE_KNOWN) {
-      SET_STR(obj, "mcsFecType", (u2.u8 & RTAP_MCS_FEC_LDPC) ? "LDPC" : "BCC");
+      SET_STR(obj, RTAP_MCS_FEC_TYPE_KEY, (u2.u8 & RTAP_MCS_FEC_LDPC) ? "LDPC" : "BCC");
     }
     if (u.u8 & RTAP_MCS_STBC_KNOWN) {
-      SET_INT(obj, "mcsRxStbc", (u2.u8 & RTAP_MCS_STBC_MASK) >> RTAP_MCS_STBC_SHIFT);
+      SET_INT(obj, RTAP_MCS_RX_STBC_KEY, (u2.u8 & RTAP_MCS_STBC_MASK) >> RTAP_MCS_STBC_SHIFT);
     }
     break;
     }
@@ -814,7 +849,7 @@ static int add_field(
 
 }
 
-NAN_METHOD(decode_radiotap) {
+NAN_METHOD(RadiotapDecoder::decode) {
 
   NanScope();
   precondition(
@@ -823,18 +858,12 @@ NAN_METHOD(decode_radiotap) {
     args[1]->IsInt32()
   );
 
+  RadiotapDecoder* decoder = ObjectWrap::Unwrap<RadiotapDecoder>(args.This());
+
   Local<Object> frame = NanNew<Object>();
   Local<Object> raw_frame = args[0]->ToObject();
   u_char *p = (u_char *) node::Buffer::Data(raw_frame);
   u_int frame_length = node::Buffer::Length(raw_frame);
-
-#define BITNO_32(x) (((x) >> 16) ? 16 + BITNO_16((x) >> 16) : BITNO_16((x)))
-#define BITNO_16(x) (((x) >> 8) ? 8 + BITNO_8((x) >> 8) : BITNO_8((x)))
-#define BITNO_8(x) (((x) >> 4) ? 4 + BITNO_4((x) >> 4) : BITNO_4((x)))
-#define BITNO_4(x) (((x) >> 2) ? 2 + BITNO_2((x) >> 2) : BITNO_2((x)))
-#define BITNO_2(x) (((x) & 2) ? 1 : 0)
-#define BIT(n)  (1U << n)
-#define IS_EXTENDED(__p) (EXTRACT_LE_32BITS(__p) & BIT(RTAP_EXT)) != 0
 
   struct cpack_state cpacker;
   struct ieee80211_radiotap_header *hdr;
@@ -894,7 +923,7 @@ NAN_METHOD(decode_radiotap) {
         bit = (enum ieee80211_radiotap_type)
             (bit0 + BITNO_32(present ^ next_present));
 
-        if (add_field(frame, &cpacker, bit, &flags, &state, presentflags) != 0)
+        if (decoder->add_field(frame, &cpacker, bit, &flags, &state, presentflags) != 0)
           break;
       }
     }
@@ -907,14 +936,7 @@ NAN_METHOD(decode_radiotap) {
     // TODO: Set body as slice of original buffer.
     // return len + ieee802_11_print(ndo, p + len, length - len, caplen - len, pad, fcslen);
     NanReturnValue(frame);
+
   }
-
-#undef BITNO_32
-#undef BITNO_16
-#undef BITNO_8
-#undef BITNO_4
-#undef BITNO_2
-#undef BIT
-
 
 }

@@ -11,15 +11,16 @@
       addon = require('../src/js/utils').requireAddon();
 
   var benchmark = new utils.Benchmark();
+  var decoder = new addon.RadiotapDecoder();
 
   benchmark
     .addFn('object creation', function (done) {
 
       var buf = new Buffer('000019006f080000d51566410000000012301c164001d2a401', 'hex');
-      var i = 10000;
+      var i = 100;
 
       while (i--) {
-        addon.decodeRadiotap(buf, 0);
+        decoder.decode(buf, 0);
       }
       done();
 
