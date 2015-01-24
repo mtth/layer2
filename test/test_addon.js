@@ -8,19 +8,6 @@
 
   describe('Addon', function () {
 
-    describe('Utilities', function () {
-
-      it('can parse MAC addresses', function () {
-
-        var buf = new Buffer('0123456789ab001122334455', 'hex');
-        assert.equal(addon.readMacAddr(buf, 0), '01:23:45:67:89:ab');
-        assert.equal(addon.readMacAddr(buf, 6), '00:11:22:33:44:55');
-        assert.throws(function () { addon.readMacAddr(buf, 8); });
-
-      });
-
-    });
-
     describe('Pcap Wrapper', function () {
 
       var maybeIt = maybe(it, hasActiveDevice()); // jshint ignore: line
@@ -201,6 +188,35 @@
       // Tests that require a live interface.
 
       // TODO: maybeIt('', function () {});
+
+    });
+
+    describe('Decoders', function () {
+
+      it('can decode radiotap headers', function () {
+
+        var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex');
+        console.dir(addon.decodeRadiotap(buf, 0));
+        assert.deepEqual(
+          addon.decodeRadiotap(buf, 0),
+          {}
+        );
+
+      });
+
+
+    });
+
+    describe('Utilities', function () {
+
+      it('can parse MAC addresses', function () {
+
+        var buf = new Buffer('0123456789ab001122334455', 'hex');
+        assert.equal(addon.readMacAddr(buf, 0), '01:23:45:67:89:ab');
+        assert.equal(addon.readMacAddr(buf, 6), '00:11:22:33:44:55');
+        assert.throws(function () { addon.readMacAddr(buf, 8); });
+
+      });
 
     });
 
