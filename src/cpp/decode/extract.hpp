@@ -26,11 +26,11 @@
 
 #define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
 
-#define SET_BOOL(obj, s, v) (obj)->Set(NanNew<String>((s)), NanNew<Boolean>((v)))
-#define SET_INT(obj, s, v) (obj)->Set(NanNew<String>((s)), NanNew<Integer>((v)))
-#define SET_NUM(obj, s, v) (obj)->Set(NanNew<String>((s)), NanNew<Number>((v)))
-#define SET_STR(obj, s, v) (obj)->Set(NanNew<String>((s)), NanNew<String>((v)))
-#define SET_NULL(obj, s) (obj)->Set(NanNew<String>((s)), NanNull())
+#define SET_BOOL(obj, s, v) (obj)->Set((s), NanNew<Boolean>((v)))
+#define SET_INT(obj, s, v) (obj)->Set((s), NanNew<Integer>((v)))
+#define SET_NUM(obj, s, v) (obj)->Set((s), NanNew<Number>((v)))
+#define SET_STR(obj, s, v) (obj)->Set((s), NanNew<String>((v)))
+#define SET_NULL(obj, s) (obj)->Set((s), NanNull())
 
 /*
  * Macros to extract possibly-unaligned big-endian integral values.
