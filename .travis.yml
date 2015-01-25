@@ -10,18 +10,5 @@ os:
 
 before_install:
   - env | sort
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -qq update; fi
-
-install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then \
-      sudo apt-get install libpcap-dev apt-get install libpcap-dev libssl-dev cmake && \
-      git clone git@github.com:mfontanini/libtins.git && \
-      cd libtins && \
-      mkdir build && \
-      cd build && \
-      cmake ../ && \
-      make && \
-      sudo make install; \
-    fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install libtins; fi
-  - npm install
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sh scripts/install_linux.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sh scripts/install_osx.sh; fi
