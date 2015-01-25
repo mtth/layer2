@@ -1,5 +1,5 @@
+#include "frame.hpp"
 #include "pcap_wrapper.hpp"
-#include "decode/radiotap.hpp"
 #include "util.hpp"
 
 using v8::FunctionTemplate;
@@ -41,13 +41,9 @@ void init(v8::Handle<v8::Object> exports) {
 
   exports->Set(NanNew(className), tpl->GetFunction());
 
-  // Decoding.
+  // Frames (decoding).
 
-  RadioTapFrame::Init();
-  exports->Set(
-    NanNew("decodeRadioTap"),
-    NanNew<FunctionTemplate>(RadioTapFrame::NewInstance)->GetFunction()
-  );
+  Frame::Init(exports);
 
   // Utilities.
 

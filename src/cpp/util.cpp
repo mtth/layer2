@@ -1,6 +1,7 @@
 #include "util.hpp"
 #include <node_buffer.h>
 #include <pcap/pcap.h>
+#include <tins/tins.h>
 
 #define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
 
