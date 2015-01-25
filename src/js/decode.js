@@ -83,12 +83,6 @@
   }
   util.inherits(Decoder, stream.Transform);
 
-  Decoder.decode = function (linkType, buf) {
-
-    return new addon.Frame(linkType, buf);
-
-  };
-
   root.exports = {
     Decoder: Decoder
   };

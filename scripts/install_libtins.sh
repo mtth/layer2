@@ -14,5 +14,4 @@ cmake ../
 make
 sudo make install
 cd ../../..
-rm -r tmp
-npm install
+rm -rf tmp
