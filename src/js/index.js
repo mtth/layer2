@@ -3,12 +3,12 @@
 (function (root) {
   'use strict';
 
-  var addon = require('./utils').requireAddon();
+  var decode = require('./decode');
 
   root.exports = {
     capture: require('./capture'),
-    Decoder: require('./decode').Decoder,
-    Frame: addon.Frame
+    Decoder: decode.Decoder,
+    Frame: decode.Frame
   };
 
 })(module);
