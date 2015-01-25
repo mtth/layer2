@@ -22,11 +22,9 @@
 
       while (i--) {
         frame = new addon.Frame(127, buf);
-        pdu = frame.getPdu(3);
-        freq = pdu.getChannel();
-        freq = pdu.getChannel();
-        freq = pdu.getChannel();
-        types = frame.getPduTypes();
+        // pdu = frame.getPdu(3);
+        // types = frame.getPduTypes();
+        frame.inspect();
       }
       done();
 

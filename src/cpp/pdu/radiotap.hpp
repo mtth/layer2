@@ -8,7 +8,7 @@ class RadioTapPdu : public node::ObjectWrap {
 
 public:
   static void Init();
-  static v8::Persistent<v8::Function> constructor;
+  static v8::Persistent<v8::FunctionTemplate> constructor;
   Tins::RadioTap *value;
 
 private:

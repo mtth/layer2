@@ -105,10 +105,12 @@ NAN_METHOD(Frame::GetPdu) {
   // Create corresponding JS wrapper instance.
   const unsigned argc = 1;
   v8::Handle<v8::Value> argv[argc] = {args[0]};
+  v8::Local<v8::FunctionTemplate> constructorHandle;
   v8::Local<v8::Object> pduInstance;
   switch (pdu->pdu_type()) {
     case Tins::PDU::RADIOTAP:
-      pduInstance = RadioTapPdu::constructor->NewInstance(argc, argv);
+      constructorHandle = NanNew<v8::FunctionTemplate>(RadioTapPdu::constructor);
+      pduInstance = constructorHandle->GetFunction()->NewInstance(argc, argv);
       ((RadioTapPdu *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::RadioTap *>(pdu);
       break;
     default:
@@ -131,7 +133,7 @@ NAN_METHOD(Frame::GetPduTypes) {
   Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
 
   int i = 0;
-  v8::Handle<v8::Array> pduTypes = v8::Array::New();
+  v8::Handle<v8::Array> pduTypes = NanNew<v8::Array>();
   Tins::PDU *pdu = frame->_pdu;
   while (pdu) {
     pduTypes->Set(i++, NanNew<v8::Integer>(pdu->pdu_type()));
