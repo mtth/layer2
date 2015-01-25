@@ -2,7 +2,7 @@
 
 RadioTapPdu::RadioTapPdu() {}
 RadioTapPdu::~RadioTapPdu() {}
-v8::Persistent<v8::Function> RadioTapPdu::constructor;
+v8::Persistent<v8::FunctionTemplate> RadioTapPdu::constructor;
 
 /**
  * Required for function template.
@@ -38,12 +38,11 @@ NAN_METHOD(RadioTapPdu::GetChannel) {
  */
 void RadioTapPdu::Init() {
 
-  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
+  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+  NanAssignPersistent(constructor, tpl);
   tpl->SetClassName(v8::String::NewSymbol("RadioTapPdu"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "getChannel", RadioTapPdu::GetChannel);
-
-  constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getChannel", GetChannel);
 
 }
