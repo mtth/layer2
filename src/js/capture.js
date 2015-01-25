@@ -385,6 +385,12 @@
 
   }
 
+  function getLinkInfo(linkType) {
+
+    return addon.getLinkInfo(linkType);
+
+  }
+
   // Export things.
 
   root.exports = {
@@ -392,6 +398,7 @@
     Replay: Replay,
     Save: Save,
     getDefaultDevice: getDefaultDevice,
+    getLinkInfo: getLinkInfo,
     summarize: summarize
   };
 

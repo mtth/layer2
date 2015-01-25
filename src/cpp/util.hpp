@@ -9,7 +9,7 @@
  *
  */
 NAN_METHOD(get_default_dev);
+NAN_METHOD(get_link_info);
 NAN_METHOD(read_mac_addr);
-NAN_METHOD(decode);
 
 #endif

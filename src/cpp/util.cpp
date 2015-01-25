@@ -7,10 +7,10 @@
 
 using namespace v8;
 
-static const char hex[] = "0123456789abcdef";
-
 // Parse MAC address.
 NAN_METHOD(read_mac_addr) {
+
+  static const char hex[] = "0123456789abcdef";
 
   NanScope();
   precondition(
@@ -77,5 +77,31 @@ found:
   name = NanNew<String>(dev->name);
   pcap_freealldevs(alldevs);
   NanReturnValue(name);
+
+}
+
+NAN_METHOD(get_link_info) {
+
+  NanScope();
+  precondition(
+    args.Length() == 1 &&
+    args[0]->IsInt32()
+  );
+
+  int link = args[0]->Int32Value();
+  const char *name = pcap_datalink_val_to_name(link);
+  if (name == NULL) {
+    NanReturnNull();
+  }
+
+  Local<Object> info = NanNew<Object>();
+  info->Set(NanNew("name"), NanNew(name));
+
+  const char *description = pcap_datalink_val_to_description(link);
+  if (description != NULL) {
+    info->Set(NanNew("description"), NanNew(description));
+  }
+
+  NanReturnValue(info);
 
 }

@@ -53,6 +53,11 @@ void init(v8::Handle<v8::Object> exports) {
   );
 
   exports->Set(
+    NanNew("getLinkInfo"),
+    NanNew<FunctionTemplate>(get_link_info)->GetFunction()
+  );
+
+  exports->Set(
     NanNew("readMacAddr"),
     NanNew<FunctionTemplate>(read_mac_addr)->GetFunction()
   );
