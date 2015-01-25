@@ -18,7 +18,7 @@
           .fromSavefile('./test/dat/mesh780.pcap');
 
         assert.equal(wrapper.getMaxFrameSize(), 65535);
-        assert.equal(wrapper.getLinkType(), 'IEEE802_11_RADIO');
+        assert.equal(wrapper.getLinkType(), 127); // Radiotap.
         wrapper.close();
 
       });
@@ -191,7 +191,7 @@
 
     });
 
-    describe('Decoders', function () {
+    describe.skip('Decoders', function () {
 
       it('can decode radiotap headers', function () {
 
@@ -215,6 +215,28 @@
         assert.equal(addon.readMacAddr(buf, 0), '01:23:45:67:89:ab');
         assert.equal(addon.readMacAddr(buf, 6), '00:11:22:33:44:55');
         assert.throws(function () { addon.readMacAddr(buf, 8); });
+
+      });
+
+      it('can return link infos', function () {
+
+        assert.equal(addon.getLinkInfo(-5), null); // Invalid type.
+
+        assert.deepEqual(
+          addon.getLinkInfo(127),
+          {
+            name: 'IEEE802_11_RADIO',
+            description: '802.11 plus radiotap header'
+          }
+        );
+
+        assert.deepEqual(
+          addon.getLinkInfo(0),
+          {
+            name: 'NULL',
+            description: 'BSD loopback'
+          }
+        );
 
       });
 

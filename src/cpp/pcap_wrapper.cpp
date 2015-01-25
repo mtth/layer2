@@ -388,8 +388,7 @@ NAN_METHOD(PcapWrapper::get_datalink) {
   check_handle_not_null(wrapper);
 
   int link = pcap_datalink(wrapper->handle);
-  const char *name = pcap_datalink_val_to_name(link);
-  NanReturnValue(NanNew(name == NULL ? "UNKNOWN" : name));
+  NanReturnValue(NanNew<Integer>(link));
 
 }
 
