@@ -17,7 +17,7 @@
 
   var stream = require('stream'),
       util = require('util'),
-      decoders = require('../utils').requireDirectory(__dirname);
+      addon = require('./utils').requireAddon();
 
   /**
    * Decoder stream class.
@@ -31,7 +31,6 @@
 
     opts = opts || {};
     var linkType = opts.linkType || null; // Inferred below.
-    var assumeValid = opts.assumeValid || false;
 
     stream.Transform.call(this, {objectMode: true});
 
@@ -57,27 +56,24 @@
 
     function activate(self) {
 
-      var decodeFn;
-      try {
-        decodeFn = getDecodeFn(linkType);
-      } catch (err) {
-        return self.emit('error', err);
+      if (!linkType) {
+        throw new Error('No link type specified.');
       }
 
       self._transform = function (data, encoding, callback) {
 
         var frame;
         try {
-          frame = decodeFn(data, assumeValid);
+          frame = new addon.Frame(linkType, data);
         } catch (err) {
           err.data = data;
           return callback(err);
         }
-        if (frame === null) {
-          this.emit('invalid', data);
-          callback();
-        } else {
+        if (frame.isValid()) {
           callback(null, frame);
+        } else {
+          this.emit('invalid', frame);
+          callback();
         }
 
       };
@@ -89,27 +85,9 @@
 
   Decoder.decode = function (linkType, buf) {
 
-    var decodeFn = getDecodeFn(linkType);
-    return decodeFn(buf);
+    return new addon.Frame(linkType, buf);
 
   };
-
-  Decoder.isSupported = function (linkType) {
-
-    return typeof linkType == 'string' && linkType.toUpperCase() in decoders;
-
-  };
-
-  function getDecodeFn(linkType) {
-
-    if (!linkType) {
-      throw new Error('No link type specified.');
-    } else if (!(linkType in decoders)) {
-      throw new Error('Unsupported link type: ' + linkType);
-    }
-    return decoders[linkType];
-
-  }
 
   root.exports = {
     Decoder: Decoder

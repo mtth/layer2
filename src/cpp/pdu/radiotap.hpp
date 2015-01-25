@@ -16,7 +16,6 @@ private:
   ~RadioTapPdu();
   static NAN_METHOD(New);
   static NAN_METHOD(GetChannel);
-  // static NAN_METHOD(GetRate);
 
 };
 

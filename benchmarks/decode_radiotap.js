@@ -11,16 +11,22 @@
       addon = require('../src/js/utils').requireAddon();
 
   var benchmark = new utils.Benchmark();
-  var decoder = new addon.RadiotapDecoder();
+  // var decoder = new addon.RadiotapDecoder();
 
   benchmark
     .addFn('object creation', function (done) {
 
-      var buf = new Buffer('000019006f080000d51566410000000012301c164001d2a401', 'hex');
-      var i = 100;
+      var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex');
+      var i = 10000;
+      var frame, pdu, freq, types;
 
       while (i--) {
-        decoder.decode(buf, 0);
+        frame = new addon.Frame(127, buf);
+        pdu = frame.getPdu(3);
+        freq = pdu.getChannel();
+        freq = pdu.getChannel();
+        freq = pdu.getChannel();
+        types = frame.getPduTypes();
       }
       done();
 
