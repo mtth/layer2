@@ -219,16 +219,10 @@ NAN_METHOD(PcapWrapper::from_savefile) {
 NAN_METHOD(PcapWrapper::from_dead) {
 
   NanScope();
-  precondition(args.Length() == 2 && args[0]->IsString() && args[1]->IsInt32());
+  precondition(args.Length() == 2 && args[0]->IsInt32() && args[1]->IsInt32());
   PcapWrapper* wrapper = ObjectWrap::Unwrap<PcapWrapper>(args.This());
 
-  // Extract datalink type.
-  String::Utf8Value datalink_name(args[0]->ToString());
-  int linktype = pcap_datalink_name_to_val((char *) *datalink_name);
-  if (linktype == -1) {
-    return NanThrowError("Invalid link type.");
-  }
-
+  int linktype = args[0]->Int32Value();
   int snaplen = args[1]->Int32Value();
   wrapper->handle = pcap_open_dead(linktype, snaplen);
   NanReturnThis();

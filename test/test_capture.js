@@ -29,7 +29,7 @@
 
       layer2.capture.summarize(captures.large.path, function (err, summary) {
         assert.deepEqual(summary, {
-          linkType: 'IEEE802_11_RADIO',
+          linkType: 127,
           maxFrameSize: 65535,
           nFrames: 780,
           nBytes: 118675
@@ -55,7 +55,7 @@
       it('returns the correct link type', function () {
 
         var capture = new Replay(captures.large.path);
-        assert.equal(capture.getLinkType(), 'IEEE802_11_RADIO');
+        assert.equal(capture.getLinkType(), 127);
 
       });
 
