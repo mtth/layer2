@@ -11,6 +11,6 @@
 
   capture
     .pipe(decoder)
-    .on('data', function (frame) { console.log(JSON.stringify(frame)); });
+    .on('data', function (frame) { console.log(frame); });
 
 })();

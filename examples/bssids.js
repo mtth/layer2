@@ -20,9 +20,9 @@
     .close(10000)
     .pipe(decoder)
     .on('data', function (frame) {
-      var bssid = frame.body.bssid;
-      if (bssid) {
-        bssids[bssid] = (bssids[bssid] || 0) + 1;
+      var pdu = frame.getPdu(layer2.pduTypes.DOT11_BEACON);
+      if (pdu) {
+        // bssids[bssid] = (bssids[bssid] || 0) + 1;
       }
     })
     .on('end', function () { console.dir(bssids); });

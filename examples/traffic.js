@@ -19,10 +19,11 @@
     .close(10000)
     .pipe(decoder)
     .on('data', function (frame) {
-      frame = frame.body; // Extract 802.11 frame from Radiotap header.
-      if (frame.type === 'data' && frame.body) {
-        var sa = frame.sa;
-        nBytesReceived[sa] = (nBytesReceived[sa] || 0) + frame.body.length;
+      var pdu = frame.getPdu(layer2.pduTypes.DOT11_QOS_DATA);
+      if (pdu) {
+        // TODO
+        // var sa = frame.sa;
+        // nBytesReceived[sa] = (nBytesReceived[sa] || 0) + frame.body.length;
       }
     })
     .on('end', function () { console.dir(nBytesReceived); });
