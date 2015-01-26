@@ -41,7 +41,8 @@
       var finished = false;
 
       new layer2.capture.Replay(srcPath)
-        .once('readable', function () {
+        .on('error', function (err) { cb(err); })
+        .on('data', function (buf) {
           if (save === null) {
             save = new layer2.capture.Save(fpath, {
               linkType: this.getLinkType()
@@ -54,9 +55,6 @@
                 }
               });
           }
-        })
-        .on('error', function (err) { cb(err); })
-        .on('data', function (buf) {
           nBytes += buf.length;
           if (nBytes < totalBytes) {
             save.write(buf);
