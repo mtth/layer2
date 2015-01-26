@@ -191,19 +191,19 @@
 
     });
 
-    describe.skip('Decoders', function () {
+    describe('Frame', function () {
 
-      it('can decode radiotap headers', function () {
+      it('supports radiotap', function () {
 
         var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex');
-        console.dir(addon.decodeRadiotap(buf, 0));
-        assert.deepEqual(
-          addon.decodeRadiotap(buf, 0),
-          {}
-        );
+        var frame = new addon.Frame(127, buf); // radiotap link type
+        var pdu = frame.getPdu(3); // radiotap pdutype
+        assert.deepEqual(pdu.getChannel(), {freq: 5180, type: 320});
+        assert.equal(pdu.getRate(), 12);
+        assert.equal(pdu.getSize(), 48);
+        assert.deepEqual(pdu.getDbm(), {signal: 218, noise: 160});
 
       });
-
 
     });
 
