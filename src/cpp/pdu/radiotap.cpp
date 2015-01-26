@@ -16,7 +16,7 @@ NAN_METHOD(RadioTapPdu::New) {
 
   RadioTapPdu* pdu = new RadioTapPdu();
   pdu->Wrap(args.This());
-  return args.This();
+  NanReturnThis();
 
 }
 
@@ -40,7 +40,7 @@ void RadioTapPdu::Init() {
 
   v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
   NanAssignPersistent(constructor, tpl);
-  tpl->SetClassName(v8::String::NewSymbol("RadioTapPdu"));
+  tpl->SetClassName(NanNew("RadioTapPdu"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "getChannel", GetChannel);
