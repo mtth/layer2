@@ -27,7 +27,12 @@ NAN_METHOD(RadioTapPdu::GetChannel) {
   NanScope();
 
   RadioTapPdu* pdu = ObjectWrap::Unwrap<RadioTapPdu>(args.This());
-  NanReturnValue(NanNew<v8::Integer>(pdu->value->channel_freq()));
+
+  v8::Local<v8::Object> channel = NanNew<v8::Object>();
+  channel->Set(NanNew("freq"), NanNew<v8::Integer>(pdu->value->channel_freq()));
+  channel->Set(NanNew("type"), NanNew<v8::Integer>(pdu->value->channel_type()));
+
+  NanReturnValue(channel);
   // TODO: return object with freq, rate, etc.
 
 }

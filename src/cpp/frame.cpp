@@ -79,6 +79,10 @@ NAN_METHOD(Frame::New) {
  * If the PDU type is found but currently not supported, an error will be
  * thrown.
  *
+ * Note that we add the frame back on the PDU to ensure that it won't be
+ * garbage collected before the PDU (otherwise methods called on the PDU would
+ * have undefined behavior).
+ *
  */
 NAN_METHOD(Frame::GetPdu) {
 
@@ -108,7 +112,8 @@ NAN_METHOD(Frame::GetPdu) {
 #define instantiate(P, V) \
   constructorHandle = NanNew<v8::FunctionTemplate>(P::constructor); \
   pduInstance = constructorHandle->GetFunction()->NewInstance(argc, argv); \
-  ((P *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::V *>(pdu);
+  ((P *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::V *>(pdu); \
+  pduInstance->Set(NanNew("_frame"), args.This());
 
   const unsigned argc = 1;
   v8::Handle<v8::Value> argv[argc] = {args[0]};

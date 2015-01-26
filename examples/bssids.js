@@ -12,7 +12,7 @@
   var layer2 = require('../src/js');
 
   var device = layer2.capture.getDefaultDevice();
-  var capture = new layer2.capture.Live(device, {monitor: true});
+  var capture = new layer2.capture.Live(device, {monitor: false});
   var decoder = new layer2.Decoder();
   var bssids = {};
 
@@ -20,8 +20,11 @@
     .close(10000)
     .pipe(decoder)
     .on('data', function (frame) {
-      var pdu = frame.getPdu(layer2.pduTypes.DOT11_BEACON);
+      var pduType = layer2.pduTypes.ETHERNET_II;
+      var pdu = frame.getPdu(pduType);
       if (pdu) {
+        console.log(pdu.getSrcAddr() + ' -> ' + pdu.getDstAddr());
+        console.log('size: ' + pdu.getSize() + ' type: ' + pdu.getPayloadType());
         // bssids[bssid] = (bssids[bssid] || 0) + 1;
       }
     })
