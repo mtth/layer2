@@ -27,7 +27,7 @@
     .once('readable', function () {
       console.log(util.format(
         '\nListening on device %s (link type: %s).\n',
-        this.getDevice(), this.getLinkType()
+        this.getDevice(), layer2.capture.getLinkInfo(this.getLinkType()).name
       ));
       startTime = process.hrtime();
     })

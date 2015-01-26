@@ -6,10 +6,7 @@
   var assert = require('assert'),
       layer2 = require('../src/js');
 
-  var savedCapture = {
-    path: './test/dat/mixed.pcap',
-    length: {valid: 48, invalid: 118}
-  };
+  var capturePath = './test/dat/mixed.pcap';
 
   describe('Decoder', function () {
 
@@ -19,7 +16,7 @@
 
       it('can be piped to and read from', function (done) {
 
-        var capture = new layer2.capture.Replay(savedCapture.path);
+        var capture = new layer2.capture.Replay(capturePath);
         var decoder = new Decoder({linkType: capture.getLinkType()});
         var readFrame = false;
 
@@ -40,7 +37,7 @@
 
       it('can be piped to and listened to', function (done) {
 
-        var capture = new layer2.capture.Replay(savedCapture.path);
+        var capture = new layer2.capture.Replay(capturePath);
         var decoder = new Decoder({linkType: capture.getLinkType()});
         var nFrames = 0;
 
@@ -56,7 +53,7 @@
 
       it('can infer the link type', function (done) {
 
-        var capture = new layer2.capture.Replay(savedCapture.path);
+        var capture = new layer2.capture.Replay(capturePath);
         var decoder = new Decoder();
         var linkType;
 
@@ -75,7 +72,7 @@
 
       it('emits end when the writable side finished', function (done) {
 
-        var capture = new layer2.capture.Replay(savedCapture.path);
+        var capture = new layer2.capture.Replay(capturePath);
         var decoder = new Decoder({linkType: capture.getLinkType()});
         var nFrames = 0;
 
@@ -97,7 +94,7 @@
 
       it('emits events when a frame fails to decode', function (done) {
 
-        var capture = new layer2.capture.Replay(savedCapture.path);
+        var capture = new layer2.capture.Replay(capturePath);
         var decoder = new Decoder();
         var nFrames = 0;
 
