@@ -4,7 +4,7 @@
   'use strict';
 
   var assert = require('assert'),
-      addon = require('../src/js/utils').requireAddon();
+      addon = require('../lib/utils').requireAddon();
 
   describe('Addon', function () {
 

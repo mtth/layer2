@@ -3,12 +3,12 @@
     {
       "target_name": "index",
       "sources": [
-        "src/cpp/addon.cpp",
-        "src/cpp/frame.cpp",
-        "src/cpp/pdu/ethernet_ii.cpp",
-        "src/cpp/pdu/radiotap.cpp",
-        "src/cpp/pcap_wrapper.cpp",
-        "src/cpp/util.cpp"
+        "src/addon.cpp",
+        "src/frame.cpp",
+        "src/pdu/ethernet_ii.cpp",
+        "src/pdu/radiotap.cpp",
+        "src/pcap_wrapper.cpp",
+        "src/util.cpp"
       ],
       "link_settings": {
         "libraries": [

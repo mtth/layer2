@@ -15,7 +15,8 @@
     "injection",
     "pcap",
     "wireshark",
-    "tcpdump"
+    "tcpdump",
+    "libtins"
   ],
   "files": [
     "LICENSE",
@@ -24,7 +25,7 @@
     "binding.gyp",
     "package.json"
   ],
-  "main": "./src/js",
+  "main": "./lib",
   "scripts": {
     "install": "node-gyp rebuild --release",
     "build": "node-gyp clean && node-gyp configure && node-gyp build",

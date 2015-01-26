@@ -7,7 +7,7 @@
       path = require('path'),
       tmp = require('tmp'),
       utils = require('./utils'),
-      addon = require('../src/js/utils').requireAddon();
+      addon = require('../lib/utils').requireAddon();
 
   tmp.setGracefulCleanup();
 

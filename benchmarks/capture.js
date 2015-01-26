@@ -7,7 +7,7 @@
       path = require('path'),
       tmp = require('tmp'),
       utils = require('./utils'),
-      layer2 = require('../src/js'),
+      layer2 = require('../lib'),
       pcap = require('pcap'),
       PcapStream = require('pcap-stream');
 

@@ -4,7 +4,7 @@
   'use strict';
 
   var assert = require('assert'),
-      layer2 = require('../src/js');
+      layer2 = require('../lib');
 
   var capturePath = './test/dat/mixed.pcap';
 

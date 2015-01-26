@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var layer2 = require('../src/js');
+  var layer2 = require('../lib');
 
   if (process.argv.length != 3) {
     console.error('Usage: node snapshot.js PATH');
