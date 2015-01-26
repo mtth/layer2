@@ -8,7 +8,7 @@
   'use strict';
 
   var utils = require('./utils'),
-      addon = require('../src/js/utils').requireAddon();
+      addon = require('../lib/utils').requireAddon();
 
   var benchmark = new utils.Benchmark();
 

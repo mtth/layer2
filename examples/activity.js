@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  var layer2 = require('../src/js'),
+  var layer2 = require('../lib'),
       util = require('util');
 
   var device = layer2.capture.getDefaultDevice();

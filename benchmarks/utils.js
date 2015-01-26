@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
 
-  var layer2 = require('../src/js'),
+  var layer2 = require('../lib'),
       fs = require('fs'),
       path = require('path'),
       tmp = require('tmp');

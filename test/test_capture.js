@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var layer2 = require('../src/js'),
+  var layer2 = require('../lib'),
       assert = require('assert'),
       crypto = require('crypto'),
       fs = require('fs'),
