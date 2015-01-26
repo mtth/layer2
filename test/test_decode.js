@@ -26,12 +26,14 @@
             done();
           })
           .pipe(decoder)
-          .once('readable', function () {
+          .on('readable', function () {
             assert.equal(this.getLinkType(), 105);
-            assert.ok(this.read());
-            readFrame = true;
+            var frame = this.read();
+            if (!readFrame) {
+              assert.ok(frame && frame instanceof layer2.Frame);
+              readFrame = true;
+            }
           });
-
 
       });
 
