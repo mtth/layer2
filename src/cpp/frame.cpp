@@ -1,3 +1,4 @@
+#include "pdu/ethernet_ii.hpp"
 #include "pdu/radiotap.hpp"
 #include "frame.hpp"
 
@@ -103,19 +104,28 @@ NAN_METHOD(Frame::GetPdu) {
   }
 
   // Create corresponding JS wrapper instance.
+
+#define instantiate(P, V) \
+  constructorHandle = NanNew<v8::FunctionTemplate>(P::constructor); \
+  pduInstance = constructorHandle->GetFunction()->NewInstance(argc, argv); \
+  ((P *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::V *>(pdu);
+
   const unsigned argc = 1;
   v8::Handle<v8::Value> argv[argc] = {args[0]};
   v8::Local<v8::FunctionTemplate> constructorHandle;
   v8::Local<v8::Object> pduInstance;
   switch (pdu->pdu_type()) {
     case Tins::PDU::RADIOTAP:
-      constructorHandle = NanNew<v8::FunctionTemplate>(RadioTapPdu::constructor);
-      pduInstance = constructorHandle->GetFunction()->NewInstance(argc, argv);
-      ((RadioTapPdu *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::RadioTap *>(pdu);
+      instantiate(RadioTapPdu, RadioTap);
+      break;
+    case Tins::PDU::ETHERNET_II:
+      instantiate(EthernetIIPdu, EthernetII);
       break;
     default:
       return NanThrowError("Unsupported PDU type.");
   }
+
+#undef instantiate
 
   NanReturnValue(pduInstance);
 
@@ -169,6 +179,7 @@ void Frame::Init(v8::Handle<v8::Object> exports) {
 
   // Initialize all PDUs.
   RadioTapPdu::Init();
+  EthernetIIPdu::Init();
 
   // Attach frame, etc.
   char className[] = "Frame";

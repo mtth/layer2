@@ -11,8 +11,8 @@ var capture = new layer2.capture.Live('en0', {monitor: true});
 var decoder = new layer2.Decoder();
 
 capture           // Stream of buffers (frames' raw bytes).
-  .pipe(decoder)  // Stream of objects (decoded frames).
-  .on('data', function (frame) { console.log(JSON.stringify(frame)); });
+  .pipe(decoder)  // Stream of decoded frames.
+  .on('data', function (frame) { console.log(frame); });
 ```
 
 

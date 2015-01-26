@@ -5,6 +5,7 @@
       "sources": [
         "src/cpp/addon.cpp",
         "src/cpp/frame.cpp",
+        "src/cpp/pdu/ethernet_ii.cpp",
         "src/cpp/pdu/radiotap.cpp",
         "src/cpp/pcap_wrapper.cpp",
         "src/cpp/util.cpp"
