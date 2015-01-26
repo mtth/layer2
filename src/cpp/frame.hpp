@@ -17,7 +17,6 @@ private:
   static NAN_METHOD(GetPdu);
   static NAN_METHOD(IsValid);
   Tins::PDU *_pdu;
-  static v8::Persistent<v8::Function> _constructor;
 
 };
 

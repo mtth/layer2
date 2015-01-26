@@ -85,7 +85,7 @@
     }
     return types;
 
-  });
+  })();
 
   /**
    * Get a name from a PDU type.
