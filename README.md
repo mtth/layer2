@@ -23,8 +23,7 @@ $ npm install layer2
 ```
 
 `layer2` leverages [libpcap][] to capture frames and [libtins][] to decode
-them. You'll need to install them first (both are available via [Homebrew][] on
-OS X). Note that you might also need to run live captures as root.
+them. You'll need to install them first.
 
 
 ## Documentation
@@ -52,7 +51,6 @@ Some tests require an active internet connection.
 
 [wiki]: http://en.wikipedia.org/wiki/Data_link_layer
 [Radiotap]: http://www.radiotap.org/
-[Homebrew]: http://brew.sh/
 [streams]: http://nodejs.org/api/stream.html
 [libpcap]: http://www.tcpdump.org/
 [libtins]: http://libtins.github.io/
