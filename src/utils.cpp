@@ -1,25 +1,22 @@
-#include "util.hpp"
-#include <node_buffer.h>
+#include "utils.hpp"
 #include <pcap/pcap.h>
-#include <tins/tins.h>
 
-#define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
+#define CHECK(b) if (!(b)) return NanThrowError("Illegal arguments.")
 
-using namespace v8;
+namespace Layer2 {
 
-// Parse MAC address.
-NAN_METHOD(read_mac_addr) {
+NAN_METHOD(ReadMacAddr) {
 
   static const char hex[] = "0123456789abcdef";
 
   NanScope();
-  precondition(
+  CHECK(
     args.Length() == 2 &&
     node::Buffer::HasInstance(args[0]) &&
     args[1]->IsInt32()
   );
 
-  Local<Object> buf = args[0]->ToObject();
+  v8::Local<v8::Object> buf = args[0]->ToObject();
   register unsigned int offset = args[1]->Int32Value();
   if (offset > node::Buffer::Length(buf) - 6) {
     return NanThrowError("Truncated address.");
@@ -39,18 +36,18 @@ NAN_METHOD(read_mac_addr) {
   }
   *cp = '\0';
 
-  NanReturnValue(NanNew<String>(addr));
+  NanReturnValue(NanNew<v8::String>(addr));
 
 }
 
 // Get the first device with an address, pcap_lookupdev() just returns the
 // first non-loopback device.
-NAN_METHOD(get_default_dev) {
+NAN_METHOD(GetDefaultDevice) {
 
   NanScope();
-  precondition(args.Length() == 0);
+  CHECK(args.Length() == 0);
 
-  Local<Value> name;
+  v8::Local<v8::Value> name;
   char errbuf[PCAP_ERRBUF_SIZE];
   pcap_if_t *alldevs, *dev;
   pcap_addr_t *addr;
@@ -74,16 +71,16 @@ NAN_METHOD(get_default_dev) {
   NanReturnNull();
 
 found:
-  name = NanNew<String>(dev->name);
+  name = NanNew<v8::String>(dev->name);
   pcap_freealldevs(alldevs);
   NanReturnValue(name);
 
 }
 
-NAN_METHOD(get_link_info) {
+NAN_METHOD(GetLinkInfo) {
 
   NanScope();
-  precondition(
+  CHECK(
     args.Length() == 1 &&
     args[0]->IsInt32()
   );
@@ -94,7 +91,7 @@ NAN_METHOD(get_link_info) {
     NanReturnNull();
   }
 
-  Local<Object> info = NanNew<Object>();
+  v8::Local<v8::Object> info = NanNew<v8::Object>();
   info->Set(NanNew("name"), NanNew(name));
 
   const char *description = pcap_datalink_val_to_description(link);
@@ -105,3 +102,5 @@ NAN_METHOD(get_link_info) {
   NanReturnValue(info);
 
 }
+
+} // Layer 2

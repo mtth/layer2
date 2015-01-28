@@ -4,9 +4,13 @@
 
 #define precondition(b) if (!(b)) return NanThrowError("Illegal arguments.")
 
-Frame::Frame(Tins::PDU *pdu) {
+namespace Layer2 {
 
-  _pdu = pdu;
+v8::Persistent<v8::FunctionTemplate> Frame::_constructor;
+
+Frame::Frame() {
+
+  _pdu = NULL;
 
 }
 
@@ -19,57 +23,67 @@ Frame::~Frame() {
 }
 
 /**
- * Instantiate new frame, returning null if the PDU is invalid.
+ * Instantiate new frame.
  *
  * The buffer's contents are copied into the PDU, freeing the buffer for reuse.
+ *
+ * This can be called in two different ways.
  *
  */
 NAN_METHOD(Frame::New) {
 
   NanScope();
-  precondition(
-    args.Length() == 2 &&
-    args[0]->IsInt32() &&
-    node::Buffer::HasInstance(args[1])
-  );
 
-  // Parse PDU. Note that older versions of libtins (e.g. the one currently
-  // installed by Homebrew) don't have the `pdu_from_dlt_flag` method so we
-  // replicate it here.
-  int linkType = args[0]->Int32Value();
-  v8::Local<v8::Object> buffer_obj = args[1]->ToObject();
-  const uint8_t *buffer = (const uint8_t *) node::Buffer::Data(buffer_obj);
-  uint32_t size = node::Buffer::Length(buffer_obj);
-  Tins::PDU *pdu;
-  try {
-    // Not using `safe_alloc` as defined in libtin's sniffer as it can't be
-    // used for 802.11 frames.
-    switch (linkType) {
-      case DLT_EN10MB:
-        pdu = new Tins::EthernetII(buffer, size);
-        break;
-      case DLT_IEEE802_11_RADIO:
-        pdu = new Tins::RadioTap(buffer, size);
-        break;
-      case DLT_IEEE802_11:
-        pdu = Tins::Dot11::from_bytes(buffer, size);
-        break;
-      case DLT_LINUX_SLL:
-        pdu = new Tins::SLL(buffer, size);
-        break;
-      case DLT_PPI:
-        pdu = new Tins::PPI(buffer, size);
-        break;
-      default:
-        return NanThrowError("Unsupported link type.");
+  Frame *frame;
+  switch (args.Length()) {
+    case 0: {
+      // Probably called from `NewInstance`. Link type, PDU, and packet header
+      // will be added directly after the call.
+      frame = new Frame();
+      break;
     }
-  } catch (Tins::malformed_packet&) {
-    pdu = NULL;
+    case 2: {
+      // Call from JavaScript, we are parsing a buffer.
+      // TODO: create fake packet header data here.
+      precondition(
+        args[0]->IsInt32() &&
+        node::Buffer::HasInstance(args[1])
+      );
+      v8::Local<v8::Object> bufferInstance = args[1]->ToObject();
+      frame = new Frame();
+      frame->_linkType = args[0]->Int32Value();
+      frame->_pdu = ParsePdu(
+        frame->_linkType,
+        (u_char *) node::Buffer::Data(bufferInstance),
+        node::Buffer::Length(bufferInstance)
+      );
+      break;
+    }
+    default:
+      return NanThrowError("Invalid arguments.");
   }
 
-  Frame *frame = new Frame(pdu);
   frame->Wrap(args.This());
   NanReturnThis();
+
+}
+
+/**
+ * Create new frame.
+ *
+ * Typically used by dispatch Iterator.
+ *
+ */
+v8::Local<v8::Object> Frame::NewInstance(int linkType, Tins::PDU *pdu) {
+
+  NanEscapableScope();
+  v8::Local<v8::FunctionTemplate> constructorHandle = NanNew<v8::FunctionTemplate>(_constructor);
+  v8::Local<v8::Object> instance = constructorHandle->GetFunction()->NewInstance();
+  Frame *frame = Unwrap<Frame>(instance);
+  frame->_linkType = linkType;
+  frame->_pdu = pdu;
+  // TODO: populate packet header on frame.
+  return NanEscapeScope(instance);
 
 }
 
@@ -109,7 +123,7 @@ NAN_METHOD(Frame::GetPdu) {
 
   // Create corresponding JS wrapper instance.
 
-#define instantiate(P, V) \
+#define INSTANTIATE(P, V) \
   constructorHandle = NanNew<v8::FunctionTemplate>(P::constructor); \
   pduInstance = constructorHandle->GetFunction()->NewInstance(argc, argv); \
   ((P *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::V *>(pdu); \
@@ -121,16 +135,16 @@ NAN_METHOD(Frame::GetPdu) {
   v8::Local<v8::Object> pduInstance;
   switch (pdu->pdu_type()) {
     case Tins::PDU::RADIOTAP:
-      instantiate(RadioTapPdu, RadioTap);
+      INSTANTIATE(RadioTapPdu, RadioTap);
       break;
     case Tins::PDU::ETHERNET_II:
-      instantiate(EthernetIIPdu, EthernetII);
+      INSTANTIATE(EthernetIIPdu, EthernetII);
       break;
     default:
       return NanThrowError("Unsupported PDU type.");
   }
 
-#undef instantiate
+#undef INSTANTIATE
 
   NanReturnValue(pduInstance);
 
@@ -174,6 +188,43 @@ NAN_METHOD(Frame::IsValid) {
 }
 
 /**
+ * Extract a PDU.
+ *
+ */
+Tins::PDU *Frame::ParsePdu(int linkType, const u_char *bytes, int size) {
+
+  Tins::PDU *pdu;
+  try {
+    // Not using `safe_alloc` as defined in libtin's sniffer as it can't be
+    // used for 802.11 frames.
+    switch (linkType) {
+      case DLT_EN10MB:
+        pdu = new Tins::EthernetII(bytes, size);
+        break;
+      case DLT_IEEE802_11_RADIO:
+        pdu = new Tins::RadioTap(bytes, size);
+        break;
+      case DLT_IEEE802_11:
+        pdu = Tins::Dot11::from_bytes(bytes, size);
+        break;
+      case DLT_LINUX_SLL:
+        pdu = new Tins::SLL(bytes, size);
+        break;
+      case DLT_PPI:
+        pdu = new Tins::PPI(bytes, size);
+        break;
+      default:
+        pdu = new Tins::RawPDU(bytes, size);
+    }
+  } catch (Tins::malformed_packet&) {
+    pdu = NULL;
+  }
+
+  return pdu;
+
+}
+
+/**
  * Initialize module.
  *
  * In particular, this function is responsible for initializing the
@@ -187,16 +238,19 @@ void Frame::Init(v8::Handle<v8::Object> exports) {
   EthernetIIPdu::Init();
 
   // Attach frame, etc.
-  char className[] = "Frame";
-
   v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Frame::New);
-  tpl->SetClassName(NanNew(className));
+  NanAssignPersistent(_constructor, tpl);
+  tpl->SetClassName(NanNew("Frame"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
+  // Prototype methods.
   NODE_SET_PROTOTYPE_METHOD(tpl, "getPdu", Frame::GetPdu);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getPduTypes", Frame::GetPduTypes);
   NODE_SET_PROTOTYPE_METHOD(tpl, "isValid", Frame::IsValid);
 
-  exports->Set(NanNew(className), tpl->GetFunction());
+  // Expose constructor.
+  exports->Set(NanNew("Frame"), tpl->GetFunction());
 
 }
+
+} // Layer2
