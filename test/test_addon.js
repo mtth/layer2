@@ -8,24 +8,25 @@
 
   describe('Addon', function () {
 
-    describe('Dispatcher', function () {
+    describe('Pcap Wrapper', function () {
 
       var maybeIt = maybe(it, hasActiveDevice()); // jshint ignore: line
 
       it('can be instantiated on a file', function () {
 
-        var wrapper = addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
 
-        assert.equal(wrapper.getSnaplen(), 65535);
-        assert.equal(wrapper.getDatalink(), 127); // Radiotap.
+        assert.equal(wrapper.getMaxFrameSize(), 65535);
+        assert.equal(wrapper.getLinkType(), 127); // Radiotap.
+        wrapper.close();
 
       });
 
       it('throws an error when instantiated on a missing file', function () {
 
         assert.throws(function () {
-          addon.Dispatcher.fromSavefile('./foobar');
+          new addon.PcapWrapper().fromSavefile('./foobar');
         });
 
       });
@@ -34,7 +35,7 @@
         // Most importantly, it doesn't segfault.
 
         assert.throws(function () {
-          addon.Dispatcher.getSnaplen();
+          new addon.PcapWrapper().getMaxFrameSize();
         });
 
       });
@@ -42,9 +43,9 @@
       it('fetches frames async', function (done) {
 
         var isAsync = false;
-        var wrapper = addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
-        var buf = new Buffer(3 * wrapper.getSnaplen());
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
+        var buf = new Buffer(3 * wrapper.getMaxFrameSize());
         var nFrames = 0;
 
         wrapper
@@ -73,8 +74,8 @@
 
       it('fetches frames async and breaks', function (done) {
 
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
 
         var buf = new Buffer(1);
         var nFrames = 0;
@@ -101,8 +102,8 @@
       it('throws an error when fetching concurrently', function (done) {
 
         var ran = false;
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
 
         var buf = new Buffer(1e6);
         var nFrames = 0;
@@ -124,9 +125,9 @@
 
       it('throws an error when fetching after close', function (done) {
 
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
-        var buf = new Buffer(wrapper.getSnaplen());
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
+        var buf = new Buffer(wrapper.getMaxFrameSize());
 
         wrapper.close();
         assert.throws(function () {
@@ -138,8 +139,8 @@
 
       it('fetches all frames from a save file', function (done) {
 
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
 
         var buf = new Buffer(1e6);
         var nFrames = 0;
@@ -160,8 +161,8 @@
 
       it('fetches no frames after finishing a save file', function (done) {
 
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
+        var wrapper = new addon.PcapWrapper()
+          .fromSavefile('./test/dat/mesh780.pcap');
 
         var buf = new Buffer(1e6);
         var nFrames = 0;

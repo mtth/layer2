@@ -4,11 +4,11 @@
       "target_name": "index",
       "sources": [
         "src/addon.cpp",
-        "src/dispatch.cpp",
         "src/frame.cpp",
-        "src/pdu/radiotap.cpp",
         "src/pdu/ethernet_ii.cpp",
-        "src/utils.cpp"
+        "src/pdu/radiotap.cpp",
+        "src/pcap_wrapper.cpp",
+        "src/util.cpp"
       ],
       "link_settings": {
         "libraries": [
