@@ -10,14 +10,14 @@ v8::Persistent<v8::FunctionTemplate> Frame::_constructor;
 
 Frame::Frame() {
 
-  _pdu = NULL;
+  _data.pdu = NULL;
 
 }
 
 Frame::~Frame() {
 
-  if (_pdu != NULL) {
-    delete _pdu;
+  if (_data.pdu != NULL) {
+    delete _data.pdu;
   }
 
 }
@@ -44,25 +44,29 @@ NAN_METHOD(Frame::New) {
     }
     case 2: {
       // Call from JavaScript, we are parsing a buffer.
-      // TODO: create fake packet header data here.
       precondition(
         args[0]->IsInt32() &&
         node::Buffer::HasInstance(args[1])
       );
       v8::Local<v8::Object> bufferInstance = args[1]->ToObject();
+      size_t size = node::Buffer::Length(bufferInstance);
+      pcap_pkthdr header;
+      // TODO: create fake header ts. Also allow an optional third argument
+      // with these parameters?
+      header.caplen = (bpf_u_int32) size;
+      header.len = (bpf_u_int32) size;
       frame = new Frame();
       frame->_linkType = args[0]->Int32Value();
-      frame->_pdu = ParsePdu(
+      frame->_data = ParsePdu(
         frame->_linkType,
         (u_char *) node::Buffer::Data(bufferInstance),
-        node::Buffer::Length(bufferInstance)
+        &header
       );
       break;
     }
     default:
       return NanThrowError("Invalid arguments.");
   }
-
   frame->Wrap(args.This());
   NanReturnThis();
 
@@ -74,15 +78,14 @@ NAN_METHOD(Frame::New) {
  * Typically used by dispatch Iterator.
  *
  */
-v8::Local<v8::Object> Frame::NewInstance(int linkType, Tins::PDU *pdu) {
+v8::Local<v8::Object> Frame::NewInstance(int linkType, const struct frame_t *data) {
 
   NanEscapableScope();
   v8::Local<v8::FunctionTemplate> constructorHandle = NanNew<v8::FunctionTemplate>(_constructor);
   v8::Local<v8::Object> instance = constructorHandle->GetFunction()->NewInstance();
   Frame *frame = Unwrap<Frame>(instance);
   frame->_linkType = linkType;
-  frame->_pdu = pdu;
-  // TODO: populate packet header on frame.
+  frame->_data = *data;
   return NanEscapeScope(instance);
 
 }
@@ -110,7 +113,7 @@ NAN_METHOD(Frame::GetPdu) {
   Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
   int pduType = args[0]->Int32Value();
   Tins::PDU::PDUType flag = static_cast<Tins::PDU::PDUType>(pduType);
-  Tins::PDU *pdu = frame->_pdu;
+  Tins::PDU *pdu = frame->_data.pdu;
   while (pdu && !pdu->matches_flag(flag)) {
     pdu = pdu->inner_pdu();
   }
@@ -163,7 +166,7 @@ NAN_METHOD(Frame::GetPduTypes) {
 
   int i = 0;
   v8::Handle<v8::Array> pduTypes = NanNew<v8::Array>();
-  Tins::PDU *pdu = frame->_pdu;
+  Tins::PDU *pdu = frame->_data.pdu;
   while (pdu) {
     pduTypes->Set(i++, NanNew<v8::Integer>(pdu->pdu_type()));
     pdu = pdu->inner_pdu();
@@ -183,7 +186,7 @@ NAN_METHOD(Frame::IsValid) {
   precondition(args.Length() == 0);
 
   Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
-  NanReturnValue(NanNew<v8::Boolean>(frame->_pdu != NULL));
+  NanReturnValue(NanNew<v8::Boolean>(frame->_data.isValid));
 
 }
 
@@ -191,36 +194,41 @@ NAN_METHOD(Frame::IsValid) {
  * Extract a PDU.
  *
  */
-Tins::PDU *Frame::ParsePdu(int linkType, const u_char *bytes, int size) {
+struct frame_t Frame::ParsePdu(int linkType, const u_char *bytes, const struct pcap_pkthdr *header) {
 
-  Tins::PDU *pdu;
+  struct frame_t data;
+  data.header = *header;
+
+  int size = header->caplen;
   try {
     // Not using `safe_alloc` as defined in libtin's sniffer as it can't be
     // used for 802.11 frames.
     switch (linkType) {
       case DLT_EN10MB:
-        pdu = new Tins::EthernetII(bytes, size);
+        data.pdu = new Tins::EthernetII(bytes, size);
         break;
       case DLT_IEEE802_11_RADIO:
-        pdu = new Tins::RadioTap(bytes, size);
+        data.pdu = new Tins::RadioTap(bytes, size);
         break;
       case DLT_IEEE802_11:
-        pdu = Tins::Dot11::from_bytes(bytes, size);
+        data.pdu = Tins::Dot11::from_bytes(bytes, size);
         break;
       case DLT_LINUX_SLL:
-        pdu = new Tins::SLL(bytes, size);
+        data.pdu = new Tins::SLL(bytes, size);
         break;
       case DLT_PPI:
-        pdu = new Tins::PPI(bytes, size);
+        data.pdu = new Tins::PPI(bytes, size);
         break;
       default:
-        pdu = new Tins::RawPDU(bytes, size);
+        data.pdu = new Tins::RawPDU(bytes, size);
     }
+    data.isValid = true;
   } catch (Tins::malformed_packet&) {
-    pdu = NULL;
+    data.pdu = new Tins::RawPDU(bytes, size);
+    data.isValid = false;
   }
 
-  return pdu;
+  return data;
 
 }
 

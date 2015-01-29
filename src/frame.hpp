@@ -6,24 +6,42 @@
 
 namespace Layer2 {
 
+/**
+ * Frame data.
+ *
+ */
+struct frame_t {
+  struct pcap_pkthdr header;
+  Tins::PDU *pdu;
+  bool isValid;
+};
+
+/**
+ * v8 object wrapping a captured frame.
+ *
+ * In most cases (i.e. unless the link type isn't supported), the frame will
+ * also be decoded.
+ *
+ */
 class Frame : public node::ObjectWrap {
 
 public:
   static void Init(v8::Handle<v8::Object> exports);
-  static v8::Local<v8::Object> NewInstance(int linkType, Tins::PDU *pdu);
-  static Tins::PDU *ParsePdu(int linkType, const u_char *bytes, int length);
+  static v8::Local<v8::Object> NewInstance(int linkType, const struct frame_t *data);
+  static struct frame_t ParsePdu(int linkType, const u_char *bytes, const struct pcap_pkthdr *header);
 
 private:
   Frame();
   ~Frame();
   static NAN_METHOD(New);
+  static NAN_METHOD(GetHeader);
+  static NAN_METHOD(GetLinkType);
   static NAN_METHOD(GetPduTypes);
   static NAN_METHOD(GetPdu);
   static NAN_METHOD(IsValid);
 
   int _linkType;
-  struct pcap_pkthdr _header;
-  Tins::PDU *_pdu;
+  struct frame_t _data;
   static v8::Persistent<v8::FunctionTemplate> _constructor;
 
 };
