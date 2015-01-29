@@ -4,7 +4,6 @@
 #include <nan.h>
 #include <pcap/pcap.h>
 #include <vector>
-#include <tins/tins.h>
 
 namespace Layer2 {
 
@@ -20,18 +19,18 @@ class Iterator : public node::ObjectWrap {
 
 public:
   static void Init();
-  static v8::Local<v8::Object> NewInstance(int linktType, std::vector<struct frame_t> *pdus);
+  static v8::Local<v8::Object> NewInstance(int linktType, std::vector<struct frame_t *> *frames);
 
 private:
   Iterator();
   ~Iterator();
   static NAN_METHOD(New);
-  static NAN_METHOD(HasNext);
   static NAN_METHOD(Next);
+  static NAN_METHOD(Remaining);
 
   size_t _index;
   int _linkType;
-  std::vector<struct frame_t> *_frames;
+  std::vector<struct frame_t *> *_frames;
   static v8::Persistent<v8::FunctionTemplate> _constructor;
 
 };
@@ -62,7 +61,7 @@ private:
   pcap_t *_captureHandle;
   int _batchSize;
   int _linkType;
-  std::vector<struct frame_t> *_frames;
+  std::vector<struct frame_t *> *_frames;
 
 };
 

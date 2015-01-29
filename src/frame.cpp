@@ -7,17 +7,21 @@
 namespace Layer2 {
 
 v8::Persistent<v8::FunctionTemplate> Frame::_constructor;
+v8::Persistent<v8::String> _frameKey;
 
 Frame::Frame() {
 
-  _data.pdu = NULL;
+  _data = NULL;
 
 }
 
 Frame::~Frame() {
 
-  if (_data.pdu != NULL) {
-    delete _data.pdu;
+  if (_data != NULL) {
+    if (_data->pdu != NULL) {
+      delete _data->pdu;
+    }
+    delete _data;
   }
 
 }
@@ -85,7 +89,7 @@ v8::Local<v8::Object> Frame::NewInstance(int linkType, const struct frame_t *dat
   v8::Local<v8::Object> instance = constructorHandle->GetFunction()->NewInstance();
   Frame *frame = Unwrap<Frame>(instance);
   frame->_linkType = linkType;
-  frame->_data = *data;
+  frame->_data = data;
   return NanEscapeScope(instance);
 
 }
@@ -113,7 +117,7 @@ NAN_METHOD(Frame::GetPdu) {
   Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
   int pduType = args[0]->Int32Value();
   Tins::PDU::PDUType flag = static_cast<Tins::PDU::PDUType>(pduType);
-  Tins::PDU *pdu = frame->_data.pdu;
+  Tins::PDU *pdu = frame->_data->pdu;
   while (pdu && !pdu->matches_flag(flag)) {
     pdu = pdu->inner_pdu();
   }
@@ -130,7 +134,7 @@ NAN_METHOD(Frame::GetPdu) {
   constructorHandle = NanNew<v8::FunctionTemplate>(P::constructor); \
   pduInstance = constructorHandle->GetFunction()->NewInstance(argc, argv); \
   ((P *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::V *>(pdu); \
-  pduInstance->Set(NanNew("_frame"), args.This());
+  pduInstance->Set(_frameKey, args.This());
 
   const unsigned argc = 1;
   v8::Handle<v8::Value> argv[argc] = {args[0]};
@@ -166,7 +170,7 @@ NAN_METHOD(Frame::GetPduTypes) {
 
   int i = 0;
   v8::Handle<v8::Array> pduTypes = NanNew<v8::Array>();
-  Tins::PDU *pdu = frame->_data.pdu;
+  Tins::PDU *pdu = frame->_data->pdu;
   while (pdu) {
     pduTypes->Set(i++, NanNew<v8::Integer>(pdu->pdu_type()));
     pdu = pdu->inner_pdu();
@@ -186,7 +190,7 @@ NAN_METHOD(Frame::IsValid) {
   precondition(args.Length() == 0);
 
   Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
-  NanReturnValue(NanNew<v8::Boolean>(frame->_data.isValid));
+  NanReturnValue(NanNew<v8::Boolean>(frame->_data->isValid));
 
 }
 
@@ -194,38 +198,38 @@ NAN_METHOD(Frame::IsValid) {
  * Extract a PDU.
  *
  */
-struct frame_t Frame::ParsePdu(int linkType, const u_char *bytes, const struct pcap_pkthdr *header) {
+struct frame_t *Frame::ParsePdu(int linkType, const u_char *bytes, const struct pcap_pkthdr *header) {
 
-  struct frame_t data;
-  data.header = *header;
+  struct frame_t *data = new struct frame_t;
+  data->header = *header;
 
-  int size = header->caplen;
+  int size = data->header.caplen;
   try {
     // Not using `safe_alloc` as defined in libtin's sniffer as it can't be
     // used for 802.11 frames.
     switch (linkType) {
       case DLT_EN10MB:
-        data.pdu = new Tins::EthernetII(bytes, size);
+        data->pdu = new Tins::EthernetII(bytes, size);
         break;
       case DLT_IEEE802_11_RADIO:
-        data.pdu = new Tins::RadioTap(bytes, size);
+        data->pdu = new Tins::RadioTap(bytes, size);
         break;
       case DLT_IEEE802_11:
-        data.pdu = Tins::Dot11::from_bytes(bytes, size);
+        data->pdu = Tins::Dot11::from_bytes(bytes, size);
         break;
       case DLT_LINUX_SLL:
-        data.pdu = new Tins::SLL(bytes, size);
+        data->pdu = new Tins::SLL(bytes, size);
         break;
       case DLT_PPI:
-        data.pdu = new Tins::PPI(bytes, size);
+        data->pdu = new Tins::PPI(bytes, size);
         break;
       default:
-        data.pdu = new Tins::RawPDU(bytes, size);
+        data->pdu = new Tins::RawPDU(bytes, size);
     }
-    data.isValid = true;
+    data->isValid = true;
   } catch (Tins::malformed_packet&) {
-    data.pdu = new Tins::RawPDU(bytes, size);
-    data.isValid = false;
+    data->pdu = new Tins::RawPDU(bytes, size);
+    data->isValid = false;
   }
 
   return data;
@@ -248,6 +252,7 @@ void Frame::Init(v8::Handle<v8::Object> exports) {
   // Attach frame, etc.
   v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Frame::New);
   NanAssignPersistent(_constructor, tpl);
+  NanAssignPersistent(_frameKey, NanNew("_frame"));
   tpl->SetClassName(NanNew("Frame"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 

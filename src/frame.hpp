@@ -28,20 +28,21 @@ class Frame : public node::ObjectWrap {
 public:
   static void Init(v8::Handle<v8::Object> exports);
   static v8::Local<v8::Object> NewInstance(int linkType, const struct frame_t *data);
-  static struct frame_t ParsePdu(int linkType, const u_char *bytes, const struct pcap_pkthdr *header);
+  static struct frame_t *ParsePdu(int linkType, const u_char *bytes, const struct pcap_pkthdr *header);
 
 private:
   Frame();
   ~Frame();
   static NAN_METHOD(New);
-  static NAN_METHOD(GetHeader);
-  static NAN_METHOD(GetLinkType);
+  static NAN_METHOD(AsBuffer); // TODO.
+  static NAN_METHOD(GetHeader); // TODO.
+  static NAN_METHOD(GetLinkType); // TODO.
   static NAN_METHOD(GetPduTypes);
   static NAN_METHOD(GetPdu);
   static NAN_METHOD(IsValid);
 
   int _linkType;
-  struct frame_t _data;
+  const struct frame_t *_data;
   static v8::Persistent<v8::FunctionTemplate> _constructor;
 
 };

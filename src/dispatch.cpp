@@ -5,6 +5,11 @@
 
 namespace Layer2 {
 
+// Cached strings.
+
+v8::Persistent<v8::String> _value;
+v8::Persistent<v8::String> _done;
+
 // Iterator.
 
 v8::Persistent<v8::FunctionTemplate> Iterator::_constructor;
@@ -34,7 +39,7 @@ NAN_METHOD(Iterator::New) {
 
 }
 
-v8::Local<v8::Object> Iterator::NewInstance(int linkType, std::vector<struct frame_t> *frames) {
+v8::Local<v8::Object> Iterator::NewInstance(int linkType, std::vector<struct frame_t *> *frames) {
 
   NanEscapableScope();
   v8::Local<v8::FunctionTemplate> constructorHandle = NanNew<v8::FunctionTemplate>(_constructor);
@@ -46,31 +51,33 @@ v8::Local<v8::Object> Iterator::NewInstance(int linkType, std::vector<struct fra
 
 }
 
-NAN_METHOD(Iterator::HasNext) {
-
-  NanScope();
-  CHECK(args.Length() == 0);
-  Iterator *iterator = Unwrap<Iterator>(args.This());
-  NanReturnValue(NanNew<v8::Boolean>(iterator->_index < iterator->_frames->size()));
-
-}
-
 NAN_METHOD(Iterator::Next) {
 
   NanScope();
   CHECK(args.Length() == 0);
   Iterator *iterator = Unwrap<Iterator>(args.This());
 
+  v8::Local<v8::Object> instance = NanNew<v8::Object>();
   if (iterator->_index < iterator->_frames->size()) {
-    std::vector<struct frame_t> frames = *iterator->_frames;
+    std::vector<struct frame_t *> frames = *iterator->_frames;
     v8::Local<v8::Object> frameInstance = Frame::NewInstance(
       iterator->_linkType,
-      &frames[iterator->_index++]
+      frames[iterator->_index++]
     );
-    NanReturnValue(frameInstance);
+    instance->Set(_value, frameInstance);
   } else {
-    NanReturnNull();
+    instance->Set(_done, NanTrue());
   }
+  NanReturnValue(instance);
+
+}
+
+NAN_METHOD(Iterator::Remaining) {
+
+  NanScope();
+  CHECK(args.Length() == 0);
+  Iterator *iterator = Unwrap<Iterator>(args.This());
+  NanReturnValue(NanNew<v8::Integer>((int) (iterator->_frames->size() - iterator->_index)));
 
 }
 
@@ -78,11 +85,13 @@ void Iterator::Init() {
 
   v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
   NanAssignPersistent(_constructor, tpl);
+  NanAssignPersistent(_value, NanNew("value"));
+  NanAssignPersistent(_done, NanNew("done"));
   tpl->SetClassName(NanNew("Iterator"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
-  NODE_SET_PROTOTYPE_METHOD(tpl, "hasNext", HasNext);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "remaining", Remaining);
   NODE_SET_PROTOTYPE_METHOD(tpl, "next", Next);
 
   // We don't expose the Iterator constructor.
@@ -100,7 +109,7 @@ Parser::Parser(
   _captureHandle = captureHandle;
   _linkType = pcap_datalink(_captureHandle);
   _batchSize = batchSize;
-  _frames = new std::vector<struct frame_t>();
+  _frames = new std::vector<struct frame_t *>();
 
 }
 
