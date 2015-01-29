@@ -12,14 +12,15 @@ v8::Persistent<v8::FunctionTemplate> Iterator::_constructor;
 Iterator::Iterator() {
 
   _index = 0;
-  _pdus = NULL;
+  _frames = NULL;
 
 };
 
 Iterator::~Iterator() {
 
-  delete _pdus;
-  // The frames are responsible for freeing individual PDUs.
+  delete _frames;
+  // We only free the vector. The emitted frames are responsible for freeing
+  // the individual PDUs.
 
 };
 
@@ -33,15 +34,24 @@ NAN_METHOD(Iterator::New) {
 
 }
 
-v8::Local<v8::Object> Iterator::NewInstance(int linkType, std::vector<Tins::PDU *> *pdus) {
+v8::Local<v8::Object> Iterator::NewInstance(int linkType, std::vector<struct frame_t> *frames) {
 
   NanEscapableScope();
   v8::Local<v8::FunctionTemplate> constructorHandle = NanNew<v8::FunctionTemplate>(_constructor);
   v8::Local<v8::Object> instance = constructorHandle->GetFunction()->NewInstance();
   Iterator *iterator = Unwrap<Iterator>(instance);
   iterator->_linkType = linkType;
-  iterator->_pdus = pdus;
+  iterator->_frames = frames;
   return NanEscapeScope(instance);
+
+}
+
+NAN_METHOD(Iterator::HasNext) {
+
+  NanScope();
+  CHECK(args.Length() == 0);
+  Iterator *iterator = Unwrap<Iterator>(args.This());
+  NanReturnValue(NanNew<v8::Boolean>(iterator->_index < iterator->_frames->size()));
 
 }
 
@@ -51,11 +61,11 @@ NAN_METHOD(Iterator::Next) {
   CHECK(args.Length() == 0);
   Iterator *iterator = Unwrap<Iterator>(args.This());
 
-  if (iterator->_index < iterator->_pdus->size()) {
-    std::vector<Tins::PDU *> pdus = *iterator->_pdus;
+  if (iterator->_index < iterator->_frames->size()) {
+    std::vector<struct frame_t> frames = *iterator->_frames;
     v8::Local<v8::Object> frameInstance = Frame::NewInstance(
       iterator->_linkType,
-      pdus[iterator->_index++]
+      &frames[iterator->_index++]
     );
     NanReturnValue(frameInstance);
   } else {
@@ -72,7 +82,10 @@ void Iterator::Init() {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
+  NODE_SET_PROTOTYPE_METHOD(tpl, "hasNext", HasNext);
   NODE_SET_PROTOTYPE_METHOD(tpl, "next", Next);
+
+  // We don't expose the Iterator constructor.
 
 }
 
@@ -87,7 +100,7 @@ Parser::Parser(
   _captureHandle = captureHandle;
   _linkType = pcap_datalink(_captureHandle);
   _batchSize = batchSize;
-  _pdus = new std::vector<Tins::PDU *>();
+  _frames = new std::vector<struct frame_t>();
 
 }
 
@@ -100,12 +113,7 @@ void Parser::OnPacket(
 ) {
 
   Parser *parser = (Parser *) etc;
-  // TODO: create object to store packet header along with PDU.
-  int size = header->caplen;
-  Tins::PDU *pdu = Frame::ParsePdu(parser->_linkType, packet, size);
-  if (pdu != NULL) {
-    parser->_pdus->push_back(pdu);
-  }
+  parser->_frames->push_back(Frame::ParsePdu(parser->_linkType, packet, header));
 
 }
 
@@ -138,7 +146,7 @@ void Parser::HandleOKCallback() {
   NanScope();
   v8::Local<v8::Value> argv[] = {
     NanNull(), // Error.
-    Iterator::NewInstance(_linkType, _pdus) // Iterator of PDUs.
+    Iterator::NewInstance(_linkType, _frames) // Iterator of frames.
   };
   callback->Call(2, argv);
 
@@ -153,7 +161,6 @@ Dispatcher::Dispatcher() {
   _device = NULL;
   _captureHandle = NULL;
   _dumpHandle = NULL;
-  _isDispatching = false;
 
 }
 
@@ -409,10 +416,6 @@ NAN_METHOD(Dispatcher::Dispatch) {
     args[1]->IsFunction() // Callback.
   );
   EXTRACT();
-
-  if (dispatcher->_isDispatching) {
-    return NanThrowError("Already dispatching.");
-  }
 
   int batchSize = args[0]->Int32Value();
   NanCallback *callback = new NanCallback(args[1].As<v8::Function>());
