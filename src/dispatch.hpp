@@ -26,7 +26,6 @@ private:
   ~Iterator();
   static NAN_METHOD(New);
   static NAN_METHOD(Next);
-  static NAN_METHOD(Remaining);
 
   size_t _index;
   int _linkType;

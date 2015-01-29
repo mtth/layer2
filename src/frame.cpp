@@ -7,7 +7,6 @@
 namespace Layer2 {
 
 v8::Persistent<v8::FunctionTemplate> Frame::_constructor;
-v8::Persistent<v8::String> _frameKey;
 
 Frame::Frame() {
 
@@ -134,7 +133,7 @@ NAN_METHOD(Frame::GetPdu) {
   constructorHandle = NanNew<v8::FunctionTemplate>(P::constructor); \
   pduInstance = constructorHandle->GetFunction()->NewInstance(argc, argv); \
   ((P *) NanGetInternalFieldPointer(pduInstance, 0))->value = static_cast<Tins::V *>(pdu); \
-  pduInstance->Set(_frameKey, args.This());
+  pduInstance->Set(NanNew("_frame"), args.This());
 
   const unsigned argc = 1;
   v8::Handle<v8::Value> argv[argc] = {args[0]};
@@ -252,7 +251,6 @@ void Frame::Init(v8::Handle<v8::Object> exports) {
   // Attach frame, etc.
   v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Frame::New);
   NanAssignPersistent(_constructor, tpl);
-  NanAssignPersistent(_frameKey, NanNew("_frame"));
   tpl->SetClassName(NanNew("Frame"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 

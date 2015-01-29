@@ -5,11 +5,6 @@
 
 namespace Layer2 {
 
-// Cached strings.
-
-v8::Persistent<v8::String> _value;
-v8::Persistent<v8::String> _done;
-
 // Iterator.
 
 v8::Persistent<v8::FunctionTemplate> Iterator::_constructor;
@@ -23,9 +18,19 @@ Iterator::Iterator() {
 
 Iterator::~Iterator() {
 
-  delete _frames;
-  // We only free the vector. The emitted frames are responsible for freeing
-  // the individual PDUs.
+  // We only free data for frames that weren't emitted. The emitted ones are
+  // responsible for freeing their individual PDUs.
+  if (_frames != NULL) {
+    std::vector<struct frame_t *> frames = *_frames;
+    while (_index < frames.size()) {
+      struct frame_t *data = frames[_index++];
+      if (data->pdu != NULL) {
+        delete data->pdu;
+      }
+      delete data;
+    }
+    delete _frames;
+  }
 
 };
 
@@ -57,41 +62,28 @@ NAN_METHOD(Iterator::Next) {
   CHECK(args.Length() == 0);
   Iterator *iterator = Unwrap<Iterator>(args.This());
 
-  v8::Local<v8::Object> instance = NanNew<v8::Object>();
   if (iterator->_index < iterator->_frames->size()) {
     std::vector<struct frame_t *> frames = *iterator->_frames;
     v8::Local<v8::Object> frameInstance = Frame::NewInstance(
       iterator->_linkType,
       frames[iterator->_index++]
     );
-    instance->Set(_value, frameInstance);
+    NanReturnValue(frameInstance);
   } else {
-    instance->Set(_done, NanTrue());
+    NanReturnNull();
   }
-  NanReturnValue(instance);
-
-}
-
-NAN_METHOD(Iterator::Remaining) {
-
-  NanScope();
-  CHECK(args.Length() == 0);
-  Iterator *iterator = Unwrap<Iterator>(args.This());
-  NanReturnValue(NanNew<v8::Integer>((int) (iterator->_frames->size() - iterator->_index)));
 
 }
 
 void Iterator::Init() {
 
+  NanScope();
   v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
   NanAssignPersistent(_constructor, tpl);
-  NanAssignPersistent(_value, NanNew("value"));
-  NanAssignPersistent(_done, NanNew("done"));
   tpl->SetClassName(NanNew("Iterator"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
-  NODE_SET_PROTOTYPE_METHOD(tpl, "remaining", Remaining);
   NODE_SET_PROTOTYPE_METHOD(tpl, "next", Next);
 
   // We don't expose the Iterator constructor.
@@ -155,9 +147,10 @@ void Parser::HandleOKCallback() {
   NanScope();
   v8::Local<v8::Value> argv[] = {
     NanNull(), // Error.
-    Iterator::NewInstance(_linkType, _frames) // Iterator of frames.
+    Iterator::NewInstance(_linkType, _frames), // Iterator of frames.
+    NanNew<v8::Integer>((int) _frames->size()) // Number of frames in batch.
   };
-  callback->Call(2, argv);
+  callback->Call(3, argv);
 
 }
 

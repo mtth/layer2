@@ -34,12 +34,13 @@ private:
   Frame();
   ~Frame();
   static NAN_METHOD(New);
-  static NAN_METHOD(AsBuffer); // TODO.
+  static NAN_METHOD(ToBuffer); // TODO.
   static NAN_METHOD(GetHeader); // TODO.
   static NAN_METHOD(GetLinkType); // TODO.
   static NAN_METHOD(GetPduTypes);
   static NAN_METHOD(GetPdu);
   static NAN_METHOD(IsValid);
+  static NAN_METHOD(Size); // TODO.
 
   int _linkType;
   const struct frame_t *_data;
