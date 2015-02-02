@@ -36,7 +36,7 @@ private:
   Frame();
   ~Frame();
   static NAN_METHOD(New);
-  static NAN_METHOD(ToBuffer);
+  static NAN_METHOD(GetData);
   static NAN_METHOD(GetHeader);
   static NAN_METHOD(GetLinkType); // TODO.
   static NAN_METHOD(GetPduTypes);

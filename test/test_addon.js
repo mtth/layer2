@@ -6,22 +6,30 @@
   var assert = require('assert'),
       addon = require('../lib/utils').requireAddon(),
       path = require('path'),
-      fs = require('fs'),
-      util = require('util'); // jshint ignore: line
+      fs = require('fs');
 
   describe('Addon', function () {
 
     describe('Frame', function () {
 
       var Frame = addon.Frame;
-      var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex');
-      // Valid Radiotap buffer.
+      var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex'); // Valid Radiotap buffer.
 
       it('can be instantiated from a valid buffer', function () {
 
         var frame = new Frame(127, buf); // radiotap link type
         assert.ok(frame.isValid());
         assert.equal(frame.size(), buf.length);
+
+      });
+
+      it('creates fake headers from the buffer', function () {
+
+        var frame = new Frame(127, buf); // radiotap link type
+        var header = frame.getHeader();
+        assert.equal(header.length, buf.length);
+        assert.equal(header.capturedLength, buf.length);
+        assert.ok(new Date().getTime() - header.time < 10);
 
       });
 
@@ -36,7 +44,7 @@
       it('returns its data in a buffer', function () {
 
         var frame = new Frame(127, buf); // radiotap link type
-        assert.deepEqual(buf, frame.toBuffer());
+        assert.deepEqual(buf, frame.getData());
 
       });
 
@@ -171,7 +179,7 @@
             assert.deepEqual(
               frame.getHeader(),
               {
-                time: [1247544845, 137966000],
+                time: 1247544845137.966,
                 length: 172,
                 capturedLength: 172
               }
@@ -218,7 +226,7 @@
           .dispatch(1, function (err, iter) {
             var frame = iter.next();
             assert.ok(frame !== null);
-            assert.deepEqual(frame.toBuffer(), buf);
+            assert.deepEqual(frame.getData(), buf);
             done();
           });
 

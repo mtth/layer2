@@ -104,13 +104,11 @@ NAN_METHOD(Frame::GetHeader) {
   Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
   pcap_pkthdr header = frame->_data->header;
 
-  // Compute time (converting us to ns, similar to `process.hrtime`).
-  v8::Handle<v8::Array> tvObj = NanNew<v8::Array>();
-  tvObj->Set(0, NanNew<v8::Number>(header.ts.tv_sec));
-  tvObj->Set(1, NanNew<v8::Number>(1000 * header.ts.tv_usec));
+  // Compute time (converting to Unix time in ms).
+  double time = 1000 * header.ts.tv_sec + 0.001 * header.ts.tv_usec;
 
   v8::Local<v8::Object> headerObj = NanNew<v8::Object>();
-  headerObj->Set(NanNew("time"), tvObj);
+  headerObj->Set(NanNew("time"), NanNew<v8::Number>(time));
   headerObj->Set(NanNew("length"), NanNew<v8::Integer>(header.len));
   headerObj->Set(NanNew("capturedLength"), NanNew<v8::Integer>(header.caplen));
 
@@ -222,7 +220,7 @@ NAN_METHOD(Frame::IsValid) {
  * Get the size of the entire frame in bytes.
  *
  */
-NAN_METHOD(Frame::ToBuffer) {
+NAN_METHOD(Frame::GetData) {
 
   NanScope();
   precondition(args.Length() == 0);
@@ -337,11 +335,11 @@ void Frame::Init(v8::Handle<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getData", GetData);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getHeader", GetHeader);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getPdu", GetPdu);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getPduTypes", GetPduTypes);
   NODE_SET_PROTOTYPE_METHOD(tpl, "isValid", IsValid);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "toBuffer", ToBuffer);
   NODE_SET_PROTOTYPE_METHOD(tpl, "size", Size);
 
   // Expose constructor.
