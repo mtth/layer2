@@ -94,6 +94,32 @@ v8::Local<v8::Object> Frame::NewInstance(int linkType, const struct frame_t *dat
 }
 
 /**
+ * Get capture header.
+ *
+ */
+NAN_METHOD(Frame::GetHeader) {
+
+  NanScope();
+  precondition(args.Length() == 0);
+
+  Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
+  pcap_pkthdr header = frame->_data->header;
+
+  // Compute time (converting us to ns, similar to `process.hrtime`).
+  v8::Handle<v8::Array> tvObj = NanNew<v8::Array>();
+  tvObj->Set(0, NanNew<v8::Number>(header.ts.tv_sec));
+  tvObj->Set(1, NanNew<v8::Number>(1000 * header.ts.tv_usec));
+
+  v8::Local<v8::Object> headerObj = NanNew<v8::Object>();
+  headerObj->Set(NanNew("time"), tvObj);
+  headerObj->Set(NanNew("length"), NanNew<v8::Integer>(header.len));
+  headerObj->Set(NanNew("capturedLength"), NanNew<v8::Integer>(header.caplen));
+
+  NanReturnValue(headerObj);
+
+}
+
+/**
  * Extract PDU of a specific type from the frame, return null if not present.
  *
  * If the PDU type is found but currently not supported, an error will be
@@ -194,6 +220,20 @@ NAN_METHOD(Frame::IsValid) {
 }
 
 /**
+ * Get the size of the entire frame in bytes.
+ *
+ */
+NAN_METHOD(Frame::Size) {
+
+  NanScope();
+  precondition(args.Length() == 0);
+
+  Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
+  NanReturnValue(NanNew<v8::Integer>(frame->_data->pdu->size()));
+
+}
+
+/**
  * Extract a PDU.
  *
  */
@@ -255,9 +295,11 @@ void Frame::Init(v8::Handle<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getHeader", Frame::GetHeader);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getPdu", Frame::GetPdu);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getPduTypes", Frame::GetPduTypes);
   NODE_SET_PROTOTYPE_METHOD(tpl, "isValid", Frame::IsValid);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "size", Frame::Size);
 
   // Expose constructor.
   exports->Set(NanNew("Frame"), tpl->GetFunction());

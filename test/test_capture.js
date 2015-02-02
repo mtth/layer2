@@ -3,36 +3,25 @@
 (function () {
   'use strict';
 
-  var layer2 = require('../lib'),
+  var capture = require('../lib/capture'),
       assert = require('assert'),
       crypto = require('crypto'),
       fs = require('fs'),
       path = require('path'),
       http = require('http');
 
-  // Sample captures used in most test cases.
-
-  var captures = {
-    small: {
-      path: './test/dat/mesh3.pcap',
-      length: 3
-    },
-    large: {
-      path: './test/dat/mesh780.pcap',
-      length: 780
-    }
-  };
-
   describe('Capture', function () {
+
+    var savefilePath = path.join(__dirname, 'dat/mesh.pcap');
 
     it('can summarize saved captures', function (done) {
 
-      layer2.capture.summarize(captures.large.path, function (err, summary) {
+      capture.summarize(savefilePath, function (err, summary) {
         assert.deepEqual(summary, {
           linkType: 127,
           maxFrameSize: 65535,
           nFrames: 780,
-          nBytes: 118675
+          nBytes: 117469 // TODO: check this number
         });
         done();
       });
@@ -43,26 +32,26 @@
 
     describe('Replay', function () {
 
-      var Replay = layer2.capture.Replay;
+      var Replay = capture.Replay;
 
       it('returns the correct maximum frame size', function () {
 
-        var capture = new Replay(captures.large.path);
+        var capture = new Replay(savefilePath);
         assert.equal(capture.getMaxFrameSize(), 65535);
 
       });
 
       it('returns the correct link type', function () {
 
-        var capture = new Replay(captures.large.path);
+        var capture = new Replay(savefilePath);
         assert.equal(capture.getLinkType(), 127);
 
       });
 
       it('returns the correct path', function () {
 
-        var capture = new Replay(captures.large.path);
-        assert.equal(capture.getPath(), captures.large.path);
+        var capture = new Replay(savefilePath);
+        assert.equal(capture.getPath(), savefilePath);
 
       });
 
@@ -70,48 +59,10 @@
 
         var nFrames = 0;
 
-        new Replay(captures.large.path)
+        new Replay(savefilePath)
           .on('data', function () { nFrames++; })
           .on('end', function () {
-            assert.equal(nFrames, captures.large.length);
-            done();
-          });
-
-      });
-
-      it('can read an entire file and breaks if necessary', function (done) {
-
-        var nFrames = 0;
-        var nBreaks = 0;
-
-        new Replay(captures.large.path, {
-          bufferSize: 100000 // Not big enough for an entire batch.
-        })
-          .on('break', function () { nBreaks++; })
-          .on('data', function () { nFrames++; })
-          .on('end', function () {
-            assert.equal(nFrames, captures.large.length);
-            assert.ok(nBreaks > 0);
-            done();
-          });
-
-      });
-
-      it('breaks each time if the buffer size is small', function (done) {
-        // I.e. equal to the max frame size.
-
-        var nFrames = 0;
-        var nBreaks = 0;
-
-        new Replay(captures.large.path, {
-          bufferSize: 65535, // Not big enough for an entire batch.
-          maxFrameSize: 65535
-        })
-          .on('break', function () { nBreaks++; })
-          .on('data', function () { nFrames++; })
-          .on('end', function () {
-            assert.equal(nFrames, captures.large.length);
-            assert.equal(nBreaks, nFrames);
+            assert.equal(nFrames, 780);
             done();
           });
 
@@ -123,14 +74,14 @@
         var nFrames2 = 0;
         var nFrames3 = 0;
 
-        new Replay(captures.large.path)
+        new Replay(savefilePath)
           .on('data', function () { nFrames1++; })
           .on('data', function () { nFrames2++; })
           .on('data', function () { nFrames3++; })
           .on('end', function () {
-            assert.equal(nFrames1, captures.large.length);
-            assert.equal(nFrames2, captures.large.length);
-            assert.equal(nFrames3, captures.large.length);
+            assert.equal(nFrames1, 780);
+            assert.equal(nFrames2, 780);
+            assert.equal(nFrames3, 780);
             done();
           });
 
@@ -140,115 +91,17 @@
 
         var frames = [];
 
-        new Replay(captures.small.path)
+        new Replay(savefilePath)
           .on('readable', function () {
-            var buf;
-            while ((buf = this.read()) !== null) {
-              frames.push(buf);
+            var frame;
+            while ((frame = this.read()) !== null) {
+              frames.push(frame);
             }
           })
           .on('end', function () {
-            assert.equal(frames.length, captures.small.length);
+            assert.equal(frames.length, 780);
             done();
           });
-
-      });
-
-      it('closes automatically after reading a file', function (done) {
-
-        var isClosed = false;
-
-        new Replay(captures.large.path)
-          .on('data', function () { assert.ok(!isClosed); })
-          .on('close', function () { isClosed = true; })
-          .on('end', function () {
-            setImmediate(function () {
-              assert.ok(isClosed); done();
-            });
-          });
-
-      });
-
-      it('closes after ending', function (done) {
-
-        var ended = false;
-
-        new Replay(captures.large.path)
-          .on('data', function () {})
-          .on('end', function () { ended = true; })
-          .on('close', function () { done(); });
-
-      });
-
-      it('can read a frame when the batch size is 1', function (done) {
-
-        testReadSingleFrame(1, done);
-
-      });
-
-      it('can read a frame when the batch size is small', function (done) {
-        // I.e. batch size smaller than frames in the file.
-
-        testReadSingleFrame(2, done);
-
-      });
-
-      it('can read a frame when the batch size matches', function (done) {
-        // I.e. batch size equal to frames in the file.
-
-        testReadSingleFrame(3, done);
-
-      });
-
-      it('can read a frame when the batch size is large', function (done) {
-        // I.e. batch size greater than frames in the file.
-
-        testReadSingleFrame(4, done);
-
-      });
-
-      it('dispatches with a batch size of 1', function (done) {
-
-        testDispatching(1, done);
-
-      });
-
-      it('dispatches with a small batch size', function (done) {
-
-        testDispatching(100, done);
-
-      });
-
-      it('dispatches with a matching batch size', function (done) {
-
-        testDispatching(780, done);
-
-      });
-
-      it('dispatches with a large batch size', function (done) {
-
-        testDispatching(1000, done);
-
-      });
-
-      it('yields correct frames', function (done) {
-
-        var index = 0;
-        var frames = {
-          0: new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex'),
-          189: new Buffer('00002000670804006d5d2725000000002230d9a001000000400100003c142411d40000000019e3d3535246e97687', 'hex'),
-          218: new Buffer('0000200067080400b51e2a2500000000220cd7a001000000400100003c14241108020000ffffffffffff06037f07a0160016cbace5f95083aaaa0300000008004500009be957000040117b3c0a0000c00a0000ff0277027700870d3b663034652033206970703a2f2f31302e302e302e3139323a3633312f7072696e746572732f41646f626550444638202222202241646f62652050444620382e3022202241646f62652050444620333031362e31303222206a6f622d7368656574733d6e6f6e652c6e6f6e65206c656173652d6475726174696f6e3d3330300a', 'hex'),
-          491: new Buffer('000020006708040059b76f2500000000220cd8a001000000400100003c14241188020000ffffffffffff00037f07a0160019e3d35352208f00002001011f540500000019e3d35352aaaa03000000080600010800060400010019e3d35352a9fef7000000000000004f673238', 'hex')
-        };
-
-        new layer2.capture.Replay(captures.large.path)
-          .on('data', function (data) {
-            var original = frames[index++];
-            if (original) {
-              assert.ok(bufferEquals(data, original));
-            }
-          })
-          .on('end', function () { done(); });
 
       });
 
@@ -257,7 +110,7 @@
         var nFrames = 0;
         var filter = 'arp';
 
-        new Replay(captures.large.path, {filter: filter})
+        new Replay(savefilePath, {filter: filter})
           .on('data', function () { nFrames++; })
           .on('end', function () {
             assert.equal(nFrames, 131); // 131 ARP packets in file.
@@ -266,55 +119,13 @@
 
       });
 
-      // Helpers.
-
-      function testDispatching(batchSize, callback) {
-
-        var totalFrames = captures.large.length;
-        var totalFetches = Math.ceil(totalFrames / batchSize) + 1;
-        var nFrames = 0;
-        var nFetches = 0;
-
-        new Replay(captures.large.path, {batchSize: batchSize})
-          .on('data', function () { nFrames++; })
-          .on('fetch', function (ratio) {
-            nFetches++;
-            if (nFetches < totalFetches - 1) assert.equal(ratio, 1);
-            if (nFetches === totalFetches) assert.equal(ratio, 0);
-          })
-          .on('end', function () {
-            assert.equal(nFrames, totalFrames);
-            assert.equal(nFetches, totalFetches);
-            callback();
-          });
-
-      }
-
-      function testReadSingleFrame(batchSize, callback) {
-
-        var readFrame = false;
-
-        new Replay(captures.small.path, {batchSize: batchSize})
-          .once('readable', function () {
-            if (this.read() !== null) {
-              readFrame = true;
-            }
-            this.on('data', function () {}); // Drain stream.
-          })
-          .on('end', function () {
-            assert.ok(readFrame);
-            callback();
-          });
-
-      }
-
     });
 
     // Saves.
 
     describe('Save', function () {
 
-      var Save = layer2.capture.Save;
+      var Save = capture.Save;
 
       it('returns the correct maximum frame size', function () {
 
@@ -357,7 +168,7 @@
       it('can be written to', function (done) {
 
         var savePath = fromName('write.pcap');
-        var replay = new layer2.capture.Replay(captures.small.path);
+        var replay = new capture.Replay(savefilePath);
         var save = new Save(savePath, {
           linkType: replay.getLinkType()
         });
@@ -368,7 +179,7 @@
 
         save
           .on('close', function () {
-            checkEqual(this.getPath(), captures.small.path);
+            checkEqual(this.getPath(), savefilePath);
             done();
           });
 
@@ -378,13 +189,13 @@
       it('can be piped to', function (done) {
 
         var savePath = fromName('pipe.pcap');
-        var replay = new layer2.capture.Replay(captures.small.path);
+        var replay = new capture.Replay(savefilePath);
         var save = new Save(savePath, {linkType: replay.getLinkType()});
 
         replay
           .pipe(save)
           .on('close', function () {
-            checkEqual(savePath, captures.small.path);
+            checkEqual(savePath, savefilePath);
             done();
           });
 
@@ -393,13 +204,13 @@
       it('can be piped to and infer the link type', function (done) {
 
         var savePath = fromName('pipe_infer.pcap');
-        var replay = new layer2.capture.Replay(captures.small.path);
+        var replay = new capture.Replay(savefilePath);
         var save = new Save(savePath);
 
         replay
           .pipe(save)
           .on('close', function () {
-            checkEqual(savePath, captures.small.path);
+            checkEqual(savePath, savefilePath);
             done();
           });
 
@@ -408,14 +219,14 @@
       it('truncates frames if necessary', function (done) {
 
         var savePath = fromName('truncate.pcap');
-        var replay = new layer2.capture.Replay(captures.small.path);
+        var replay = new capture.Replay(savefilePath);
         var save = new Save(savePath, {maxFrameSize: 50});
 
         replay
           .pipe(save)
           .on('close', function () {
-            new layer2.capture.Replay(savePath)
-              .on('data', function (buf) { assert.ok(buf.length <= 50); })
+            new capture.Replay(savePath)
+              .on('data', function (frame) { assert.ok(frame.size() <= 50); })
               .on('error', function () {}) // Skip frame overflow errors.
               .on('end', function () { done(); });
           });
@@ -425,7 +236,7 @@
       it('closes after finish', function (done) {
 
         var savePath = fromName('close.pcap');
-        var replay = new layer2.capture.Replay(captures.small.path);
+        var replay = new capture.Replay(savefilePath);
         var save = new Save(savePath, {linkType: replay.getLinkType()});
         var finished = false;
 
@@ -444,7 +255,7 @@
 
         save
           .on('close', function () {
-            layer2.capture.summarize(savePath, function (err, summary) {
+            capture.summarize(savePath, function (err, summary) {
               assert.equal(summary.nFrames, 9);
               done();
             });
@@ -452,7 +263,7 @@
 
         (function saveOnce() {
 
-          new layer2.capture.Replay(captures.small.path)
+          new capture.Replay(savefilePath)
             .on('end', function () {
               if (--loop) {
                 saveOnce(save);
@@ -480,8 +291,8 @@
       // Check that two replay files are equal.
       function checkEqual(pathA, pathB) {
 
-        var replayA = new layer2.capture.Replay(pathA);
-        var replayB = new layer2.capture.Replay(pathB);
+        var replayA = new capture.Replay(pathA);
+        var replayB = new capture.Replay(pathB);
 
         var a, b;
         while ((a = replayA.read()) !== null || (b = replayB.read()) !== null) {
@@ -496,8 +307,8 @@
 
     maybe(describe, hasActiveDevice())('Live', function () {
 
-      var Live = layer2.capture.Live;
-      var dev = layer2.capture.getDefaultDevice();
+      var Live = capture.Live;
+      var dev = capture.getDefaultDevice();
 
       beforeEach(function () {
         // Make sure there are some frames to listen to.
@@ -804,7 +615,7 @@
 
     var device;
     try {
-      device = layer2.capture.getDefaultDevice();
+      device = capture.getDefaultDevice();
     } catch (err) {
       device = null;
     }

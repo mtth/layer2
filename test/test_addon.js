@@ -8,6 +8,50 @@
 
   describe('Addon', function () {
 
+    describe('Frame', function () {
+
+      var Frame = addon.Frame;
+      var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex');
+      // Valid Radiotap buffer.
+
+      it('can be instantiated from a valid buffer', function () {
+
+        var frame = new Frame(127, buf); // radiotap link type
+        assert.ok(frame.isValid());
+        assert.equal(frame.size(), buf.length);
+
+      });
+
+      it('can be instantiated from a invalid buffer', function () {
+
+        var buf = new Buffer('0020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d7', 'hex');
+        var frame = new Frame(127, buf);
+        assert.ok(!frame.isValid());
+
+      });
+
+      it('returns an existing PDU', function () {
+
+        var frame = new Frame(127, buf);
+        var pdu = frame.getPdu(3); // radiotap pdutype
+        assert.ok(pdu !== null);
+        assert.deepEqual(pdu.getChannel(), {freq: 5180, type: 320});
+        assert.equal(pdu.getRate(), 12);
+        assert.equal(pdu.getSize(), 172);
+        assert.deepEqual(pdu.getDbm(), {signal: 218, noise: 160});
+
+      });
+
+      it('returns null on missing PDU', function () {
+
+        var frame = new Frame(127, buf);
+        var pdu = frame.getPdu(2); // ethernet pdutype
+        assert.ok(pdu === null);
+
+      });
+
+    });
+
     describe('Dispatcher', function () {
 
       var Dispatcher = addon.Dispatcher;
@@ -109,23 +153,25 @@
 
       });
 
-      // TODO: Tests that require a live interface.
+      it('returns frames with capture headers', function (done) {
 
-    });
-
-    describe('Frame', function () {
-
-      it('supports radiotap', function () {
-
-        var buf = new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d6', 'hex');
-        var frame = new addon.Frame(127, buf); // radiotap link type
-        var pdu = frame.getPdu(3); // radiotap pdutype
-        assert.deepEqual(pdu.getChannel(), {freq: 5180, type: 320});
-        assert.equal(pdu.getRate(), 12);
-        assert.equal(pdu.getSize(), 48);
-        assert.deepEqual(pdu.getDbm(), {signal: 218, noise: 160});
+        Dispatcher.fromSavefile('./test/dat/mesh.pcap')
+          .dispatch(1, function (err, iter) {
+            var frame = iter.next();
+            assert.deepEqual(
+              frame.getHeader(),
+              {
+                time: [1247544845, 137966000],
+                length: 172,
+                capturedLength: 172
+              }
+            );
+            done();
+          });
 
       });
+
+      // TODO: Tests that require a live interface.
 
     });
 
