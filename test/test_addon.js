@@ -10,22 +10,23 @@
 
     describe('Dispatcher', function () {
 
+      var Dispatcher = addon.Dispatcher;
+
       var maybeIt = maybe(it, hasActiveDevice()); // jshint ignore: line
 
       it('can be instantiated on a file', function () {
 
-        var wrapper = addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
+        var dispatcher = Dispatcher.fromSavefile('./test/dat/mesh.pcap');
 
-        assert.equal(wrapper.getSnaplen(), 65535);
-        assert.equal(wrapper.getDatalink(), 127); // Radiotap.
+        assert.equal(dispatcher.getSnaplen(), 65535);
+        assert.equal(dispatcher.getDatalink(), 127); // Radiotap.
 
       });
 
       it('throws an error when instantiated on a missing file', function () {
 
         assert.throws(function () {
-          addon.Dispatcher.fromSavefile('./foobar');
+          Dispatcher.fromSavefile('./foobar');
         });
 
       });
@@ -34,159 +35,81 @@
         // Most importantly, it doesn't segfault.
 
         assert.throws(function () {
-          addon.Dispatcher.getSnaplen();
+          Dispatcher.getSnaplen();
         });
 
       });
 
-      it('fetches frames async', function (done) {
+      it('dispatches frames async', function (done) {
 
         var isAsync = false;
-        var wrapper = addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
-        var buf = new Buffer(3 * wrapper.getSnaplen());
-        var nFrames = 0;
+        var dispatcher = Dispatcher.fromSavefile('./test/dat/mesh.pcap');
 
-        wrapper
-          .fetch(3, buf, function (err, start, end) {
+        dispatcher
+          .dispatch(3, function (err, iter) {
             assert.ok(err === null);
-
-            if (end === 0) { // Flag.
-              assert.equal(start, 3);
-              return;
+            var nFrames = 0;
+            while (iter.next()) {
+              nFrames++;
             }
-
-            if (++nFrames === 3) {
-              // assert.deepEqual(
-              //   buf.slice(0, headers[0].capLen),
-              //   new Buffer('000020006708040054c6b82400000000220cdaa002000000400100003c14241180000000ffffffffffff06037f07a01606037f07a016b0773a40cb260000000064000105000a667265656273642d617001088c129824b048606c030124050400010000072a5553202401112801112c01113001113401173801173c011740011795011e99011e9d011ea1011ea5011e200100dd180050f2020101000003a4000027a4000042435e0062322f00', 'hex')
-              // );
-              wrapper.close();
-              done();
-            }
-
+            assert.ok(isAsync);
+            assert.equal(nFrames, 3);
+            done();
           });
 
         setImmediate(function () { isAsync = true; });
 
       });
 
-      it('fetches frames async and breaks', function (done) {
+      it('throws an error when dispatching concurrently', function (done) {
 
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
+        var dispatcher = new Dispatcher.fromSavefile('./test/dat/mesh.pcap');
 
-        var buf = new Buffer(1);
-        var nFrames = 0;
-        // Break after first frame.
-
-        wrapper
-          .fetch(3, buf, function (err, start, end) {
-
-            if (end === 0) {
-              assert.ok(err === null);
-              assert.equal(start, 1);
-              return;
-            }
-
-            if (++nFrames === 1) {
-              wrapper.close();
-              done();
-            }
-
-          });
-
-      });
-
-      it('throws an error when fetching concurrently', function (done) {
-
-        var ran = false;
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
-
-        var buf = new Buffer(1e6);
-        var nFrames = 0;
-
-        wrapper.fetch(-1, buf, function () {
-          if (++nFrames === 780) {
-            wrapper.close();
-            assert.ok(ran);
+        dispatcher
+          .dispatch(-1, function () {})
+          .dispatch(-1, function (err) {
+            assert.ok(err !== null);
             done();
-          }
-        });
-
-        assert.throws(function () {
-          ran = true;
-          wrapper.fetch(1, buf, function () {});
-        });
+          });
 
       });
 
-      it('throws an error when fetching after close', function (done) {
+      it('dispatches all frames from a save file', function (done) {
 
-        var wrapper = new addon.Dispatcher
+        var dispatcher = new Dispatcher
           .fromSavefile('./test/dat/mesh.pcap');
-        var buf = new Buffer(wrapper.getSnaplen());
-
-        wrapper.close();
-        assert.throws(function () {
-          wrapper.fetch(1, buf, function () {});
-        });
-        done();
-
-      });
-
-      it('fetches all frames from a save file', function (done) {
-
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
-
-        var buf = new Buffer(1e6);
         var nFrames = 0;
 
-        wrapper
-          .fetch(-1, buf, function (err, start, end) {
-            if (end === 0) {
-              assert.equal(start, 780);
-              return;
+        dispatcher
+          .dispatch(-1, function (err, iter) {
+            assert.ok(err === null);
+            while (iter.next()) {
+              nFrames++;
             }
-            if (++nFrames === 780) {
-              wrapper.close();
+            assert.equal(nFrames, 780);
+            done();
+          });
+
+      });
+
+      it('dispatches no frames after finishing a save file', function (done) {
+
+        var dispatcher = new Dispatcher
+          .fromSavefile('./test/dat/mesh.pcap');
+
+        dispatcher
+          .dispatch(-1, function (err) {
+            assert.ok(err === null);
+            dispatcher.dispatch(1, function (err, iter) {
+              assert.ok(err === null);
+              assert.ok(iter.next() === null);
               done();
-            }
+            });
           });
 
       });
 
-      it('fetches no frames after finishing a save file', function (done) {
-
-        var wrapper = new addon.Dispatcher
-          .fromSavefile('./test/dat/mesh.pcap');
-
-        var buf = new Buffer(1e6);
-        var nFrames = 0;
-
-        wrapper
-          .fetch(-1, buf, function (err, start, end) {
-            if (end === 0) {
-              assert.equal(start, 780);
-              return;
-            }
-            if (++nFrames === 780) {
-              wrapper.fetch(1, buf, function (err, start, end) {
-                assert.equal(start, 0);
-                assert.equal(end, 0);
-                wrapper.close();
-                done();
-              });
-            }
-          });
-
-      });
-
-      // Tests that require a live interface.
-
-      // TODO: maybeIt('', function () {});
+      // TODO: Tests that require a live interface.
 
     });
 

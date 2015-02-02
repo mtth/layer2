@@ -45,10 +45,11 @@ private:
 class Parser : public NanAsyncWorker {
 
 public:
-  Parser(pcap_t *captureHandle, int batchSize, NanCallback *callback);
+  Parser(pcap_t *captureHandle, bool *active, int batchSize, NanCallback *callback);
   ~Parser();
   void Execute();
   void HandleOKCallback();
+  void HandleErrorCallback();
 
 private:
   static void OnPacket(
@@ -58,6 +59,7 @@ private:
   );
 
   pcap_t *_captureHandle;
+  bool *_active;
   int _batchSize;
   int _linkType;
   std::vector<struct frame_t *> *_frames;
@@ -101,6 +103,7 @@ private:
   pcap_t *_captureHandle;
   pcap_dumper_t *_dumpHandle;
   char *_device; // For filters.
+  bool _dispatching;
   static v8::Persistent<v8::FunctionTemplate> _constructor;
 
 };

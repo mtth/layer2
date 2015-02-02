@@ -94,11 +94,13 @@ void Iterator::Init() {
 
 Parser::Parser(
   pcap_t *captureHandle,
+  bool *active,
   int batchSize,
   NanCallback *callback
 ) : NanAsyncWorker(callback) {
 
   _captureHandle = captureHandle;
+  _active = active;
   _linkType = pcap_datalink(_captureHandle);
   _batchSize = batchSize;
   _frames = new std::vector<struct frame_t *>();
@@ -120,6 +122,12 @@ void Parser::OnPacket(
 
 void Parser::Execute() {
 
+  if (*_active) {
+    SetErrorMessage("Already dispatching.");
+    return;
+  }
+
+  *_active = true;
   int n = pcap_dispatch(
     _captureHandle,
     _batchSize,
@@ -145,6 +153,7 @@ void Parser::Execute() {
 void Parser::HandleOKCallback() {
 
   NanScope();
+  *_active = false;
   v8::Local<v8::Value> argv[] = {
     NanNull(), // Error.
     Iterator::NewInstance(_linkType, _frames), // Iterator of frames.
@@ -154,15 +163,23 @@ void Parser::HandleOKCallback() {
 
 }
 
+void Parser::HandleErrorCallback() {
+
+  *_active = false;
+  NanAsyncWorker::HandleErrorCallback();
+
+}
+
 // Dispatcher.
 
 v8::Persistent<v8::FunctionTemplate> Dispatcher::_constructor;
 
 Dispatcher::Dispatcher() {
 
-  _device = NULL;
   _captureHandle = NULL;
   _dumpHandle = NULL;
+  _device = NULL;
+  _dispatching = false;
 
 }
 
@@ -421,7 +438,12 @@ NAN_METHOD(Dispatcher::Dispatch) {
 
   int batchSize = args[0]->Int32Value();
   NanCallback *callback = new NanCallback(args[1].As<v8::Function>());
-  NanAsyncQueueWorker(new Parser(dispatcher->_captureHandle, batchSize, callback));
+  NanAsyncQueueWorker(new Parser(
+    dispatcher->_captureHandle,
+    &(dispatcher->_dispatching),
+    batchSize,
+    callback
+  ));
 
   NanReturnThis();
 
