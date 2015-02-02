@@ -26,15 +26,17 @@ struct frame_t {
 class Frame : public node::ObjectWrap {
 
 public:
+  int Dump(pcap_dumper_t *handle);
   static void Init(v8::Handle<v8::Object> exports);
   static v8::Local<v8::Object> NewInstance(int linkType, const struct frame_t *data);
+  static bool IsInstance(v8::Handle<v8::Value> val);
   static struct frame_t *ParsePdu(int linkType, const u_char *bytes, const struct pcap_pkthdr *header);
 
 private:
   Frame();
   ~Frame();
   static NAN_METHOD(New);
-  static NAN_METHOD(ToBuffer); // TODO.
+  static NAN_METHOD(ToBuffer);
   static NAN_METHOD(GetHeader);
   static NAN_METHOD(GetLinkType); // TODO.
   static NAN_METHOD(GetPduTypes);

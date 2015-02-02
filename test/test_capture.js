@@ -174,13 +174,12 @@
         });
 
         replay
-          .on('data', function (buf) { save.write(buf); })
+          .on('data', function (frame) { save.write(frame); })
           .on('end', function () { save.end(); }); // Not piping so manual close.
 
         save
-          .on('close', function () {
-            checkEqual(this.getPath(), savefilePath);
-            done();
+          .on('finish', function () {
+            checkEqual(this.getPath(), savefilePath, done);
           });
 
 
@@ -194,9 +193,8 @@
 
         replay
           .pipe(save)
-          .on('close', function () {
-            checkEqual(savePath, savefilePath);
-            done();
+          .on('finish', function () {
+            checkEqual(savePath, savefilePath, done);
           });
 
       });
@@ -209,9 +207,8 @@
 
         replay
           .pipe(save)
-          .on('close', function () {
-            checkEqual(savePath, savefilePath);
-            done();
+          .on('finish', function () {
+            checkEqual(savePath, savefilePath, done);
           });
 
       });
@@ -224,26 +221,12 @@
 
         replay
           .pipe(save)
-          .on('close', function () {
+          .on('finish', function () {
             new capture.Replay(savePath)
               .on('data', function (frame) { assert.ok(frame.size() <= 50); })
               .on('error', function () {}) // Skip frame overflow errors.
               .on('end', function () { done(); });
           });
-
-      });
-
-      it('closes after finish', function (done) {
-
-        var savePath = fromName('close.pcap');
-        var replay = new capture.Replay(savefilePath);
-        var save = new Save(savePath, {linkType: replay.getLinkType()});
-        var finished = false;
-
-        replay
-          .pipe(save)
-          .on('finish', function () { finished = true; })
-          .on('close', function () { assert.ok(finished); done(); });
 
       });
 
@@ -254,9 +237,9 @@
         var save = new Save(savePath);
 
         save
-          .on('close', function () {
+          .on('finish', function () {
             capture.summarize(savePath, function (err, summary) {
-              assert.equal(summary.nFrames, 9);
+              assert.equal(summary.nFrames, 780 * 3);
               done();
             });
           });
@@ -289,15 +272,16 @@
       }
 
       // Check that two replay files are equal.
-      function checkEqual(pathA, pathB) {
+      function checkEqual(pathA, pathB, cb) {
 
-        var replayA = new capture.Replay(pathA);
-        var replayB = new capture.Replay(pathB);
+          var replayA = new capture.Replay(pathA);
+          var replayB = new capture.Replay(pathB);
 
-        var a, b;
-        while ((a = replayA.read()) !== null || (b = replayB.read()) !== null) {
-          assert.deepEqual(a, b);
-        }
+          var a, b;
+          while ((a = replayA.read()) !== null || (b = replayB.read()) !== null) {
+            assert.deepEqual(a, b);
+          }
+          cb();
 
       }
 
@@ -336,7 +320,6 @@
           .once('readable', function () {
             var data = this.read();
             var stats = this.getStats();
-            this.close();
             assert.ok(data !== null);
             assert.ok(stats.psRecv > 0);
             done();
@@ -344,24 +327,7 @@
 
       });
 
-      it('throws an error on frame truncation by default', function (done) {
-
-        var nErrors = 0;
-        var nFrames = 0;
-
-        new Live(dev, {maxFrameSize: 2})
-          .close(500)
-          .on('error', function () { nErrors++; })
-          .on('data', function () { nFrames++; })
-          .on('end', function () {
-            assert.ok(nFrames === 0);
-            assert.ok(nErrors > 0);
-            done();
-          });
-
-      });
-
-      it('emits events and closes', function (done) {
+      it('emits finish events when ended', function (done) {
 
         var totalFrames = 2;
         var nFrames = 0;
@@ -372,10 +338,10 @@
             assert.ok(data !== null);
             if (++nFrames === totalFrames) {
               stats = this.getStats();
-              this.close();
+              this.end();
             }
           })
-          .on('end', function () {
+          .on('finish', function () {
             assert.ok(nFrames >= totalFrames);
             assert.ok(stats && stats.psRecv >= 2);
             done();
@@ -383,102 +349,25 @@
 
       });
 
-      it('supports closing after a few frames', function (done) {
+      it('can be ended from outside', function (done) {
 
         var nFrames = 0;
-
-        new Live(dev, {batchSize: 1})
-          .on('data', function () {
-            if (nFrames++ === 10) this.close();
-          })
-          .on('end', function () {
-            done();
-          });
-
-      });
-
-      it('closes after a given timeout', function (done) {
-
-        var nFrames = 0;
-
-        new Live(dev)
-          .on('data', function () { nFrames++; })
-          .on('end', function () {
-            assert.ok(nFrames > 0);
-            done();
-          })
-          .close(500);
-
-      });
-
-      it('closes from outside', function (done) {
-
-        var nFrames = 0;
-        var ended = false;
-        var finished = false;
         var capture = new Live(dev);
 
         capture
           .on('data', function () { nFrames++; })
-          .on('finish', function () { finished = true; })
-          .on('end', function () { ended = true; })
-          .on('close', function () {
+          .on('finish', function () {
             assert.ok(nFrames > 0);
-            assert.ok(finished);
-            assert.ok(ended);
             done();
           });
-        setTimeout(function () { capture.close(500); }, 1);
+        setTimeout(capture.end.bind(capture), 250);
 
       });
 
-      it('closes after the writable side finishes', function (done) {
-
-        var capture = new Live(dev);
-        var ended = false;
-        var finished = false;
-
-        capture
-          .on('data', function () {})
-          .on('finish', function () { finished = true; })
-          .on('end', function () { ended = true; })
-          .on('close', function () {
-            assert.ok(ended);
-            assert.ok(finished);
-            done();
-          });
-
-        setTimeout(function () { capture.end(); }, 200);
-
-      });
-
-      it('closes after the readable side ends', function (done) {
-
-        var capture = new Live(dev);
-        var ended = false;
-        var finished = false;
-
-        capture
-          .on('data', function () {})
-          .on('finish', function () { finished = true; })
-          .on('end', function () { ended = true; })
-          .on('close', function () {
-            assert.ok(ended);
-            assert.ok(finished);
-            done();
-          });
-
-        setTimeout(function () { capture.push(null); }, 200);
-
-      });
-
-      it('supports filters', function (done) {
+      it('supports filters', function () {
 
         var filter = 'ether host 01:02:03:04:05:06';
-        new Live(dev, {filter: filter})
-          .close()
-          .on('data', function () {})
-          .on('close', done);
+        new Live(dev, {filter: filter}).end();
 
       });
 
@@ -487,7 +376,7 @@
         var frames1 = [];
         var frames2 = [];
 
-        var onClose = (function () {
+        var onFinish = (function () {
           var nClosed = 0;
           return function () {
             if (++nClosed === 2) {
@@ -508,28 +397,29 @@
           };
         })();
 
-        new Live(dev)
-          .close(100)
-          .on('close', onClose)
+        var l1 = new Live(dev)
+          .on('finish', onFinish)
           .on('data', function (buf) { frames1.push(buf.toString('hex')); });
 
-        new Live(dev)
-          .close(100)
-          .on('close', onClose)
+        var l2 = new Live(dev)
+          .on('finish', onFinish)
           .on('data', function (buf) { frames2.push(buf.toString('hex')); });
+
+        setTimeout(l1.end.bind(l1), 1000);
+        setTimeout(l2.end.bind(l2), 1000);
 
       });
 
       it('can be opened many times', function (done) {
 
-        var nCaptures = 50;
+        var nCaptures = 20;
         var frameCounts = [];
 
-        var onClose = (function () {
+        var onFinish = (function () {
           var nClosed = 0;
           return function () {
             if (++nClosed === nCaptures) {
-              assert.ok(Math.min.apply(null, frameCounts));
+              assert.ok(Math.min.apply(null, frameCounts) > 0);
               done();
             }
           };
@@ -542,10 +432,10 @@
         }
 
         function createCapture(i) {
-          new Live(dev)
-            .close(1000)
-            .on('close', onClose)
+          var live = new Live(dev)
+            .on('finish', onFinish)
             .on('data', function () { frameCounts[i]++; });
+          setTimeout(live.end.bind(live), 1000);
         }
 
       });

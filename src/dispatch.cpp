@@ -285,34 +285,25 @@ NAN_METHOD(Dispatcher::FromSavefile) {
 
 }
 
-NAN_METHOD(Dispatcher::ToSavefile) {
+NAN_METHOD(Dispatcher::FromDead) {
 
   // TODO: add write mode option (e.g. append). This would require skipping the
   // header and doing some link type consistency checks.
 
   NanScope();
   CHECK(
-    args.Length() == 3 &&
-    args[0]->IsString() && // Path to output.
-    args[1]->IsInt32() && // Link type.
-    args[2]->IsInt32() // Snapshot length.
+    args.Length() == 2 &&
+    args[0]->IsInt32() && // Link type.
+    args[1]->IsInt32() // Snapshot length.
   );
   v8::Local<v8::Object> instance = NewInstance();
   Dispatcher *dispatcher = Unwrap<Dispatcher>(instance);
 
   // Instantiate fake capture handle (this call apparently can't fail, so we
   // don't do error checking here).
-  int linktype = args[1]->Int32Value();
-  int snaplen = args[2]->Int32Value();
+  int linktype = args[0]->Int32Value();
+  int snaplen = args[1]->Int32Value();
   dispatcher->_captureHandle = pcap_open_dead(linktype, snaplen);
-
-  // Activate dump handle.
-  v8::String::Utf8Value path(args[0]->ToString());
-  pcap_dumper_t *handle = pcap_dump_open(dispatcher->_captureHandle, (char *) *path);
-  if (handle == NULL) {
-    return NanThrowError(pcap_geterr(dispatcher->_captureHandle));
-  }
-  dispatcher->_dumpHandle = handle;
 
   NanReturnValue(instance);
 
@@ -326,6 +317,39 @@ NAN_METHOD(Dispatcher::ToSavefile) {
   if (handle == NULL) { \
     return NanThrowError("Inactive dispatcher."); \
   }
+
+/**
+ * Set the dump file. Pass null to flush and close current.
+ *
+ */
+NAN_METHOD(Dispatcher::SetSavefile) {
+
+  NanScope();
+  CHECK(
+    args.Length() == 1 &&
+    (args[0]->IsString() || args[0]->IsNull())
+  );
+  EXTRACT();
+
+  // Close current dump handle if it exists (also flushes it importantly).
+  if (dispatcher->_dumpHandle != NULL) {
+    pcap_dump_close(dispatcher->_dumpHandle);
+    dispatcher->_dumpHandle = NULL;
+  }
+
+  if (args[0]->IsString()) {
+    // Activate new dump handle.
+    v8::String::Utf8Value path(args[0]->ToString());
+    pcap_dumper_t *dumpHandle = pcap_dump_open(handle, (char *) *path);
+    if (dumpHandle == NULL) {
+      return NanThrowError(pcap_geterr(handle));
+    }
+    dispatcher->_dumpHandle = dumpHandle;
+  }
+
+  NanReturnThis();
+
+}
 
 NAN_METHOD(Dispatcher::SetFilter) {
 
@@ -418,14 +442,6 @@ NAN_METHOD(Dispatcher::Inject) {
 
 }
 
-NAN_METHOD(Dispatcher::Dump) { // TODO.
-
-  NanScope();
-  // This method should take a Frame object as argument.
-  NanReturnThis();
-
-}
-
 NAN_METHOD(Dispatcher::Dispatch) {
 
   NanScope();
@@ -451,6 +467,23 @@ NAN_METHOD(Dispatcher::Dispatch) {
 
 #undef EXTRACT
 
+NAN_METHOD(Dispatcher::Dump) {
+
+  NanScope();
+  CHECK(
+    args.Length() == 1 &&
+    Frame::IsInstance(args[0])
+  );
+  Dispatcher *dispatcher = Unwrap<Dispatcher>(args.This());
+  Frame* frame = ObjectWrap::Unwrap<Frame>(args[0]->ToObject());
+  if (frame->Dump(dispatcher->_dumpHandle)) {
+    return NanThrowError("Savefile not set.");
+  }
+
+  NanReturnThis();
+
+}
+
 void Dispatcher::Init(v8::Handle<v8::Object> exports) {
 
   // Activate iterator.
@@ -464,6 +497,7 @@ void Dispatcher::Init(v8::Handle<v8::Object> exports) {
 
   // Prototype methods.
   NODE_SET_PROTOTYPE_METHOD(tpl, "setFilter", SetFilter);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setSavefile", SetSavefile);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getSnaplen", GetSnaplen);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getDatalink", GetDatalink);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getStats", GetStats);
@@ -475,7 +509,7 @@ void Dispatcher::Init(v8::Handle<v8::Object> exports) {
   v8::Local<v8::Function> fn = tpl->GetFunction();
   fn->Set(NanNew("fromDevice"), NanNew<v8::FunctionTemplate>(FromDevice)->GetFunction());
   fn->Set(NanNew("fromSavefile"), NanNew<v8::FunctionTemplate>(FromSavefile)->GetFunction());
-  fn->Set(NanNew("toSavefile"), NanNew<v8::FunctionTemplate>(ToSavefile)->GetFunction());
+  fn->Set(NanNew("fromDead"), NanNew<v8::FunctionTemplate>(FromDead)->GetFunction());
 
   exports->Set(NanNew("Dispatcher"), fn);
 

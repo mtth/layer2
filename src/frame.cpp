@@ -51,15 +51,14 @@ NAN_METHOD(Frame::New) {
         args[0]->IsInt32() &&
         node::Buffer::HasInstance(args[1])
       );
+      frame = new Frame();
+      frame->_linkType = args[0]->Int32Value();
       v8::Local<v8::Object> bufferInstance = args[1]->ToObject();
       size_t size = node::Buffer::Length(bufferInstance);
       pcap_pkthdr header;
-      // TODO: create fake header ts. Also allow an optional third argument
-      // with these parameters?
+      gettimeofday(&header.ts, NULL);
       header.caplen = (bpf_u_int32) size;
       header.len = (bpf_u_int32) size;
-      frame = new Frame();
-      frame->_linkType = args[0]->Int32Value();
       frame->_data = ParsePdu(
         frame->_linkType,
         (u_char *) node::Buffer::Data(bufferInstance),
@@ -223,6 +222,22 @@ NAN_METHOD(Frame::IsValid) {
  * Get the size of the entire frame in bytes.
  *
  */
+NAN_METHOD(Frame::ToBuffer) {
+
+  NanScope();
+  precondition(args.Length() == 0);
+
+  Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
+  Tins::PDU::serialization_type bytes = frame->_data->pdu->serialize();
+  NanReturnValue(NanNewBufferHandle((char *) &bytes[0], bytes.size()));
+  // Creating a buffer creates a copy of the data.
+
+}
+
+/**
+ * Get the size of the entire frame in bytes.
+ *
+ */
 NAN_METHOD(Frame::Size) {
 
   NanScope();
@@ -275,6 +290,33 @@ struct frame_t *Frame::ParsePdu(int linkType, const u_char *bytes, const struct 
 
 }
 
+
+/**
+ * Write PDU. Returns 0 on OK, -1 on error.
+ *
+ */
+int Frame::Dump(pcap_dumper_t *handle) {
+
+  if (handle == NULL) {
+    return -1;
+  }
+
+  Tins::PDU::serialization_type bytes = _data->pdu->serialize();
+  pcap_dump((u_char *) handle, &_data->header, (u_char *) &bytes[0]);
+  return 0;
+
+}
+
+/**
+ * Check if handle contains a frame.
+ *
+ */
+bool Frame::IsInstance(v8::Handle<v8::Value> handle) {
+
+  return NanHasInstance(_constructor, handle);
+
+}
+
 /**
  * Initialize module.
  *
@@ -295,11 +337,12 @@ void Frame::Init(v8::Handle<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
-  NODE_SET_PROTOTYPE_METHOD(tpl, "getHeader", Frame::GetHeader);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "getPdu", Frame::GetPdu);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "getPduTypes", Frame::GetPduTypes);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "isValid", Frame::IsValid);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "size", Frame::Size);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getHeader", GetHeader);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getPdu", GetPdu);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getPduTypes", GetPduTypes);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "isValid", IsValid);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "toBuffer", ToBuffer);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "size", Size);
 
   // Expose constructor.
   exports->Set(NanNew("Frame"), tpl->GetFunction());

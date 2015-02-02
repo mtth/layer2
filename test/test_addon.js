@@ -4,7 +4,10 @@
   'use strict';
 
   var assert = require('assert'),
-      addon = require('../lib/utils').requireAddon();
+      addon = require('../lib/utils').requireAddon(),
+      path = require('path'),
+      fs = require('fs'),
+      util = require('util'); // jshint ignore: line
 
   describe('Addon', function () {
 
@@ -27,6 +30,13 @@
         var buf = new Buffer('0020006708040054c6b82400000000220cdaa002000000400100003c142411b4007c013ce072e6612bcc03fadc202a719fe3d7', 'hex');
         var frame = new Frame(127, buf);
         assert.ok(!frame.isValid());
+
+      });
+
+      it('returns its data in a buffer', function () {
+
+        var frame = new Frame(127, buf); // radiotap link type
+        assert.deepEqual(buf, frame.toBuffer());
 
       });
 
@@ -171,7 +181,80 @@
 
       });
 
+      it('can be activated from a dead interface', function () {
+
+        var dispatcher = Dispatcher.fromDead(127, 200);
+        assert.equal(dispatcher.getDatalink(), 127);
+        assert.equal(dispatcher.getSnaplen(), 200);
+
+      });
+
+      it('sets the properties on a savefile', function () {
+
+        var fpath = fromName('set_properties.pcap');
+
+        Dispatcher
+          .fromDead(127, 500)
+          .setSavefile(fpath)
+          .setSavefile(null); // Flush.
+
+        var dispatcher = Dispatcher.fromSavefile(fpath);
+        assert.equal(dispatcher.getDatalink(), 127);
+        assert.equal(dispatcher.getSnaplen(), 500);
+
+      });
+
+      it('can write a frame to a file', function (done) {
+
+        var fpath = fromName('write_frame.pcap');
+        var buf = new Buffer('aabb', 'hex');
+
+        Dispatcher.fromDead(127, 65535)
+          .setSavefile(fpath)
+          .dump(new addon.Frame(127, buf))
+          .setSavefile(null); // Flush.
+
+        Dispatcher.fromSavefile(fpath)
+          .dispatch(1, function (err, iter) {
+            var frame = iter.next();
+            assert.ok(frame !== null);
+            assert.deepEqual(frame.toBuffer(), buf);
+            done();
+          });
+
+      });
+
+      it('fails when writing without setting the file', function () {
+
+        assert.throws(function () {
+          Dispatcher.fromDead(127, 65535)
+            .dump(new addon.Frame(127, new Buffer(0)));
+        });
+
+      });
+
+      it('fails when writing something else than a frame', function () {
+
+        assert.throws(function () {
+          Dispatcher.fromDead(127, 65535)
+            .setSavefile(fromName('write_non_frame.pcap'))
+            .dump(new Buffer(0));
+        });
+
+      });
+
       // TODO: Tests that require a live interface.
+
+      // Helpers.
+
+      // Name and delete file after test.
+      function fromName(fname) {
+
+        var fpath = path.join(__dirname, 'dat', fname);
+        after(function () { fs.unlink(fpath); });
+        return fpath;
+
+      }
 
     });
 

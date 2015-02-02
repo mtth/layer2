@@ -98,7 +98,7 @@ private:
   static NAN_METHOD(New);
   static NAN_METHOD(Inject);
   static NAN_METHOD(SetFilter);
-  static NAN_METHOD(ToSavefile);
+  static NAN_METHOD(SetSavefile);
 
   pcap_t *_captureHandle;
   pcap_dumper_t *_dumpHandle;
