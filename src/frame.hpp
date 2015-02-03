@@ -27,6 +27,7 @@ class Frame : public node::ObjectWrap {
 
 public:
   int Dump(pcap_dumper_t *handle);
+  int Inject(pcap_t *handle);
   static void Init(v8::Handle<v8::Object> exports);
   static v8::Local<v8::Object> NewInstance(int linkType, const struct frame_t *data);
   static bool IsInstance(v8::Handle<v8::Value> val);

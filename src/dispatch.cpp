@@ -424,18 +424,15 @@ NAN_METHOD(Dispatcher::GetStats) {
 NAN_METHOD(Dispatcher::Inject) {
 
   NanScope();
-  CHECK(args.Length() == 1 && node::Buffer::HasInstance(args[0]));
+  CHECK(
+    args.Length() == 1 &&
+    Frame::IsInstance(args[0])
+  );
   EXTRACT();
 
-  v8::Local<v8::Object> packet = args[0]->ToObject();
-  char *packet_data = node::Buffer::Data(packet);
-  int packet_length = node::Buffer::Length(packet);
-
-  int n = pcap_inject(handle, packet_data, packet_length);
-  if (n == -1) {
-    return NanThrowError(pcap_geterr(handle));
-  } else if (n != packet_length) {
-    return NanThrowError("Frame injection truncated.");
+  Frame* frame = ObjectWrap::Unwrap<Frame>(args[0]->ToObject());
+  if (frame->Inject(dispatcher->_captureHandle)) {
+    return NanThrowError("Injection failed."); // TODO: pass status.
   }
 
   NanReturnThis();
@@ -486,6 +483,7 @@ NAN_METHOD(Dispatcher::Dump) {
     Frame::IsInstance(args[0])
   );
   Dispatcher *dispatcher = Unwrap<Dispatcher>(args.This());
+
   Frame* frame = ObjectWrap::Unwrap<Frame>(args[0]->ToObject());
   if (frame->Dump(dispatcher->_dumpHandle)) {
     return NanThrowError("Savefile not set.");

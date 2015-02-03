@@ -435,7 +435,7 @@
           var live = new Live(dev)
             .on('finish', onFinish)
             .on('data', function () { frameCounts[i]++; });
-          setTimeout(live.end.bind(live), 1000);
+          setTimeout(live.end.bind(live), 1500);
         }
 
       });

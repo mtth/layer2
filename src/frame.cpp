@@ -288,7 +288,6 @@ struct frame_t *Frame::ParsePdu(int linkType, const u_char *bytes, const struct 
 
 }
 
-
 /**
  * Write PDU. Returns 0 on OK, -1 on error.
  *
@@ -301,6 +300,28 @@ int Frame::Dump(pcap_dumper_t *handle) {
 
   Tins::PDU::serialization_type bytes = _data->pdu->serialize();
   pcap_dump((u_char *) handle, &_data->header, (u_char *) &bytes[0]);
+  return 0;
+
+}
+
+/**
+ * Inject PDU. Returns 0 on OK, -X on error.
+ *
+ */
+int Frame::Inject(pcap_t *handle) {
+
+  if (handle == NULL) {
+    return -1;
+  }
+
+  int length = _data->header.caplen;
+  Tins::PDU::serialization_type bytes = _data->pdu->serialize();
+  int n = pcap_inject(handle, (u_char *) &bytes[0], length);
+  if (n == -1) {
+    return -2;
+  } else if (n != length) {
+    return -3;
+  }
   return 0;
 
 }
