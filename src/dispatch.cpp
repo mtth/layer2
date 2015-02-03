@@ -465,6 +465,17 @@ NAN_METHOD(Dispatcher::Dispatch) {
 
 }
 
+NAN_METHOD(Dispatcher::Close) {
+
+  NanScope();
+  CHECK(args.Length() == 0);
+  EXTRACT();
+  pcap_close(handle);
+  dispatcher->_captureHandle = NULL;
+  NanReturnThis();
+
+}
+
 #undef EXTRACT
 
 NAN_METHOD(Dispatcher::Dump) {
@@ -496,6 +507,7 @@ void Dispatcher::Init(v8::Handle<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
+  NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setFilter", SetFilter);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setSavefile", SetSavefile);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getSnaplen", GetSnaplen);
