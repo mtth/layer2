@@ -187,7 +187,6 @@ NAN_METHOD(Frame::GetPduTypes) {
 
   NanScope();
   precondition(args.Length() == 0);
-
   Frame* frame = ObjectWrap::Unwrap<Frame>(args.This());
 
   int i = 0;

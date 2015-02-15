@@ -25,4 +25,6 @@
     })
     .on('end', function () { console.dir(nBytesReceived); });
 
+  process.on('SIGINT', function () { capture.end(); });
+
 })();

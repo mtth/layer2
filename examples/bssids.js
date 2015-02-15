@@ -27,6 +27,6 @@
     })
     .on('end', function () { console.dir(bssids); });
 
-  process.on('SIGINT', function () { capture.finish(); });
+  process.on('SIGINT', function () { capture.end(); });
 
 })();
