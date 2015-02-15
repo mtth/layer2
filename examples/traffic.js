@@ -12,12 +12,9 @@
 
   var device = layer2.capture.getDefaultDevice();
   var capture = new layer2.capture.Live(device, {monitor: true});
-  var decoder = new layer2.Decoder();
   var nBytesReceived = {};
 
   capture
-    .close(10000)
-    .pipe(decoder)
     .on('data', function (frame) {
       var pdu = frame.getPdu(layer2.pduTypes.DOT11_QOS_DATA);
       if (pdu) {

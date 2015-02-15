@@ -15,6 +15,7 @@ private:
   Dot11BeaconPdu();
   ~Dot11BeaconPdu();
   static NAN_METHOD(New);
+  static NAN_METHOD(GetAddresses);
   static NAN_METHOD(GetCapabilities);
   static NAN_METHOD(GetSize);
 

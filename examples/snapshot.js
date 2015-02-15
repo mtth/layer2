@@ -24,10 +24,11 @@
   var saveStream = new layer2.capture.Save(fpath);
 
   liveStream
-    .close(5000)
     .on('end', function () {
-      console.log('Saved ' + this.getStats().psRecv + ' frames!');
+      console.log('\rSaved ' + this.getStats().psRecv + ' frames!');
     })
     .pipe(saveStream);
+
+  process.on('SIGINT', function () { liveStream.end(); });
 
 })();
