@@ -27,7 +27,7 @@
   ],
   "main": "./lib",
   "scripts": {
-    "install": "node-gyp rebuild --release && find .",
+    "install": "node-gyp rebuild --release",
     "build": "node-gyp clean && node-gyp configure && node-gyp build",
     "clean": "rm -rf build node_modules benchmarks/node_modules",
     "debug": "lldb -- node $(npm bin)/_mocha --no-timeouts",
