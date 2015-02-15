@@ -1,4 +1,5 @@
 #!/bin/env bash
+
 set -e
 
 libtins_v=3.1
