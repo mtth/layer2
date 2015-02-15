@@ -16,9 +16,8 @@
   var layer2 = require('../lib'),
       util = require('util');
 
-  var device = layer2.capture.getDefaultDevice();
+  var device = layer2.capture.getDefaultDevice() || 'en0';
   var capture = new layer2.capture.Live(device, {monitor: true});
-  var decoder = new layer2.Decoder();
   var nValid = 0;
   var nInvalid = 0;
   var startTime;
@@ -31,28 +30,25 @@
       ));
       startTime = process.hrtime();
     })
-    .pipe(decoder)
-    .on('data', function () {
-      nValid++;
-      process.stderr.write('.');
+    .on('data', function (frame) {
+      if (frame.isValid()) {
+        nValid++;
+        process.stderr.write('.');
+      } else {
+        nInvalid++;
+        process.stderr.write('I');
+      }
     })
-    .on('invalid', function () {
-      nInvalid++;
-      process.stderr.write('I');
+    .on('end', function () {
+      var runTime = process.hrtime(startTime);
+      console.log(util.format(
+        '\n\n%s frames captured in %s seconds (%s%% invalid).',
+        (nValid + nInvalid),
+        (runTime[0] + 1e-9 * runTime[1]).toFixed(1),
+        (100 * nInvalid / (nValid + nInvalid)).toFixed(1)
+      ));
     });
 
-  process.on('SIGINT', function () {
-    capture
-      .on('close', function () {
-        var runTime = process.hrtime(startTime);
-        console.log(util.format(
-          '\n\n %s frames captured in %s seconds (%s%% invalid).',
-          (nValid + nInvalid),
-          (runTime[0] + 1e-9 * runTime[1]).toFixed(1),
-          (100 * nInvalid / (nValid + nInvalid)).toFixed(1)
-        ));
-      })
-      .close();
-  });
+  process.on('SIGINT', function () { capture.end(); });
 
 })();

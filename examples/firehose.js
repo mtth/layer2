@@ -5,12 +5,10 @@
 
   var layer2 = require('../lib');
 
-  var device = layer2.capture.getDefaultDevice();
+  var device = layer2.capture.getDefaultDevice() || 'en0';
   var capture = new layer2.capture.Live(device, {monitor: true});
-  var decoder = new layer2.Decoder();
 
   capture
-    .pipe(decoder)
     .on('data', function (frame) { console.log(frame); });
 
 })();

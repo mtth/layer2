@@ -315,7 +315,7 @@ NAN_METHOD(Dispatcher::FromDead) {
   Dispatcher *dispatcher = Unwrap<Dispatcher>(args.This()); \
   pcap_t *handle = dispatcher->_captureHandle; \
   if (handle == NULL) { \
-    return NanThrowError("Inactive dispatcher."); \
+    return NanThrowError("Inactive capture handle."); \
   }
 
 /**
@@ -467,6 +467,7 @@ NAN_METHOD(Dispatcher::Close) {
   NanScope();
   CHECK(args.Length() == 0);
   EXTRACT();
+
   pcap_close(handle);
   dispatcher->_captureHandle = NULL;
   NanReturnThis();

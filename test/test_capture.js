@@ -164,7 +164,6 @@
 
       });
 
-
       it('can be written to', function (done) {
 
         var savePath = fromName('write.pcap');
@@ -257,6 +256,19 @@
             .pipe(save, {end: false});
 
         })();
+
+      });
+
+      it('can be closed directly', function (done) {
+
+        var savePath = fromName('closed.pcap');
+        var save = new Save(savePath);
+
+        save
+          .on('finish', function () {
+            done();
+          })
+          .end();
 
       });
 

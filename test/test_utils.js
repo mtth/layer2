@@ -4,13 +4,13 @@
   'use strict';
 
   var assert = require('assert'),
+      stream = require('stream'),
+      util = require('util'),
       utils = require('../lib/utils');
 
   describe('Utils', function () {
 
-    describe('BatchReadable', function () {
-
-      var BatchReadable = utils.BatchReadable;
+    describe('BatchStream', function () {
 
       it('works when fn is sync', function (done) {
 
@@ -178,9 +178,18 @@
 
       // Helpers.
 
+      function BatchReadable(fn, opts) {
+
+        utils.BatchStream.call(this, opts);
+
+        this._batch = fn;
+
+      }
+      util.inherits(BatchReadable, stream.Readable);
+
       function Iterator(n) {
 
-        this.next = function () { return n-- || null; };
+        this.next = function () { return n ? {value: n--} : {done: true}; };
 
       }
 
