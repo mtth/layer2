@@ -27,13 +27,11 @@
   ],
   "main": "./lib",
   "scripts": {
-    "install": "node-gyp rebuild --release",
+    "install": "node-gyp rebuild --release && find .",
     "build": "node-gyp clean && node-gyp configure && node-gyp build",
     "clean": "rm -rf build node_modules benchmarks/node_modules",
     "debug": "lldb -- node $(npm bin)/_mocha --no-timeouts",
-    "test": "$(npm bin)/mocha",
-    "benchmark-capture": "cd benchmarks && make && node capture.js",
-    "benchmark-decode": "cd benchmarks && make && node decode.js"
+    "test": "$(npm bin)/mocha"
   },
   "engines": {
     "node": ">= 0.10.0"
