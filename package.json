@@ -17,6 +17,13 @@
     "wireshark",
     "tcpdump"
   ],
+  "files": [
+    "LICENSE",
+    "README.md",
+    "src/",
+    "binding.gyp",
+    "package.json"
+  ],
   "main": "./src/js",
   "scripts": {
     "install": "node-gyp rebuild --release",
