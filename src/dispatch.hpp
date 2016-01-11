@@ -1,38 +1,9 @@
-#ifndef LAYER2_DISPATCH_HPP_
-#define LAYER2_DISPATCH_HPP_
+#pragma once
 
 #include <nan.h>
-#include <pcap/pcap.h>
-#include <vector>
+#include <tins/tins.h>
 
 namespace Layer2 {
-
-/**
- * v8 object passed to the dispatcher's `dispatch` method's callback.
- *
- * Consumers should call `next` on the iterator until it returns `null`
- * (signalling that the iterator is exhausted). The iterator lazily produces
- * the v8 frame objects.
- *
- */
-class Iterator : public node::ObjectWrap {
-
-public:
-  static void Init();
-  static v8::Local<v8::Object> NewInstance(int linktType, std::vector<struct frame_t *> *frames);
-
-private:
-  Iterator();
-  ~Iterator();
-  static NAN_METHOD(New);
-  static NAN_METHOD(Next);
-
-  size_t _index;
-  int _linkType;
-  std::vector<struct frame_t *> *_frames;
-  static v8::Persistent<v8::FunctionTemplate> _constructor;
-
-};
 
 /**
  * Asynchronous worker that captures and decodes frames.
@@ -42,28 +13,22 @@ private:
  * delegates the creation of the actual v8 frame objects to the latter.
  *
  */
-class Parser : public NanAsyncWorker {
+class Parser : public Nan::AsyncWorker {
 
 public:
-  Parser(pcap_t *captureHandle, bool *active, int batchSize, NanCallback *callback);
+  Parser(Tins::Sniffer sniffer, v8::Local<v8::Value> buf, Nan::Callback *cb);
   ~Parser();
   void Execute();
   void HandleOKCallback();
   void HandleErrorCallback();
 
 private:
-  static void OnPacket(
-    u_char *etc,
-    const struct pcap_pkthdr *header,
-    const u_char *packet
-  );
+  static void OnPdu(Tins::PDU &pdu);
 
-  pcap_t *_captureHandle;
-  bool *_active;
-  int _batchSize;
-  int _linkType;
-  std::vector<struct frame_t *> *_frames;
-
+  Tins::Sniffer _sniffer;
+  char *_data;
+  int _numPdus;
+  int _maxBytes;
 };
 
 /**
@@ -100,14 +65,8 @@ private:
   static NAN_METHOD(SetFilter);
   static NAN_METHOD(SetSavefile);
 
-  pcap_t *_captureHandle;
-  pcap_dumper_t *_dumpHandle;
-  char *_device; // For filters.
-  bool _dispatching;
+  Tins::Sniffer _sniffer;
   static v8::Persistent<v8::FunctionTemplate> _constructor;
-
 };
 
 } // Layer2
-
-#endif

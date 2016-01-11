@@ -1,0 +1,124 @@
+@namespace("dot11")
+protocol Dot11 {
+
+  @doc("MAC address")
+  fixed Addr(6);
+
+  enum Type { MGMT, CTRL, DATA }
+
+  @namespace("dot11.mgmt")
+  enum Capability {
+    ESS,
+    IBSS,
+    CF_POLL,
+    CF_POLL_REQ,
+    PRIVACY,
+    SHORT_PREAMBLE,
+    PBCC,
+    CHANNEL_AGILITY,
+    SPECTRUM_MGMT,
+    QOS,
+    SST,
+    APSD,
+    RADIO_MEASUREMENT,
+    DSSS_OFDM,
+    DELAYED_BLOCK_ACK,
+    IMMEDIATE_BLOCK_ACK
+  }
+
+  @namespace("dot11.mgmt")
+  enum Subtype {
+    // TODO
+    BEACON
+  }
+
+  @namespace("dot11.mgmt")
+  record Beacon {
+    dot11.Type type;
+    Subtype subtype;
+    boolean toDs;
+    boolean fromDs;
+    boolean moreFrag;
+    boolean wep;
+    boolean order;
+    int durationId;
+    int protocol;
+    int fragNum;
+    int seqNum;
+    dot11.Addr bssidAddr;
+    long timestamp;
+    long interval;
+    array<Capability> capabilities;
+  }
+
+  @namespace("dot11.ctrl")
+  record Ack {
+    dot11.Type type;
+    // Subtype subtype;
+    boolean toDs;
+    boolean fromDs;
+    boolean moreFrag;
+    boolean wep;
+    boolean order;
+    int durationId;
+    int protocol;
+    int fragNum;
+    int seqNum;
+    dot11.Addr addr1;
+  }
+
+  @namespace("dot11.data")
+  enum Subtype {
+    DATA,
+    CF_ACK,
+    CF_POLL,
+    CF_ACK_POLL,
+    NULL,
+    ACK,
+    POLL,
+    ACK_POLL,
+    QOS_DATA,
+    QOS_CF_ACK,
+    QOS_CF_POLL,
+    QOS_CF_ACK_POLL,
+    QOS_NULL
+  }
+
+  @namespace("dot11.data")
+  record Data {
+    dot11.Type type;
+    Subtype subtype;
+    boolean toDs;
+    boolean fromDs;
+    boolean moreFrag;
+    boolean wep;
+    boolean order;
+    int durationId;
+    int protocol;
+    int fragNum;
+    int seqNum;
+    dot11.Addr srcAddr;
+    dot11.Addr dstAddr;
+    dot11.Addr bssidAddr;
+  }
+
+  @namespace("dot11.data")
+  record QosData {
+    dot11.Type type;
+    Subtype subtype;
+    boolean toDs;
+    boolean fromDs;
+    boolean moreFrag;
+    boolean wep;
+    boolean order;
+    int durationId;
+    int protocol;
+    int fragNum;
+    int seqNum;
+    dot11.Addr srcAddr;
+    dot11.Addr dstAddr;
+    dot11.Addr bssidAddr;
+    int qosControl;
+  }
+
+}

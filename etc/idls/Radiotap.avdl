@@ -1,0 +1,58 @@
+/**
+ * A radiotap header.
+ *
+ * http://libtins.github.io/docs/latest/d7/d0e/classTins_1_1RadioTap.html
+ * http://www.radiotap.org/defined-fields/all
+ *
+ * TODO: Order fields such that the most important ones are towards the
+ * beginning. (Perhaps putting the inner PDU before the headers even.)
+ *
+ */
+@namespace("radiotap")
+protocol Radiotap {
+
+  enum ChannelType {
+    TURBO, CCK, OFDM, TWO_GZ, FIVE_GZ, PASSIVE, DYN_CCK_OFDM, GFSK
+  }
+
+  enum PresentFlags {
+    TSTF,
+    FLAGS,
+    RATE,
+    CHANNEL,
+    FHSS,
+    DBM_SIGNAL,
+    DBM_NOISE,
+    LOCK_QUALITY,
+    TX_ATTENUATION,
+    DB_TX_ATTENUATION,
+    DBM_TX_ATTENUATION,
+    ANTENNA,
+    DB_SIGNAL,
+    DB_NOISE,
+    RX_FLAGS,
+    TX_FLAGS,
+    DATA_RETRIES,
+    CHANNEL_PLUS,
+    MCS
+  }
+
+  record Frame {
+    union {null, long} tsft; // Synchronization time.
+    union {null, int} rate;
+    union {null, int} channelFreq;
+    union {null, ChannelType} channelType;
+    union {null, int} dbmSignal;
+    union {null, int} dbmNoise;
+    union {null, int} signalQuality;
+    union {null, int} antenna;
+    union {
+      dot11.data.Data,
+      dot11.data.QosData,
+      dot11.ctrl.Ack,
+      dot11.mgmt.Beacon
+      // TODO: Add more.
+    } data;
+  }
+
+}

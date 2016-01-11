@@ -1,6 +1,6 @@
 {
   "name": "layer2",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A streaming API for the data link layer",
   "keywords": [
     "wifi",
@@ -19,28 +19,24 @@
     "libtins"
   ],
   "files": [
-    "LICENSE",
-    "README.md",
-    "src/",
-    "binding.gyp",
-    "package.json"
+    "src",
+    "lib",
+    "binding.gyp"
   ],
   "main": "./lib",
   "scripts": {
-    "install": "node-gyp rebuild --release",
+    "build-avro": "bash etc/scripts/build_avro.sh",
     "build": "node-gyp clean && node-gyp configure && node-gyp build",
-    "clean": "rm -rf build node_modules benchmarks/node_modules",
-    "debug": "lldb -- node $(npm bin)/_mocha --no-timeouts",
-    "test": "$(npm bin)/mocha"
-  },
-  "engines": {
-    "node": ">= 0.10.0"
+    "clean": "rm -rf build node_modules etc/deps/avro/lang/c++/build",
+    "debug": "lldb -- node _mocha --no-timeouts",
+    "test": "mocha"
   },
   "dependencies": {
-    "nan": "^1.4.1"
+    "avsc": "^3.3.0",
+    "nan": "^2.2.0"
   },
   "devDependencies": {
-    "mocha": "^2.0.1"
+    "mocha": "^2.3.4"
   },
   "repository": {
     "type": "git",

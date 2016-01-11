@@ -1,0 +1,19 @@
+/**
+ * Entry point.
+ *
+ * The serialization format (used for communication between JS and CPP) will
+ * be (written to a single large buffer):
+ *
+ *  + uint32_t total size of PDU (including this).
+ *  + union of all possible PDUs
+ *
+ *  Each PDU's inner PDU will be front-loaded. This will enable more efficient
+ *  decoding of the inner layers.
+ *
+ */
+protocol Pdu {
+
+  import idl "Dot11.avdl";
+  import idl "Radiotap.avdl";
+
+}

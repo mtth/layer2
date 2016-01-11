@@ -1,0 +1,14 @@
+@namespace("pdu.ethernet2")
+protocol EthernetII {
+
+  @doc("MAC address")
+  fixed MacAddr(6);
+
+  record EthernetFrame {
+    Addr srcAddr;
+    Addr dstAddr;
+    int etherType;
+    bytes payload;
+  }
+
+}

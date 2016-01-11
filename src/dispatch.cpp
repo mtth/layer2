@@ -1,103 +1,15 @@
 #include "dispatch.hpp"
-#include "frame.hpp"
 
 #define CHECK(b) if (!(b)) return NanThrowError("Illegal arguments.")
 
 namespace Layer2 {
 
-// Iterator.
-
-v8::Persistent<v8::FunctionTemplate> Iterator::_constructor;
-
-Iterator::Iterator() {
-
-  _index = 0;
-  _frames = NULL;
-
-};
-
-Iterator::~Iterator() {
-
-  // We only free data for frames that weren't emitted. The emitted ones are
-  // responsible for freeing their individual PDUs.
-  if (_frames != NULL) {
-    std::vector<struct frame_t *> frames = *_frames;
-    while (_index < frames.size()) {
-      struct frame_t *data = frames[_index++];
-      if (data->pdu != NULL) {
-        delete data->pdu;
-      }
-      delete data;
-    }
-    delete _frames;
-  }
-
-};
-
-NAN_METHOD(Iterator::New) {
-
-  NanScope();
-  CHECK(args.Length() == 0);
-  Iterator *iterator = new Iterator();
-  iterator->Wrap(args.This());
-  NanReturnThis();
-
-}
-
-v8::Local<v8::Object> Iterator::NewInstance(int linkType, std::vector<struct frame_t *> *frames) {
-
-  NanEscapableScope();
-  v8::Local<v8::FunctionTemplate> constructorHandle = NanNew<v8::FunctionTemplate>(_constructor);
-  v8::Local<v8::Object> instance = constructorHandle->GetFunction()->NewInstance();
-  Iterator *iterator = Unwrap<Iterator>(instance);
-  iterator->_linkType = linkType;
-  iterator->_frames = frames;
-  return NanEscapeScope(instance);
-
-}
-
-NAN_METHOD(Iterator::Next) {
-
-  NanScope();
-  CHECK(args.Length() == 0);
-  Iterator *iterator = Unwrap<Iterator>(args.This());
-
-  if (iterator->_index < iterator->_frames->size()) {
-    std::vector<struct frame_t *> frames = *iterator->_frames;
-    v8::Local<v8::Object> frameInstance = Frame::NewInstance(
-      iterator->_linkType,
-      frames[iterator->_index++]
-    );
-    NanReturnValue(frameInstance);
-  } else {
-    NanReturnNull();
-  }
-
-}
-
-void Iterator::Init() {
-
-  NanScope();
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
-  NanAssignPersistent(_constructor, tpl);
-  tpl->SetClassName(NanNew("Iterator"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-  // Prototype methods.
-  NODE_SET_PROTOTYPE_METHOD(tpl, "next", Next);
-
-  // We don't expose the Iterator constructor.
-
-}
-
-// Parser.
-
 Parser::Parser(
   pcap_t *captureHandle,
   bool *active,
   int batchSize,
-  NanCallback *callback
-) : NanAsyncWorker(callback) {
+  Nan::Callback *callback
+) : Nan::AsyncWorker(callback) {
 
   _captureHandle = captureHandle;
   _active = active;
@@ -157,7 +69,7 @@ void Parser::HandleOKCallback() {
   v8::Local<v8::Value> argv[] = {
     NanNull(), // Error.
     Iterator::NewInstance(_linkType, _frames), // Iterator of frames.
-    NanNew<v8::Integer>((int) _frames->size()) // Number of frames in batch.
+    Nan::New<v8::Integer>((int) _frames->size()) // Number of frames in batch.
   };
   callback->Call(3, argv);
 
@@ -166,7 +78,7 @@ void Parser::HandleOKCallback() {
 void Parser::HandleErrorCallback() {
 
   *_active = false;
-  NanAsyncWorker::HandleErrorCallback();
+  Nan::AsyncWorker::HandleErrorCallback();
 
 }
 
@@ -215,7 +127,7 @@ NAN_METHOD(Dispatcher::New) {
 v8::Local<v8::Object> Dispatcher::NewInstance() {
 
   NanEscapableScope();
-  v8::Local<v8::FunctionTemplate> constructorHandle = NanNew<v8::FunctionTemplate>(_constructor);
+  v8::Local<v8::FunctionTemplate> constructorHandle = Nan::New<v8::FunctionTemplate>(_constructor);
   v8::Local<v8::Object> instance = constructorHandle->GetFunction()->NewInstance();
   return NanEscapeScope(instance);
 
@@ -389,7 +301,7 @@ NAN_METHOD(Dispatcher::GetSnaplen) {
   CHECK(args.Length() == 0);
   EXTRACT();
 
-  NanReturnValue(NanNew<v8::Integer>(pcap_snapshot(handle)));
+  NanReturnValue(Nan::New<v8::Integer>(pcap_snapshot(handle)));
 
 }
 
@@ -399,7 +311,7 @@ NAN_METHOD(Dispatcher::GetDatalink) {
   CHECK(args.Length() == 0);
   EXTRACT();
 
-  NanReturnValue(NanNew<v8::Integer>(pcap_datalink(handle)));
+  NanReturnValue(Nan::New<v8::Integer>(pcap_datalink(handle)));
 
 }
 
@@ -413,10 +325,10 @@ NAN_METHOD(Dispatcher::GetStats) {
   if (pcap_stats(handle, &ps) == -1) {
     return NanThrowError(pcap_geterr(handle));
   }
-  v8::Local<v8::Object> stats_obj = NanNew<v8::Object>();
-  stats_obj->Set(NanNew("psRecv"), NanNew<v8::Integer>(ps.ps_recv));
-  stats_obj->Set(NanNew("psDrop"), NanNew<v8::Integer>(ps.ps_drop));
-  stats_obj->Set(NanNew("psIfDrop"), NanNew<v8::Integer>(ps.ps_ifdrop));
+  v8::Local<v8::Object> stats_obj = Nan::New<v8::Object>();
+  stats_obj->Set(Nan::New("psRecv"), Nan::New<v8::Integer>(ps.ps_recv));
+  stats_obj->Set(Nan::New("psDrop"), Nan::New<v8::Integer>(ps.ps_drop));
+  stats_obj->Set(Nan::New("psIfDrop"), Nan::New<v8::Integer>(ps.ps_ifdrop));
   NanReturnValue(stats_obj);
 
 }
@@ -450,8 +362,8 @@ NAN_METHOD(Dispatcher::Dispatch) {
   EXTRACT();
 
   int batchSize = args[0]->Int32Value();
-  NanCallback *callback = new NanCallback(args[1].As<v8::Function>());
-  NanAsyncQueueWorker(new Parser(
+  Nan::Callback *callback = new Nan::Callback(args[1].As<v8::Function>());
+  Nan::AsyncQueueWorker(new Parser(
     dispatcher->_captureHandle,
     &(dispatcher->_dispatching),
     batchSize,
@@ -500,9 +412,9 @@ void Dispatcher::Init(v8::Handle<v8::Object> exports) {
   Iterator::Init();
 
   // Create dispatcher constructor template.
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
   NanAssignPersistent(_constructor, tpl);
-  tpl->SetClassName(NanNew("Dispatcher"));
+  tpl->SetClassName(Nan::New("Dispatcher"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   // Prototype methods.
@@ -518,11 +430,11 @@ void Dispatcher::Init(v8::Handle<v8::Object> exports) {
 
   // Static methods.
   v8::Local<v8::Function> fn = tpl->GetFunction();
-  fn->Set(NanNew("fromDevice"), NanNew<v8::FunctionTemplate>(FromDevice)->GetFunction());
-  fn->Set(NanNew("fromSavefile"), NanNew<v8::FunctionTemplate>(FromSavefile)->GetFunction());
-  fn->Set(NanNew("fromDead"), NanNew<v8::FunctionTemplate>(FromDead)->GetFunction());
+  fn->Set(Nan::New("fromDevice"), Nan::New<v8::FunctionTemplate>(FromDevice)->GetFunction());
+  fn->Set(Nan::New("fromSavefile"), Nan::New<v8::FunctionTemplate>(FromSavefile)->GetFunction());
+  fn->Set(Nan::New("fromDead"), Nan::New<v8::FunctionTemplate>(FromDead)->GetFunction());
 
-  exports->Set(NanNew("Dispatcher"), fn);
+  exports->Set(Nan::New("Dispatcher"), fn);
 
 }
 

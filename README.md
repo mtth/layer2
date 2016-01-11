@@ -39,6 +39,10 @@ $ npm test
 
 Some tests require an active internet connection.
 
+## License
+
+MIT, Apache 2 for Avro.
+
 
 [streams]: http://nodejs.org/api/stream.html
 [wiki]: http://en.wikipedia.org/wiki/Data_link_layer
