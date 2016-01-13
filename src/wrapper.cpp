@@ -169,19 +169,52 @@ NAN_METHOD(Wrapper::Empty) {}
 
 NAN_METHOD(Wrapper::FromInterface) {
   if (
-    info.Length() < 1 ||
+    info.Length() != 7 ||
     !info[0]->IsString() ||
-    (info.Length() > 1 && !info[1]->IsObject())
+    !(info[1]->IsUndefined() || info[1]->IsUint32()) ||   // snaplen
+    !(info[2]->IsUndefined() || info[2]->IsBoolean()) ||  // promisc
+    !(info[3]->IsUndefined() || info[3]->IsBoolean()) ||  // rfmon
+    !(info[4]->IsUndefined() || info[4]->IsUint32()) ||   // timeout
+    !(info[5]->IsUndefined() || info[5]->IsUint32()) ||   // bufferSize
+    !(info[6]->IsUndefined() || info[6]->IsString())      // filter
   ) {
     Nan::ThrowError("invalid arguments");
     return;
   }
 
+  // The device to listen on.
   Nan::Utf8String dev(info[0]);
+
+  // Prepare the configuration, only overriding system defaults when a value
+  // has been specified.
   Tins::SnifferConfiguration config;
-  config.set_promisc_mode(true);
-  config.set_rfmon(true);
-  Tins::Sniffer *sniffer = new Tins::Sniffer(*dev, config);
+  if (!info[1]->IsUndefined()) {
+    config.set_snap_len(info[1]->Uint32Value());
+  }
+  if (!info[2]->IsUndefined()) {
+    config.set_promisc_mode(info[2]->BooleanValue());
+  }
+  if (!info[3]->IsUndefined()) {
+    config.set_rfmon(info[3]->BooleanValue());
+  }
+  if (!info[4]->IsUndefined()) {
+    config.set_timeout(info[4]->Uint32Value());
+  }
+  if (!info[5]->IsUndefined()) {
+    config.set_buffer_size(info[5]->Uint32Value());
+  }
+  if (!info[6]->IsUndefined()) {
+    Nan::Utf8String filter(info[6]);
+    config.set_filter(std::string(*filter));
+  }
+
+  Tins::Sniffer *sniffer;
+  try {
+    sniffer = new Tins::Sniffer(*dev, config);
+  } catch (std::runtime_error &err) {
+    Nan::ThrowError(err.what());
+    return;
+  }
 
   Wrapper *wrapper = new Wrapper(sniffer);
   wrapper->Wrap(info.This());
@@ -189,7 +222,35 @@ NAN_METHOD(Wrapper::FromInterface) {
 }
 
 NAN_METHOD(Wrapper::FromFile) {
-  // TODO.
+  if (
+    info.Length() != 2 ||
+    !info[0]->IsString() ||
+    !(info[1]->IsUndefined() || info[1]->IsString())  // filter
+  ) {
+    Nan::ThrowError("invalid arguments");
+    return;
+  }
+
+  // The file to open.
+  Nan::Utf8String path(info[0]);
+
+  Tins::SnifferConfiguration config;
+  if (!info[1]->IsUndefined()) {
+    Nan::Utf8String filter(info[1]);
+    config.set_filter(std::string(*filter));
+  }
+
+  Tins::Sniffer *sniffer;
+  try {
+    sniffer = new Tins::Sniffer(*path, config);
+  } catch (std::runtime_error &err) {
+    Nan::ThrowError(err.what());
+    return;
+  }
+
+  Wrapper *wrapper = new Wrapper(sniffer);
+  wrapper->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(Wrapper::GetPdus) {
