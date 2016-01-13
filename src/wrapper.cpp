@@ -5,6 +5,10 @@ namespace Layer2 {
 
 #define LAYER2_BUFFER_SIZE 1024
 
+// Black hole array used to write any overflowing data. We must use this since
+// Avro's encoder will throw an error when it tries to write and the underlying
+// stream is full. Since this might happen at every loop, it is cheaper to fake
+// a successful write rather than catch (which might also have side-effects).
 static uint8_t BUFFER[LAYER2_BUFFER_SIZE] = {0};
 
 /**
@@ -240,9 +244,9 @@ NAN_METHOD(Wrapper::FromFile) {
     config.set_filter(std::string(*filter));
   }
 
-  Tins::Sniffer *sniffer;
+  Tins::FileSniffer *sniffer;
   try {
-    sniffer = new Tins::Sniffer(*path, config);
+    sniffer = new Tins::FileSniffer(*path, config);
   } catch (std::runtime_error &err) {
     Nan::ThrowError(err.what());
     return;

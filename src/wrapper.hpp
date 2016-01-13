@@ -42,8 +42,6 @@ private:
   /**
    * Required function constructor.
    *
-   * It throws an error?
-   *
    */
   static NAN_METHOD(Empty);
 
