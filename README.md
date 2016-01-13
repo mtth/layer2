@@ -3,11 +3,13 @@
 ```javascript
 var layer2 = require('layer2');
 
-layer2.createInterfaceSniffer('en0')
+layer2.createInterfaceSniffer('en0', {bufferSize: 1024})
   .on('pdu', function (pdu) {
     // Assuming EthernetII frames.
-    var src = pdu.srcAddr;
-    var dst = pdu.dstAddr;
-    console.log('captured frame ' + src + ' -> ' + dst);
+    var frame = pdu.Ethernet2;
+    var src = frame.srcAddr.toString('hex');
+    var dst = frame.dstAddr.toString('hex');
+    var size = frame.data.length;
+    console.log(src + ' -> ' + dst + ' [' + size + ']');
   });
 ```
