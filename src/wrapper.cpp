@@ -15,18 +15,18 @@ class BufferOutputStream : public avro::OutputStream {
 public:
   enum State { ALMOST_EMPTY, ALMOST_FULL, FULL };
 
-  static std::unique_ptr<BufferOutputStream> fromBuffer(
+  static BufferOutputStream *fromBuffer(
     v8::Local<v8::Value> buf,
     float loadFactor
   ) {
     if (!node::Buffer::HasInstance(buf)) {
-      return std::unique_ptr<BufferOutputStream>();
+      return NULL;
     }
 
     v8::Local<v8::Object> obj = buf->ToObject();
     uint8_t *data = (uint8_t *) node::Buffer::Data(obj);
     size_t len = node::Buffer::Length(obj);
-    return std::unique_ptr<BufferOutputStream>(new BufferOutputStream(data, len, loadFactor));
+    return new BufferOutputStream(data, len, loadFactor);
   }
 
   BufferOutputStream(uint8_t *data, size_t len, float loadFactor) :
@@ -103,7 +103,8 @@ public:
         SetErrorMessage("buffer too small");
       case BufferOutputStream::State::ALMOST_FULL:
         return;
-      // Else we have room for more.
+      default:
+        ; // Else we have room for more.
       }
     }
 
@@ -122,18 +123,31 @@ public:
         --_numPdus;
       case BufferOutputStream::State::ALMOST_FULL:
         return;
-      // Otherwise, continue looping.
+      default:
+        ; // Otherwise, continue looping.
       }
     }
   }
 
   void HandleOKCallback() {
     Nan::HandleScope scope;
+    // We have to call this to prevent the encoder from resetting the stream
+    // after it has been deleted.
+    _wrapper->_encoder->init(*_stream);
     v8::Local<v8::Value> argv[] = {
       Nan::Null(),
       Nan::New<v8::Number>(_numPdus)
     };
     callback->Call(2, argv);
+  }
+
+  void HandleErrorCallback() {
+    Nan::HandleScope scope;
+    _wrapper->_encoder->init(*_stream);
+    v8::Local<v8::Value> argv[] = {
+      v8::Exception::Error(Nan::New<v8::String>(ErrorMessage()).ToLocalChecked())
+    };
+    callback->Call(1, argv);
   }
 
 private:
