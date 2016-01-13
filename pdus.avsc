@@ -1,5 +1,120 @@
 [
   {
+    "type": "record",
+    "name": "Unsupported",
+    "fields": [
+      {
+        "type": "string",
+        "name": "name"
+      },
+      {
+        "type": "bytes",
+        "name": "data"
+      }
+    ]
+  },
+  {
+    "doc": "MAC address",
+    "type": "fixed",
+    "name": "MacAddr",
+    "size": 6
+  },
+  {
+    "type": "enum",
+    "name": "Dot11Capability",
+    "symbols": [
+      "ESS",
+      "IBSS",
+      "CF_POLL",
+      "CF_POLL_REQ",
+      "PRIVACY",
+      "SHORT_PREAMBLE",
+      "PBCC",
+      "CHANNEL_AGILITY",
+      "SPECTRUM_MGMT",
+      "QOS",
+      "SST",
+      "APSD",
+      "RADIO_MEASUREMENT",
+      "DSSS_OFDM",
+      "DELAYED_BLOCK_ACK",
+      "IMMEDIATE_BLOCK_ACK"
+    ]
+  },
+  {
+    "type": "record",
+    "name": "Dot11Beacon",
+    "fields": [
+      {
+        "type": "boolean",
+        "name": "toDs"
+      },
+      {
+        "type": "boolean",
+        "name": "fromDs"
+      },
+      {
+        "type": "boolean",
+        "name": "moreFrag"
+      },
+      {
+        "type": "boolean",
+        "name": "wep"
+      },
+      {
+        "type": "boolean",
+        "name": "order"
+      },
+      {
+        "type": "boolean",
+        "name": "retry"
+      },
+      {
+        "type": "boolean",
+        "name": "powerMgmt"
+      },
+      {
+        "type": "int",
+        "name": "fragNum"
+      },
+      {
+        "type": "int",
+        "name": "seqNum"
+      },
+      {
+        "type": "MacAddr",
+        "name": "addr1"
+      },
+      {
+        "type": "MacAddr",
+        "name": "addr2"
+      },
+      {
+        "type": "MacAddr",
+        "name": "addr3"
+      },
+      {
+        "type": "MacAddr",
+        "name": "addr4"
+      },
+      {
+        "type": "long",
+        "name": "timestamp"
+      },
+      {
+        "type": "long",
+        "name": "interval"
+      },
+      {
+        "type": {
+          "type": "array",
+          "items": "Dot11Capability"
+        },
+        "name": "capabilities"
+      }
+    ]
+  },
+  {
     "type": "enum",
     "name": "RadiotapChannelType",
     "symbols": [
@@ -11,8 +126,7 @@
       "PASSIVE",
       "DYN_CCK_OFDM",
       "GFSK"
-    ],
-    "namespace": "radiotap"
+    ]
   },
   {
     "type": "record",
@@ -26,8 +140,7 @@
         "type": "RadiotapChannelType",
         "name": "type"
       }
-    ],
-    "namespace": "radiotap"
+    ]
   },
   {
     "type": "enum",
@@ -41,8 +154,7 @@
       "PADDING",
       "FAILED_FCS",
       "SHORT_GI"
-    ],
-    "namespace": "radiotap"
+    ]
   },
   {
     "type": "record",
@@ -72,21 +184,15 @@
         ],
         "name": "channel",
         "default": null
-      }
-    ],
-    "namespace": "radiotap"
-  },
-  {
-    "type": "record",
-    "name": "Unsupported",
-    "fields": [
-      {
-        "type": "string",
-        "name": "name"
       },
       {
-        "type": "bytes",
-        "name": "data"
+        "type": [
+          "null",
+          "Unsupported",
+          "Dot11Beacon"
+        ],
+        "name": "pdu",
+        "default": null
       }
     ]
   },
@@ -97,7 +203,7 @@
       {
         "type": [
           "Unsupported",
-          "radiotap.Radiotap"
+          "Radiotap"
         ],
         "name": "pdu"
       }

@@ -1,30 +1,99 @@
 /**
- * Entry point.
+ * Avro types.
  *
- * The serialization format (used for communication between JS and CPP) will
- * be (written to a single large buffer):
- *
- *  + uint32_t total size of PDU (including this).
- *  + union of all possible PDUs
- *
- *  Each PDU's inner PDU will be front-loaded. This will enable more efficient
- *  decoding of the inner layers.
+ * We aren't using namespaces here because they aren't handled property by the
+ * Avro C++ header generator (they are ignored). This implies that all names
+ * must be unique anyway. Maybe fix this in the future.
  *
  */
 protocol Pdu {
-
-  import idl "Radiotap.avdl";
-  // importa idl "Dot11.avdl";
 
   record Unsupported {
     string name;
     bytes data;
   }
 
+  // Dot11.
+
+  @doc("MAC address")
+  fixed MacAddr(6);
+
+  enum Dot11Capability {
+    ESS,
+    IBSS,
+    CF_POLL,
+    CF_POLL_REQ,
+    PRIVACY,
+    SHORT_PREAMBLE,
+    PBCC,
+    CHANNEL_AGILITY,
+    SPECTRUM_MGMT,
+    QOS,
+    SST,
+    APSD,
+    RADIO_MEASUREMENT,
+    DSSS_OFDM,
+    DELAYED_BLOCK_ACK,
+    IMMEDIATE_BLOCK_ACK
+  }
+
+  record Dot11Beacon {
+    boolean toDs;
+    boolean fromDs;
+    boolean moreFrag;
+    boolean wep;
+    boolean order;
+    boolean retry;
+    boolean powerMgmt;
+    int fragNum;
+    int seqNum;
+    MacAddr addr1;
+    MacAddr addr2;
+    MacAddr addr3;
+    MacAddr addr4;
+    long timestamp;
+    long interval;
+    array<Dot11Capability> capabilities;
+  }
+
+  // Radiotap.
+
+  enum RadiotapChannelType {
+    TURBO, CCK, OFDM, TWO_GZ, FIVE_GZ, PASSIVE, DYN_CCK_OFDM, GFSK
+  }
+
+  record RadiotapChannel {
+    int freq;
+    RadiotapChannelType type;
+  }
+
+  enum RadiotapFlag {
+    CFP,
+    PREAMBLE,
+    WEP,
+    FRAGMENTATION,
+    FCS,
+    PADDING,
+    FAILED_FCS,
+    SHORT_GI
+  }
+
+  record Radiotap {
+    long tsft = 0;
+    array<RadiotapFlag> flags;
+    int rate = 0;
+    union {null, RadiotapChannel} channel = null;
+    union {
+      null,
+      Unsupported,
+      Dot11Beacon
+    } pdu = null;
+  }
+
   record Pdu {
     union {
       Unsupported,
-      radiotap.Radiotap
+      Radiotap
     } pdu;
   }
 
