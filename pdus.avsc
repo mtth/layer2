@@ -1,0 +1,106 @@
+[
+  {
+    "type": "enum",
+    "name": "RadiotapChannelType",
+    "symbols": [
+      "TURBO",
+      "CCK",
+      "OFDM",
+      "TWO_GZ",
+      "FIVE_GZ",
+      "PASSIVE",
+      "DYN_CCK_OFDM",
+      "GFSK"
+    ],
+    "namespace": "radiotap"
+  },
+  {
+    "type": "record",
+    "name": "RadiotapChannel",
+    "fields": [
+      {
+        "type": "int",
+        "name": "freq"
+      },
+      {
+        "type": "RadiotapChannelType",
+        "name": "type"
+      }
+    ],
+    "namespace": "radiotap"
+  },
+  {
+    "type": "enum",
+    "name": "RadiotapFlag",
+    "symbols": [
+      "CFP",
+      "PREAMBLE",
+      "WEP",
+      "FRAGMENTATION",
+      "FCS",
+      "PADDING",
+      "FAILED_FCS",
+      "SHORT_GI"
+    ],
+    "namespace": "radiotap"
+  },
+  {
+    "type": "record",
+    "name": "Radiotap",
+    "fields": [
+      {
+        "type": "long",
+        "name": "tsft",
+        "default": 0
+      },
+      {
+        "type": {
+          "type": "array",
+          "items": "RadiotapFlag"
+        },
+        "name": "flags"
+      },
+      {
+        "type": "int",
+        "name": "rate",
+        "default": 0
+      },
+      {
+        "type": [
+          "null",
+          "RadiotapChannel"
+        ],
+        "name": "channel",
+        "default": null
+      }
+    ],
+    "namespace": "radiotap"
+  },
+  {
+    "type": "record",
+    "name": "Unsupported",
+    "fields": [
+      {
+        "type": "string",
+        "name": "name"
+      },
+      {
+        "type": "bytes",
+        "name": "data"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "Pdu",
+    "fields": [
+      {
+        "type": [
+          "Unsupported",
+          "radiotap.Radiotap"
+        ],
+        "name": "pdu"
+      }
+    ]
+  }
+]

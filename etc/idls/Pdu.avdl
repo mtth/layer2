@@ -13,7 +13,19 @@
  */
 protocol Pdu {
 
-  import idl "Dot11.avdl";
   import idl "Radiotap.avdl";
+  // importa idl "Dot11.avdl";
+
+  record Unsupported {
+    string name;
+    bytes data;
+  }
+
+  record Pdu {
+    union {
+      Unsupported,
+      radiotap.Radiotap
+    } pdu;
+  }
 
 }

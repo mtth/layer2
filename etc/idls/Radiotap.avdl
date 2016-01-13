@@ -11,48 +11,38 @@
 @namespace("radiotap")
 protocol Radiotap {
 
-  enum ChannelType {
+  enum RadiotapChannelType {
     TURBO, CCK, OFDM, TWO_GZ, FIVE_GZ, PASSIVE, DYN_CCK_OFDM, GFSK
   }
 
-  enum PresentFlags {
-    TSTF,
-    FLAGS,
-    RATE,
-    CHANNEL,
-    FHSS,
-    DBM_SIGNAL,
-    DBM_NOISE,
-    LOCK_QUALITY,
-    TX_ATTENUATION,
-    DB_TX_ATTENUATION,
-    DBM_TX_ATTENUATION,
-    ANTENNA,
-    DB_SIGNAL,
-    DB_NOISE,
-    RX_FLAGS,
-    TX_FLAGS,
-    DATA_RETRIES,
-    CHANNEL_PLUS,
-    MCS
+  record RadiotapChannel {
+    int freq;
+    RadiotapChannelType type;
   }
 
-  record Frame {
-    union {null, long} tsft; // Synchronization time.
-    union {null, int} rate;
-    union {null, int} channelFreq;
-    union {null, ChannelType} channelType;
-    union {null, int} dbmSignal;
-    union {null, int} dbmNoise;
-    union {null, int} signalQuality;
-    union {null, int} antenna;
-    union {
-      dot11.data.Data,
-      dot11.data.QosData,
-      dot11.ctrl.Ack,
-      dot11.mgmt.Beacon
-      // TODO: Add more.
-    } data;
+  enum RadiotapFlag {
+    CFP,
+    PREAMBLE,
+    WEP,
+    FRAGMENTATION,
+    FCS,
+    PADDING,
+    FAILED_FCS,
+    SHORT_GI
+  }
+
+  record Radiotap {
+    long tsft = 0;
+    array<RadiotapFlag> flags;
+    int rate = 0;
+    union {null, RadiotapChannel} channel = null;
+    // union {
+    //   dot11.data.Data,
+    //   dot11.data.QosData,
+    //   dot11.ctrl.Ack,
+    //   dot11.mgmt.Beacon
+    //   // TODO: Add more.
+    // } data;
   }
 
 }

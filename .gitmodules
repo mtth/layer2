@@ -1,3 +1,6 @@
 [submodule "etc/deps/avro"]
 	path = etc/deps/avro
 	url = https://github.com/apache/avro.git
+[submodule "etc/deps/libtins"]
+	path = etc/deps/libtins
+	url = https://github.com/mfontanini/libtins.git
