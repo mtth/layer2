@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../etc/deps/avro/lang/c++/api/Encoder.hh"
-#include "../etc/deps/avro/lang/c++/api/Specific.hh"
 #include "./pdus.hpp"
+#include <avro/lang/c++/api/Encoder.hh>
 #include <tins/tins.h>
 
 /**
  * Converters between tins PDU data structures and Avro records.
  *
  */
+
 namespace Layer2 {
 
 std::unique_ptr<Layer2::Radiotap> convert(const Tins::RadioTap &src);

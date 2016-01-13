@@ -6,9 +6,7 @@
       'sources': [
         'src/index.cpp',
         'src/codecs.cpp',
-        'src/utils.cpp',
         'src/wrapper.cpp'
-        # 'src/dispatch.cpp',
       ],
       'link_settings': {
         'libraries': [
@@ -25,7 +23,6 @@
               '/usr/local/include' # TODO: Remove this.
             ],
             'libraries': [
-              # '-L/usr/local/lib',
               '-L<(module_root_dir)/etc/deps/avro/lang/c++/build',
               '-L<(module_root_dir)/etc/deps/libtins/build/lib'
             ],

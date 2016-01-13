@@ -1,9 +1,86 @@
 #include "codecs.hpp"
-#include "utils.hpp"
 #include "wrapper.hpp"
 
 namespace Layer2 {
 
+#define LAYER2_BUFFER_SIZE 1024
+
+static uint8_t BUFFER[LAYER2_BUFFER_SIZE] = {0};
+
+/**
+ * Helper class to handle encoding Avro records to a JavaScript buffer.
+ *
+ */
+class BufferOutputStream : public avro::OutputStream {
+public:
+  enum State { ALMOST_EMPTY, ALMOST_FULL, FULL };
+
+  static std::unique_ptr<BufferOutputStream> fromBuffer(
+    v8::Local<v8::Value> buf,
+    float loadFactor
+  ) {
+    if (!node::Buffer::HasInstance(buf)) {
+      return std::unique_ptr<BufferOutputStream>();
+    }
+
+    v8::Local<v8::Object> obj = buf->ToObject();
+    uint8_t *data = (uint8_t *) node::Buffer::Data(obj);
+    size_t len = node::Buffer::Length(obj);
+    return std::unique_ptr<BufferOutputStream>(new BufferOutputStream(data, len, loadFactor));
+  }
+
+  BufferOutputStream(uint8_t *data, size_t len, float loadFactor) :
+    _data(data),
+    _len(len),
+    _hwm(len * loadFactor),
+    _pos(0) {};
+
+  ~BufferOutputStream() {};
+
+  virtual bool next(uint8_t** data, size_t* len) {
+    if (_pos < _hwm) {
+      *data = _data + _pos;
+      *len = _hwm - _pos;
+      _pos = _hwm;
+    } else if (_pos < _len) {
+      *data = _data + _pos;
+      *len = _len - _pos;
+      _pos = _len;
+    } else {
+      *data = BUFFER;
+      *len = LAYER2_BUFFER_SIZE;
+      _pos = _len + 1;
+    }
+    return true;
+  }
+
+  virtual void backup(size_t len) { _pos -= len; }
+
+  virtual void flush() {}
+
+  virtual uint64_t byteCount() const { return _pos; }
+
+  State getState() const {
+    if (_pos < _len) {
+      return State::ALMOST_EMPTY;
+    }
+    if (_pos == _len) {
+      return State::ALMOST_FULL;
+    }
+    return State::FULL;
+  }
+
+private:
+  uint8_t *_data;
+  size_t _len;
+  size_t _hwm; // High watermark.
+  size_t _pos;
+};
+
+/**
+ * Helper class to handle asynchronous PDU capture.
+ *
+ */
 class Worker : public Nan::AsyncWorker {
 public:
   Worker(Wrapper *wrapper, v8::Local<v8::Value> buf, Nan::Callback *callback) :
@@ -98,6 +175,7 @@ NAN_METHOD(Wrapper::FromInterface) {
 }
 
 NAN_METHOD(Wrapper::FromFile) {
+  // TODO.
 }
 
 NAN_METHOD(Wrapper::GetPdus) {
