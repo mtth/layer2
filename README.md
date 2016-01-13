@@ -3,7 +3,7 @@
 ```javascript
 var layer2 = require('layer2');
 
-layer2.createInterfaceSniffer('en0', {bufferSize: 1024})
+layer2.createInterfaceSniffer('en0')
   .on('pdu', function (pdu) {
     // Assuming EthernetII frames.
     var frame = pdu.Ethernet2;
