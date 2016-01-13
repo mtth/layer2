@@ -37,6 +37,19 @@ struct Unsupported {
         { }
 };
 
+struct Ethernet2 {
+    boost::array<uint8_t, 6> srcAddr;
+    boost::array<uint8_t, 6> dstAddr;
+    int32_t payloadType;
+    std::vector<uint8_t> data;
+    Ethernet2() :
+        srcAddr(boost::array<uint8_t, 6>()),
+        dstAddr(boost::array<uint8_t, 6>()),
+        payloadType(int32_t()),
+        data(std::vector<uint8_t>())
+        { }
+};
+
 enum Dot11Capability {
     ESS,
     IBSS,
@@ -187,6 +200,8 @@ public:
     size_t idx() const { return idx_; }
     Unsupported get_Unsupported() const;
     void set_Unsupported(const Unsupported& v);
+    Ethernet2 get_Ethernet2() const;
+    void set_Ethernet2(const Ethernet2& v);
     Radiotap get_Radiotap() const;
     void set_Radiotap(const Radiotap& v);
     pdus_avsc_Union__2__();
@@ -210,6 +225,8 @@ public:
     void set_Unsupported(const Unsupported& v);
     boost::array<uint8_t, 6> get_MacAddr() const;
     void set_MacAddr(const boost::array<uint8_t, 6>& v);
+    Ethernet2 get_Ethernet2() const;
+    void set_Ethernet2(const Ethernet2& v);
     Dot11Capability get_Dot11Capability() const;
     void set_Dot11Capability(const Dot11Capability& v);
     Dot11Beacon get_Dot11Beacon() const;
@@ -284,8 +301,22 @@ void pdus_avsc_Union__2__::set_Unsupported(const Unsupported& v) {
 }
 
 inline
-Radiotap pdus_avsc_Union__2__::get_Radiotap() const {
+Ethernet2 pdus_avsc_Union__2__::get_Ethernet2() const {
     if (idx_ != 1) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<Ethernet2 >(value_);
+}
+
+inline
+void pdus_avsc_Union__2__::set_Ethernet2(const Ethernet2& v) {
+    idx_ = 1;
+    value_ = v;
+}
+
+inline
+Radiotap pdus_avsc_Union__2__::get_Radiotap() const {
+    if (idx_ != 2) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<Radiotap >(value_);
@@ -293,7 +324,7 @@ Radiotap pdus_avsc_Union__2__::get_Radiotap() const {
 
 inline
 void pdus_avsc_Union__2__::set_Radiotap(const Radiotap& v) {
-    idx_ = 1;
+    idx_ = 2;
     value_ = v;
 }
 
@@ -326,8 +357,22 @@ void pdus_avsc_Union__3__::set_MacAddr(const boost::array<uint8_t, 6>& v) {
 }
 
 inline
-Dot11Capability pdus_avsc_Union__3__::get_Dot11Capability() const {
+Ethernet2 pdus_avsc_Union__3__::get_Ethernet2() const {
     if (idx_ != 2) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<Ethernet2 >(value_);
+}
+
+inline
+void pdus_avsc_Union__3__::set_Ethernet2(const Ethernet2& v) {
+    idx_ = 2;
+    value_ = v;
+}
+
+inline
+Dot11Capability pdus_avsc_Union__3__::get_Dot11Capability() const {
+    if (idx_ != 3) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<Dot11Capability >(value_);
@@ -335,13 +380,13 @@ Dot11Capability pdus_avsc_Union__3__::get_Dot11Capability() const {
 
 inline
 void pdus_avsc_Union__3__::set_Dot11Capability(const Dot11Capability& v) {
-    idx_ = 2;
+    idx_ = 3;
     value_ = v;
 }
 
 inline
 Dot11Beacon pdus_avsc_Union__3__::get_Dot11Beacon() const {
-    if (idx_ != 3) {
+    if (idx_ != 4) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<Dot11Beacon >(value_);
@@ -349,13 +394,13 @@ Dot11Beacon pdus_avsc_Union__3__::get_Dot11Beacon() const {
 
 inline
 void pdus_avsc_Union__3__::set_Dot11Beacon(const Dot11Beacon& v) {
-    idx_ = 3;
+    idx_ = 4;
     value_ = v;
 }
 
 inline
 RadiotapChannelType pdus_avsc_Union__3__::get_RadiotapChannelType() const {
-    if (idx_ != 4) {
+    if (idx_ != 5) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<RadiotapChannelType >(value_);
@@ -363,13 +408,13 @@ RadiotapChannelType pdus_avsc_Union__3__::get_RadiotapChannelType() const {
 
 inline
 void pdus_avsc_Union__3__::set_RadiotapChannelType(const RadiotapChannelType& v) {
-    idx_ = 4;
+    idx_ = 5;
     value_ = v;
 }
 
 inline
 RadiotapChannel pdus_avsc_Union__3__::get_RadiotapChannel() const {
-    if (idx_ != 5) {
+    if (idx_ != 6) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<RadiotapChannel >(value_);
@@ -377,13 +422,13 @@ RadiotapChannel pdus_avsc_Union__3__::get_RadiotapChannel() const {
 
 inline
 void pdus_avsc_Union__3__::set_RadiotapChannel(const RadiotapChannel& v) {
-    idx_ = 5;
+    idx_ = 6;
     value_ = v;
 }
 
 inline
 RadiotapFlag pdus_avsc_Union__3__::get_RadiotapFlag() const {
-    if (idx_ != 6) {
+    if (idx_ != 7) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<RadiotapFlag >(value_);
@@ -391,13 +436,13 @@ RadiotapFlag pdus_avsc_Union__3__::get_RadiotapFlag() const {
 
 inline
 void pdus_avsc_Union__3__::set_RadiotapFlag(const RadiotapFlag& v) {
-    idx_ = 6;
+    idx_ = 7;
     value_ = v;
 }
 
 inline
 Radiotap pdus_avsc_Union__3__::get_Radiotap() const {
-    if (idx_ != 7) {
+    if (idx_ != 8) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<Radiotap >(value_);
@@ -405,13 +450,13 @@ Radiotap pdus_avsc_Union__3__::get_Radiotap() const {
 
 inline
 void pdus_avsc_Union__3__::set_Radiotap(const Radiotap& v) {
-    idx_ = 7;
+    idx_ = 8;
     value_ = v;
 }
 
 inline
 Pdu pdus_avsc_Union__3__::get_Pdu() const {
-    if (idx_ != 8) {
+    if (idx_ != 9) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<Pdu >(value_);
@@ -419,7 +464,7 @@ Pdu pdus_avsc_Union__3__::get_Pdu() const {
 
 inline
 void pdus_avsc_Union__3__::set_Pdu(const Pdu& v) {
-    idx_ = 8;
+    idx_ = 9;
     value_ = v;
 }
 
@@ -453,6 +498,45 @@ template<> struct codec_traits<Layer2::Unsupported> {
             }
         } else {
             avro::decode(d, v.name);
+            avro::decode(d, v.data);
+        }
+    }
+};
+
+template<> struct codec_traits<Layer2::Ethernet2> {
+    static void encode(Encoder& e, const Layer2::Ethernet2& v) {
+        avro::encode(e, v.srcAddr);
+        avro::encode(e, v.dstAddr);
+        avro::encode(e, v.payloadType);
+        avro::encode(e, v.data);
+    }
+    static void decode(Decoder& d, Layer2::Ethernet2& v) {
+        if (avro::ResolvingDecoder *rd =
+            dynamic_cast<avro::ResolvingDecoder *>(&d)) {
+            const std::vector<size_t> fo = rd->fieldOrder();
+            for (std::vector<size_t>::const_iterator it = fo.begin();
+                it != fo.end(); ++it) {
+                switch (*it) {
+                case 0:
+                    avro::decode(d, v.srcAddr);
+                    break;
+                case 1:
+                    avro::decode(d, v.dstAddr);
+                    break;
+                case 2:
+                    avro::decode(d, v.payloadType);
+                    break;
+                case 3:
+                    avro::decode(d, v.data);
+                    break;
+                default:
+                    break;
+                }
+            }
+        } else {
+            avro::decode(d, v.srcAddr);
+            avro::decode(d, v.dstAddr);
+            avro::decode(d, v.payloadType);
             avro::decode(d, v.data);
         }
     }
@@ -776,13 +860,16 @@ template<> struct codec_traits<Layer2::pdus_avsc_Union__2__> {
             avro::encode(e, v.get_Unsupported());
             break;
         case 1:
+            avro::encode(e, v.get_Ethernet2());
+            break;
+        case 2:
             avro::encode(e, v.get_Radiotap());
             break;
         }
     }
     static void decode(Decoder& d, Layer2::pdus_avsc_Union__2__& v) {
         size_t n = d.decodeUnionIndex();
-        if (n >= 2) { throw avro::Exception("Union index too big"); }
+        if (n >= 3) { throw avro::Exception("Union index too big"); }
         switch (n) {
         case 0:
             {
@@ -792,6 +879,13 @@ template<> struct codec_traits<Layer2::pdus_avsc_Union__2__> {
             }
             break;
         case 1:
+            {
+                Layer2::Ethernet2 vv;
+                avro::decode(d, vv);
+                v.set_Ethernet2(vv);
+            }
+            break;
+        case 2:
             {
                 Layer2::Radiotap vv;
                 avro::decode(d, vv);
@@ -837,31 +931,34 @@ template<> struct codec_traits<Layer2::pdus_avsc_Union__3__> {
             avro::encode(e, v.get_MacAddr());
             break;
         case 2:
-            avro::encode(e, v.get_Dot11Capability());
+            avro::encode(e, v.get_Ethernet2());
             break;
         case 3:
-            avro::encode(e, v.get_Dot11Beacon());
+            avro::encode(e, v.get_Dot11Capability());
             break;
         case 4:
-            avro::encode(e, v.get_RadiotapChannelType());
+            avro::encode(e, v.get_Dot11Beacon());
             break;
         case 5:
-            avro::encode(e, v.get_RadiotapChannel());
+            avro::encode(e, v.get_RadiotapChannelType());
             break;
         case 6:
-            avro::encode(e, v.get_RadiotapFlag());
+            avro::encode(e, v.get_RadiotapChannel());
             break;
         case 7:
-            avro::encode(e, v.get_Radiotap());
+            avro::encode(e, v.get_RadiotapFlag());
             break;
         case 8:
+            avro::encode(e, v.get_Radiotap());
+            break;
+        case 9:
             avro::encode(e, v.get_Pdu());
             break;
         }
     }
     static void decode(Decoder& d, Layer2::pdus_avsc_Union__3__& v) {
         size_t n = d.decodeUnionIndex();
-        if (n >= 9) { throw avro::Exception("Union index too big"); }
+        if (n >= 10) { throw avro::Exception("Union index too big"); }
         switch (n) {
         case 0:
             {
@@ -879,47 +976,54 @@ template<> struct codec_traits<Layer2::pdus_avsc_Union__3__> {
             break;
         case 2:
             {
+                Layer2::Ethernet2 vv;
+                avro::decode(d, vv);
+                v.set_Ethernet2(vv);
+            }
+            break;
+        case 3:
+            {
                 Layer2::Dot11Capability vv;
                 avro::decode(d, vv);
                 v.set_Dot11Capability(vv);
             }
             break;
-        case 3:
+        case 4:
             {
                 Layer2::Dot11Beacon vv;
                 avro::decode(d, vv);
                 v.set_Dot11Beacon(vv);
             }
             break;
-        case 4:
+        case 5:
             {
                 Layer2::RadiotapChannelType vv;
                 avro::decode(d, vv);
                 v.set_RadiotapChannelType(vv);
             }
             break;
-        case 5:
+        case 6:
             {
                 Layer2::RadiotapChannel vv;
                 avro::decode(d, vv);
                 v.set_RadiotapChannel(vv);
             }
             break;
-        case 6:
+        case 7:
             {
                 Layer2::RadiotapFlag vv;
                 avro::decode(d, vv);
                 v.set_RadiotapFlag(vv);
             }
             break;
-        case 7:
+        case 8:
             {
                 Layer2::Radiotap vv;
                 avro::decode(d, vv);
                 v.set_Radiotap(vv);
             }
             break;
-        case 8:
+        case 9:
             {
                 Layer2::Pdu vv;
                 avro::decode(d, vv);

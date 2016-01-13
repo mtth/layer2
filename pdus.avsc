@@ -14,10 +14,31 @@
     ]
   },
   {
-    "doc": "MAC address",
     "type": "fixed",
     "name": "MacAddr",
     "size": 6
+  },
+  {
+    "type": "record",
+    "name": "Ethernet2",
+    "fields": [
+      {
+        "type": "MacAddr",
+        "name": "srcAddr"
+      },
+      {
+        "type": "MacAddr",
+        "name": "dstAddr"
+      },
+      {
+        "type": "int",
+        "name": "payloadType"
+      },
+      {
+        "type": "bytes",
+        "name": "data"
+      }
+    ]
   },
   {
     "type": "enum",
@@ -203,6 +224,7 @@
       {
         "type": [
           "Unsupported",
+          "Ethernet2",
           "Radiotap"
         ],
         "name": "pdu"

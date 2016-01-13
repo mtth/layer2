@@ -12,6 +12,7 @@
 namespace Layer2 {
 
 std::unique_ptr<Layer2::Unsupported> convert(const Tins::PDU &src);
+std::unique_ptr<Layer2::Ethernet2> convert(const Tins::EthernetII &src);
 std::unique_ptr<Layer2::Dot11Beacon> convert(const Tins::Dot11Beacon &src);
 std::unique_ptr<Layer2::Radiotap> convert(const Tins::RadioTap &src);
 
@@ -25,6 +26,9 @@ struct codec_traits<Tins::PDU> {
   static void encode(Encoder &encoder, const Tins::PDU &src) {
     Layer2::Pdu dst;
     switch (src.pdu_type()) {
+    case Tins::PDU::PDUType::ETHERNET_II:
+      dst.pdu.set_Ethernet2(*Layer2::convert(static_cast<const Tins::EthernetII &>(src)));
+      break;
     case Tins::PDU::PDUType::RADIOTAP:
       dst.pdu.set_Radiotap(*Layer2::convert(static_cast<const Tins::RadioTap &>(src)));
       break;

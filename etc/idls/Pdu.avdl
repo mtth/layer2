@@ -8,15 +8,29 @@
  */
 protocol Pdu {
 
+  /**
+   * Generic PDU type.
+   *
+   * This type is used when no matching record was found for the received PDU.
+   *
+   */
   record Unsupported {
     string name;
     bytes data;
   }
 
-  // Dot11.
-
-  @doc("MAC address")
   fixed MacAddr(6);
+
+  // Ethernet II
+
+  record Ethernet2 {
+    MacAddr srcAddr;
+    MacAddr dstAddr;
+    int payloadType;
+    bytes data;
+  }
+
+  // Dot11.
 
   enum Dot11Capability {
     ESS,
@@ -90,9 +104,14 @@ protocol Pdu {
     } pdu = null;
   }
 
+  /**
+   * Outermost PDU.
+   *
+   */
   record Pdu {
     union {
       Unsupported,
+      Ethernet2,
       Radiotap
     } pdu;
   }

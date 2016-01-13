@@ -9,6 +9,21 @@ std::unique_ptr<Layer2::Unsupported> convert(const Tins::PDU &src) {
   return std::unique_ptr<Layer2::Unsupported>(dst);
 }
 
+std::unique_ptr<Layer2::Ethernet2> convert(const Tins::EthernetII &src) {
+  Layer2::Ethernet2 *dst = new Layer2::Ethernet2;
+
+  src.src_addr().copy(dst->srcAddr.data());
+  src.dst_addr().copy(dst->dstAddr.data());
+  dst->payloadType = src.payload_type();
+
+  Tins::PDU *innerPdu = src.inner_pdu();
+  if (innerPdu) {
+    dst->data = const_cast<Tins::PDU &>(*innerPdu).serialize();
+  }
+
+  return std::unique_ptr<Layer2::Ethernet2>(dst);
+}
+
 std::unique_ptr<Layer2::Dot11Beacon> convert(const Tins::Dot11Beacon &src) {
   Layer2::Dot11Beacon *dst = new Layer2::Dot11Beacon;
 
