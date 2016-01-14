@@ -1,5 +1,6 @@
 #include "codecs.hpp"
 #include "wrapper.hpp"
+#include <chrono>
 
 namespace Layer2 {
 
@@ -98,6 +99,9 @@ public:
   ~Worker() {}
 
   void Execute() {
+    std::chrono::time_point<std::chrono::high_resolution_clock> start, current;
+    start = std::chrono::high_resolution_clock::now();
+
     // First, check whether we have a backlogged PDU.
     std::unique_ptr<Tins::PDU> savedPdu(std::move(_wrapper->_pdu));
     if (savedPdu) {
@@ -128,7 +132,14 @@ public:
       case BufferOutputStream::State::ALMOST_FULL:
         return;
       default:
-        ; // Otherwise, continue looping.
+        // Otherwise, continue looping if the timeout hasn't been reached.
+        current = std::chrono::high_resolution_clock::now();
+        if (
+          _wrapper->_timeout &&
+          std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count() > _wrapper->_timeout
+        ) {
+          return;
+        }
       }
     }
   }
@@ -192,6 +203,7 @@ NAN_METHOD(Wrapper::FromInterface) {
   // Prepare the configuration, only overriding system defaults when a value
   // has been specified.
   Tins::SnifferConfiguration config;
+  uint32_t timeout = 0;
   if (!info[1]->IsUndefined()) {
     config.set_snap_len(info[1]->Uint32Value());
   }
@@ -202,7 +214,8 @@ NAN_METHOD(Wrapper::FromInterface) {
     config.set_rfmon(info[3]->BooleanValue());
   }
   if (!info[4]->IsUndefined()) {
-    config.set_timeout(info[4]->Uint32Value());
+    timeout = info[4]->Uint32Value();
+    config.set_timeout(timeout);
   }
   if (!info[5]->IsUndefined()) {
     config.set_buffer_size(info[5]->Uint32Value());
@@ -220,7 +233,7 @@ NAN_METHOD(Wrapper::FromInterface) {
     return;
   }
 
-  Wrapper *wrapper = new Wrapper(sniffer);
+  Wrapper *wrapper = new Wrapper(sniffer, timeout);
   wrapper->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
@@ -252,7 +265,7 @@ NAN_METHOD(Wrapper::FromFile) {
     return;
   }
 
-  Wrapper *wrapper = new Wrapper(sniffer);
+  Wrapper *wrapper = new Wrapper(sniffer, 0);
   wrapper->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }

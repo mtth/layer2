@@ -32,8 +32,11 @@ private:
   std::unique_ptr<Tins::BaseSniffer> _sniffer;
   avro::EncoderPtr _encoder;
   std::unique_ptr<Tins::PDU> _pdu; // Used to store last PDU in case of overflow.
+  uint32_t _timeout;
 
-  Wrapper(Tins::BaseSniffer *sniffer) : _sniffer(sniffer) {
+  Wrapper(Tins::BaseSniffer *sniffer, uint32_t timeout) :
+  _sniffer(sniffer),
+  _timeout(timeout) {
     _encoder = avro::binaryEncoder();
   }
 
