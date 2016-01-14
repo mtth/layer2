@@ -25,9 +25,7 @@
   ],
   "main": "./lib",
   "scripts": {
-    "build-avro": "bash etc/scripts/build_avro.sh",
-    "build": "node-gyp clean && node-gyp configure && node-gyp build",
-    "clean": "rm -rf build node_modules etc/deps/avro/lang/c++/build",
+    "clean": "rm -rf build node_modules",
     "debug": "lldb -- node _mocha --no-timeouts",
     "test": "mocha"
   },

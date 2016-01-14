@@ -1,9 +1,13 @@
 language: node_js
 
 node_js:
-  - "0.10"
-  - "0.11"
-  - "0.12"
+  - node
+  - iojs
+  - '4'
+  - '3'
+  - '2'
+  - '1.8'
+  - '1.0'
 
 os:
   - linux
@@ -11,6 +15,5 @@ os:
 
 before_install:
   - env | sort
-  - sh "scripts/setup_${TRAVIS_OS_NAME}.sh"
-  - sh scripts/install_libtins.sh
+  - ./etc/scripts/build-deps
   - export LD_LIBRARY_PATH="/usr/local/lib/:$LD_LIBRARY_PATH"

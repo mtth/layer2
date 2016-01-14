@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+shopt -s nullglob
+
+# Dependencies directory.
+dpath="$(cd "$(dirname "${BASH_SOURCE[0]}")/../deps" && pwd)"
+
+# Download dependencies.
+case "$(uname -s)" in
+Darwin)
+  brew install cmake
+  ;;
+Linux)
+  sudo apt-get -qq update
+  sudo apt-get install libpcap-dev libssl-dev cmake
+  ;;
+*)
+  echo 'unsupported OS' >&2
+  exit 1
+esac
+
+# Build libtins.
+cd "$dpath/libtins"
+rm -rf build
+mkdir build
+cd build
+cmake ../ -DLIBTINS_ENABLE_CXX11=1 -Wno-dev
+make
+
+# Build avro.
+cd "$dpath/avro/lang/c++"
+rm -rf build
+# We can't simply run `./build.sh install` because of a deprecated function
+# used in tests. We must first generate the Makefile by running a fake command,
+# then only make the shared library we are interested in.
+./build.sh foo || : # Hack, see above.
+cd build
+make avrocpp
