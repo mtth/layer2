@@ -11,10 +11,9 @@
 
 namespace Layer2 {
 
-std::unique_ptr<Layer2::Unsupported> convert(const Tins::PDU &src);
 std::unique_ptr<Layer2::Ethernet2> convert(const Tins::EthernetII &src);
-std::unique_ptr<Layer2::Dot11Beacon> convert(const Tins::Dot11Beacon &src);
 std::unique_ptr<Layer2::Radiotap> convert(const Tins::RadioTap &src);
+std::unique_ptr<Layer2::Unsupported> convert(const Tins::PDU &src);
 
 }
 
