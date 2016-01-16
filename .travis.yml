@@ -3,7 +3,7 @@ node_js:
   - node
 addons:
   apt:
-   sources:
+    sources:
       - ubuntu-toolchain-r-test
     packages:
       - libpcap-dev
