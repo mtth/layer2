@@ -14,6 +14,6 @@ addons:
 env:
   global:
     - CXX=g++-4.8
-    - LD_LIBRARY_PATH="$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build:/usr/local/lib"
+    - LD_LIBRARY_PATH="$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build"
 install:
   - npm run install-all
