@@ -19,6 +19,7 @@
     "libtins"
   ],
   "files": [
+    "etc/idls",
     "src",
     "lib",
     "binding.gyp"
