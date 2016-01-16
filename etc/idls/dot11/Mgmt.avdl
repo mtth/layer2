@@ -1,0 +1,116 @@
+import idl "../Common.avdl";
+import idl "./Common.avdl";
+
+@namespace("dot11.mgmt")
+protocol Mgmt {
+
+  enum Capability {
+    ESS,
+    IBSS,
+    CF_POLL,
+    CF_POLL_REQ,
+    PRIVACY,
+    SHORT_PREAMBLE,
+    PBCC,
+    CHANNEL_AGILITY,
+    SPECTRUM_MGMT,
+    QOS,
+    SST,
+    APSD,
+    RADIO_MEASUREMENT,
+    DSSS_OFDM,
+    DELAYED_BLOCK_ACK,
+    IMMEDIATE_BLOCK_ACK
+  }
+
+  /**
+   * Common header for all 802.11 management frames.
+   *
+   * Includes everything but the address fields (to keep them at the same level
+   * as the others).
+   *
+   */
+  @namespace("")
+  record dot11.mgmt.Header {
+    MacAddr addr2;
+    MacAddr addr3;
+    MacAddr addr4;
+    int fragNum;
+    int seqNum;
+    // TODO: Add more (e.g. SSID), though tin's API currently makes this difficult.
+  }
+
+  record AssocRequest {
+    dot11.Header header;
+    Header mgmtHeader;
+    array<Capability> capabilities;
+    int listenInterval;
+  }
+
+  record AssocResponse {
+    dot11.Header header;
+    dot11.mgmt.Header mgmtHeader;
+    array<Capability> capabilities;
+    int statusCode; // 0: success, 1: failure (make this an enum?).
+    int aid;
+  }
+
+  record Authentication {
+    dot11.Header header;
+    Header mgmtHeader;
+    int authAlgorithm;
+    int authSeqNumber;
+    int statusCode;
+  }
+
+  record Beacon {
+    dot11.Header header;
+    Header mgmtHeader;
+    long timestamp;
+    int interval;
+    array<Capability> capabilities;
+  }
+
+  record Deauthentication {
+    dot11.Header header;
+    Header mgmtHeader;
+    int reasonCode;
+  }
+
+  record Disassoc {
+    dot11.Header header;
+    Header mgmtHeader;
+    int reasonCode;
+  }
+
+  record ProbeRequest {
+    dot11.Header header;
+    Header mgmtHeader;
+  }
+
+  record ProbeResponse {
+    dot11.Header header;
+    Header mgmtHeader;
+    long timestamp;
+    int interval;
+    array<Capability> capabilities;
+  }
+
+  @namespace("")
+  record dot11.mgmt.ReassocRequest {
+    dot11.Header header;
+    dot11.mgmt.Header mgmtHeader;
+    array<dot11.mgmt.Capability> capabilities;
+    int listenInterval;
+    MacAddr currentAp;
+  }
+
+  record ReassocResponse {
+    dot11.Header header;
+    Header mgmtHeader;
+    array<Capability> capabilities;
+    int statusCode; // 0: success, 1: failure (make this an enum?).
+    int aid;
+  }
+
+}

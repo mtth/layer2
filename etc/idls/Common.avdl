@@ -1,0 +1,20 @@
+protocol Common {
+
+  /**
+   * Generic PDU type.
+   *
+   * This type is used when no matching record was found for the received PDU.
+   *
+   */
+  record Unsupported {
+    string name;
+    bytes data;
+  }
+
+  /**
+   * MAC address.
+   *
+   */
+  fixed MacAddr(6);
+
+}

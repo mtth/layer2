@@ -1,0 +1,14 @@
+import idl "./Common.avdl";
+
+@namespace("ethernet2")
+protocol Ethernet2 {
+
+  @namespace("")
+  record ethernet2.Ethernet2 {
+    MacAddr srcAddr;
+    MacAddr dstAddr;
+    int payloadType;
+    bytes data;
+  }
+
+}

@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+/* jshint node: true */
+
+'use strict';
+
+var avro = require('avsc'),
+    path = require('path');
+
+
+var dpath = path.join(__dirname, '..'); // Path to `etc/` directory.
+
+avro.assemble(path.join(dpath, 'idls', 'Pdu.avdl'), function (err, attrs) {
+  if (err) {
+    throw err;
+  }
+
+  // CPP code-generation doesn't properly handle namespaces. We work around
+  // this by forcing all names in the global namespace.
+  var registry = {};
+  var protocol = avro.parse(attrs, {registry: registry});
+  Object.keys(registry).forEach(function (name) {
+    var type = registry[name];
+    if (type._name) {
+      type._name = type._name.replace(/\./g, '_');
+    }
+  });
+
+  // Return all types declared in the IDL files.
+  console.log(JSON.stringify(JSON.parse(protocol.toString()).types));
+});

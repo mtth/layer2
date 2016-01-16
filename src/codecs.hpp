@@ -11,8 +11,8 @@
 
 namespace Layer2 {
 
-std::unique_ptr<Layer2::Ethernet2> convert(const Tins::EthernetII &src);
-std::unique_ptr<Layer2::Radiotap> convert(const Tins::RadioTap &src);
+std::unique_ptr<Layer2::ethernet2_Ethernet2> convert(const Tins::EthernetII &src);
+std::unique_ptr<Layer2::radiotap_Radiotap> convert(const Tins::RadioTap &src);
 std::unique_ptr<Layer2::Unsupported> convert(const Tins::PDU &src);
 
 }
@@ -26,10 +26,10 @@ struct codec_traits<Tins::PDU> {
     Layer2::Pdu dst;
     switch (src.pdu_type()) {
     case Tins::PDU::PDUType::ETHERNET_II:
-      dst.pdu.set_Ethernet2(*Layer2::convert(static_cast<const Tins::EthernetII &>(src)));
+      dst.pdu.set_ethernet2_Ethernet2(*Layer2::convert(static_cast<const Tins::EthernetII &>(src)));
       break;
     case Tins::PDU::PDUType::RADIOTAP:
-      dst.pdu.set_Radiotap(*Layer2::convert(static_cast<const Tins::RadioTap &>(src)));
+      dst.pdu.set_radiotap_Radiotap(*Layer2::convert(static_cast<const Tins::RadioTap &>(src)));
       break;
     default:
       dst.pdu.set_Unsupported(*Layer2::convert(src));

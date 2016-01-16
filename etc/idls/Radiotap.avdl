@@ -1,0 +1,69 @@
+import idl "./Common.avdl";
+import idl "./dot11/Common.avdl";
+import idl "./dot11/Ctrl.avdl";
+import idl "./dot11/Data.avdl";
+import idl "./dot11/Mgmt.avdl";
+
+@namespace("radiotap")
+protocol Radiotap {
+
+  enum Flag {
+    CFP,
+    PREAMBLE,
+    WEP,
+    FRAGMENTATION,
+    FCS,
+    PADDING,
+    FAILED_FCS,
+    SHORT_GI
+  }
+
+  enum ChannelType {
+    TURBO,
+    CCK,
+    OFDM,
+    TWO_GZ,
+    FIVE_GZ,
+    PASSIVE,
+    DYN_CCK_OFDM,
+    GFSK
+  }
+
+  record Channel {
+    int freq;
+    ChannelType type;
+  }
+
+  @namespace("")
+  record radiotap.Radiotap {
+    long tsft = 0;
+    array<radiotap.Flag> flags;
+    int rate = 0;
+    union {null, radiotap.Channel} channel = null;
+    union {
+      null,
+      Unsupported,
+      dot11.Unsupported,
+      dot11.ctrl.Ack,
+      dot11.ctrl.BlockAck,
+      dot11.ctrl.BlockAckRequest,
+      dot11.ctrl.CfEnd,
+      dot11.ctrl.EndCfAck,
+      dot11.ctrl.PsPoll,
+      dot11.ctrl.Rts,
+      dot11.data.Data,
+      dot11.data.QosData,
+      dot11.mgmt.AssocRequest,
+      dot11.mgmt.AssocResponse,
+      dot11.mgmt.Authentication,
+      dot11.mgmt.Beacon,
+      dot11.mgmt.Deauthentication,
+      dot11.mgmt.Disassoc,
+      dot11.mgmt.ProbeRequest,
+      dot11.mgmt.ProbeResponse,
+      dot11.mgmt.ReassocRequest,
+      dot11.mgmt.ReassocResponse
+    } pdu = null;
+  }
+
+}

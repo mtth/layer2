@@ -1,0 +1,27 @@
+import idl "../Common.avdl";
+import idl "./Common.avdl";
+
+@namespace("dot11.data")
+protocol Data {
+
+  @namespace("")
+  record dot11.data.Header {
+    MacAddr addr2;
+    MacAddr addr3;
+    MacAddr addr4;
+    int fragNum;
+    int seqNum;
+  }
+
+  record Data {
+    dot11.Header header;
+    Header dataHeader;
+  }
+
+  record QosData {
+    dot11.Header header;
+    Header dataHeader;
+    int qosControl;
+  }
+
+}

@@ -27,6 +27,7 @@
   "scripts": {
     "clean": "rm -rf build node_modules",
     "debug": "lldb -- node _mocha --no-timeouts",
+    "compile-idls": "./etc/deps/avro/lang/c++/build/avrogencpp -i <(./etc/scripts/assemble-idls) -o src/pdus.hpp -n Layer2",
     "test": "mocha"
   },
   "dependencies": {
