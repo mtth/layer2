@@ -3,32 +3,33 @@
   "version": "0.3.0",
   "description": "A streaming API for the data link layer",
   "keywords": [
-    "wifi",
     "802.11",
-    "ethernet",
-    "mac",
-    "frame",
-    "packet",
-    "stream",
-    "monitor",
     "capture",
+    "ethernet",
+    "frame",
     "injection",
+    "libtins",
+    "mac",
+    "monitor",
+    "packet",
     "pcap",
-    "wireshark",
+    "stream",
     "tcpdump",
-    "libtins"
+    "wifi",
+    "wireshark"
   ],
   "files": [
+    "binding.gyp",
     "etc/idls",
-    "src",
     "lib",
-    "binding.gyp"
+    "src"
   ],
   "main": "./lib",
   "scripts": {
-    "install-local": "CPLUS_INCLUDE_PATH=\"$(pwd)/etc/deps/libtins/include:$(pwd)/etc/deps/avro/lang/c++/build/include:/usr/local/include\" LIBRARY_PATH=\"$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build:/usr/local/lib\" npm install",
     "clean": "rm -rf build node_modules",
     "debug": "lldb -- node _mocha --no-timeouts",
+    "install-all": "./etc/scripts/build-deps && npm run install-local",
+    "install-local": "CPLUS_INCLUDE_PATH=\"$(pwd)/etc/deps/libtins/include:$(pwd)/etc/deps/avro/lang/c++/build/include:/usr/local/include\" LIBRARY_PATH=\"$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build:/usr/local/lib\" npm install",
     "test": "mocha"
   },
   "dependencies": {

@@ -13,3 +13,18 @@ layer2.createInterfaceSniffer('en0')
     console.log(src + ' -> ' + dst + ' [' + size + ']');
   });
 ```
+
+## Installation
+
+If you already have `libtins>=3.2` and `avro>=1.7.7` installed:
+
+```bash
+$ npm install layer2
+```
+
+Otherwise, you can build both dependencies along with this package by running:
+
+```bash
+$ git clone git@github.com:mtth/layer2.git
+$ npm run install-local
+```
