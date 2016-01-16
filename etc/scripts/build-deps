@@ -20,7 +20,7 @@ Darwin)
   ;;
 Linux)
   sudo apt-get -qq update
-  sudo apt-get install libpcap-dev libssl-dev cmake
+  sudo apt-get install libpcap-dev libssl-dev cmake libboost-system-dev
   ;;
 *)
   echo 'unsupported OS' >&2
