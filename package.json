@@ -26,13 +26,13 @@
   ],
   "main": "./lib",
   "scripts": {
-    "install-local": "CPLUS_INCLUDE_PATH=\"$(pwd)/etc/deps/libtins/include:$(pwd)/etc/deps/avro/lang/c++/build/include:/usr/local/include\" LIBRARY_PATH=\"$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build:/usr/local/lib\" node-gyp rebuild",
+    "install-local": "CPLUS_INCLUDE_PATH=\"$(pwd)/etc/deps/libtins/include:$(pwd)/etc/deps/avro/lang/c++/build/include:/usr/local/include\" LIBRARY_PATH=\"$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build:/usr/local/lib\" npm install",
     "clean": "rm -rf build node_modules",
     "debug": "lldb -- node _mocha --no-timeouts",
     "test": "mocha"
   },
   "dependencies": {
-    "avsc": "^3.3.0",
+    "avsc": "^3.3.3",
     "nan": "^2.2.0"
   },
   "devDependencies": {
