@@ -26,6 +26,7 @@
   ],
   "main": "./lib",
   "scripts": {
+    "install-local": "CPLUS_INCLUDE_PATH=\"$(pwd)/etc/deps/libtins/include:$(pwd)/etc/deps/avro/lang/c++/build/include:/usr/local/include\" LIBRARY_PATH=\"$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build:/usr/local/lib\" node-gyp rebuild",
     "clean": "rm -rf build node_modules",
     "debug": "lldb -- node _mocha --no-timeouts",
     "test": "mocha"
