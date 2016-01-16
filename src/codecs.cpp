@@ -279,39 +279,41 @@ std::unique_ptr<Layer2::radiotap_Radiotap> convert(const Tins::RadioTap &src) {
 
   Tins::RadioTap::PresentFlags present = src.present();
   if (present & Tins::RadioTap::PresentFlags::TSTF) {
-    dst->tsft = src.tsft();
+    dst->tsft.set_long(src.tsft());
   }
 
   if (present & Tins::RadioTap::PresentFlags::FLAGS) {
     Tins::RadioTap::FrameFlags frameFlags = src.flags();
+    std::vector<Layer2::radiotap_Flag> flags;
     if (frameFlags & Tins::RadioTap::FrameFlags::CFP) {
-      dst->flags.push_back(Layer2::radiotap_Flag::CFP);
+      flags.push_back(Layer2::radiotap_Flag::CFP);
     }
     if (frameFlags & Tins::RadioTap::FrameFlags::PREAMBLE) {
-      dst->flags.push_back(Layer2::radiotap_Flag::PREAMBLE);
+      flags.push_back(Layer2::radiotap_Flag::PREAMBLE);
     }
     if (frameFlags & Tins::RadioTap::FrameFlags::WEP) {
-      dst->flags.push_back(Layer2::radiotap_Flag::WEP);
+      flags.push_back(Layer2::radiotap_Flag::WEP);
     }
     if (frameFlags & Tins::RadioTap::FrameFlags::FRAGMENTATION) {
-      dst->flags.push_back(Layer2::radiotap_Flag::FRAGMENTATION);
+      flags.push_back(Layer2::radiotap_Flag::FRAGMENTATION);
     }
     if (frameFlags & Tins::RadioTap::FrameFlags::FCS) {
-      dst->flags.push_back(Layer2::radiotap_Flag::FCS);
+      flags.push_back(Layer2::radiotap_Flag::FCS);
     }
     if (frameFlags & Tins::RadioTap::FrameFlags::PADDING) {
-      dst->flags.push_back(Layer2::radiotap_Flag::PADDING);
+      flags.push_back(Layer2::radiotap_Flag::PADDING);
     }
     if (frameFlags & Tins::RadioTap::FrameFlags::FAILED_FCS) {
-      dst->flags.push_back(Layer2::radiotap_Flag::FAILED_FCS);
+      flags.push_back(Layer2::radiotap_Flag::FAILED_FCS);
     }
     if (frameFlags & Tins::RadioTap::FrameFlags::SHORT_GI) {
-      dst->flags.push_back(Layer2::radiotap_Flag::SHORT_GI);
+      flags.push_back(Layer2::radiotap_Flag::SHORT_GI);
     }
+    dst->flags.set_array(flags);
   }
 
   if (present & Tins::RadioTap::PresentFlags::RATE) {
-    dst->rate = src.rate();
+    dst->rate.set_int(src.rate());
   }
 
   if (present & Tins::RadioTap::PresentFlags::CHANNEL) {

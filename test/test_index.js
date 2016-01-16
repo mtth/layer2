@@ -9,7 +9,6 @@ var layer2 = require('../lib'),
 
 var DPATH = path.join(__dirname, 'dat'); // Test data directory.
 
-// Empty for now!
 suite('index', function () {
 
   test('read capture file', function (done) {

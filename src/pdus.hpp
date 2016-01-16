@@ -390,12 +390,66 @@ public:
         idx_ = 0;
         value_ = boost::any();
     }
-    radiotap_Channel get_radiotap_Channel() const;
-    void set_radiotap_Channel(const radiotap_Channel& v);
+    int64_t get_long() const;
+    void set_long(const int64_t& v);
     _63_Union__0__();
 };
 
 struct _63_Union__1__ {
+private:
+    size_t idx_;
+    boost::any value_;
+public:
+    size_t idx() const { return idx_; }
+    bool is_null() const {
+        return (idx_ == 0);
+    }
+    void set_null() {
+        idx_ = 0;
+        value_ = boost::any();
+    }
+    std::vector<radiotap_Flag > get_array() const;
+    void set_array(const std::vector<radiotap_Flag >& v);
+    _63_Union__1__();
+};
+
+struct _63_Union__2__ {
+private:
+    size_t idx_;
+    boost::any value_;
+public:
+    size_t idx() const { return idx_; }
+    bool is_null() const {
+        return (idx_ == 0);
+    }
+    void set_null() {
+        idx_ = 0;
+        value_ = boost::any();
+    }
+    int32_t get_int() const;
+    void set_int(const int32_t& v);
+    _63_Union__2__();
+};
+
+struct _63_Union__3__ {
+private:
+    size_t idx_;
+    boost::any value_;
+public:
+    size_t idx() const { return idx_; }
+    bool is_null() const {
+        return (idx_ == 0);
+    }
+    void set_null() {
+        idx_ = 0;
+        value_ = boost::any();
+    }
+    radiotap_Channel get_radiotap_Channel() const;
+    void set_radiotap_Channel(const radiotap_Channel& v);
+    _63_Union__3__();
+};
+
+struct _63_Union__4__ {
 private:
     size_t idx_;
     boost::any value_;
@@ -450,27 +504,30 @@ public:
     void set_dot11_mgmt_ReassocRequest(const dot11_mgmt_ReassocRequest& v);
     dot11_mgmt_ReassocResponse get_dot11_mgmt_ReassocResponse() const;
     void set_dot11_mgmt_ReassocResponse(const dot11_mgmt_ReassocResponse& v);
-    _63_Union__1__();
+    _63_Union__4__();
 };
 
 struct radiotap_Radiotap {
-    typedef _63_Union__0__ channel_t;
-    typedef _63_Union__1__ pdu_t;
-    int64_t tsft;
-    std::vector<radiotap_Flag > flags;
-    int32_t rate;
+    typedef _63_Union__0__ tsft_t;
+    typedef _63_Union__1__ flags_t;
+    typedef _63_Union__2__ rate_t;
+    typedef _63_Union__3__ channel_t;
+    typedef _63_Union__4__ pdu_t;
+    tsft_t tsft;
+    flags_t flags;
+    rate_t rate;
     channel_t channel;
     pdu_t pdu;
     radiotap_Radiotap() :
-        tsft(int64_t()),
-        flags(std::vector<radiotap_Flag >()),
-        rate(int32_t()),
+        tsft(tsft_t()),
+        flags(flags_t()),
+        rate(rate_t()),
         channel(channel_t()),
         pdu(pdu_t())
         { }
 };
 
-struct _63_Union__2__ {
+struct _63_Union__5__ {
 private:
     size_t idx_;
     boost::any value_;
@@ -482,18 +539,18 @@ public:
     void set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v);
     radiotap_Radiotap get_radiotap_Radiotap() const;
     void set_radiotap_Radiotap(const radiotap_Radiotap& v);
-    _63_Union__2__();
+    _63_Union__5__();
 };
 
 struct Pdu {
-    typedef _63_Union__2__ pdu_t;
+    typedef _63_Union__5__ pdu_t;
     pdu_t pdu;
     Pdu() :
         pdu(pdu_t())
         { }
 };
 
-struct _63_Union__3__ {
+struct _63_Union__6__ {
 private:
     size_t idx_;
     boost::any value_;
@@ -563,768 +620,54 @@ public:
     void set_radiotap_Radiotap(const radiotap_Radiotap& v);
     Pdu get_Pdu() const;
     void set_Pdu(const Pdu& v);
-    _63_Union__3__();
+    _63_Union__6__();
 };
 
 inline
-radiotap_Channel _63_Union__0__::get_radiotap_Channel() const {
+int64_t _63_Union__0__::get_long() const {
     if (idx_ != 1) {
         throw avro::Exception("Invalid type for union");
     }
-    return boost::any_cast<radiotap_Channel >(value_);
+    return boost::any_cast<int64_t >(value_);
 }
 
 inline
-void _63_Union__0__::set_radiotap_Channel(const radiotap_Channel& v) {
+void _63_Union__0__::set_long(const int64_t& v) {
     idx_ = 1;
     value_ = v;
 }
 
 inline
-Unsupported _63_Union__1__::get_Unsupported() const {
+std::vector<radiotap_Flag > _63_Union__1__::get_array() const {
     if (idx_ != 1) {
         throw avro::Exception("Invalid type for union");
     }
-    return boost::any_cast<Unsupported >(value_);
+    return boost::any_cast<std::vector<radiotap_Flag > >(value_);
 }
 
 inline
-void _63_Union__1__::set_Unsupported(const Unsupported& v) {
+void _63_Union__1__::set_array(const std::vector<radiotap_Flag >& v) {
     idx_ = 1;
     value_ = v;
 }
 
 inline
-dot11_Unsupported _63_Union__1__::get_dot11_Unsupported() const {
-    if (idx_ != 2) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_Unsupported >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_Unsupported(const dot11_Unsupported& v) {
-    idx_ = 2;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_Ack _63_Union__1__::get_dot11_ctrl_Ack() const {
-    if (idx_ != 3) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_Ack >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_ctrl_Ack(const dot11_ctrl_Ack& v) {
-    idx_ = 3;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_BlockAck _63_Union__1__::get_dot11_ctrl_BlockAck() const {
-    if (idx_ != 4) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_BlockAck >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_ctrl_BlockAck(const dot11_ctrl_BlockAck& v) {
-    idx_ = 4;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_BlockAckRequest _63_Union__1__::get_dot11_ctrl_BlockAckRequest() const {
-    if (idx_ != 5) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_BlockAckRequest >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_ctrl_BlockAckRequest(const dot11_ctrl_BlockAckRequest& v) {
-    idx_ = 5;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_CfEnd _63_Union__1__::get_dot11_ctrl_CfEnd() const {
-    if (idx_ != 6) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_CfEnd >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_ctrl_CfEnd(const dot11_ctrl_CfEnd& v) {
-    idx_ = 6;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_EndCfAck _63_Union__1__::get_dot11_ctrl_EndCfAck() const {
-    if (idx_ != 7) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_EndCfAck >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_ctrl_EndCfAck(const dot11_ctrl_EndCfAck& v) {
-    idx_ = 7;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_PsPoll _63_Union__1__::get_dot11_ctrl_PsPoll() const {
-    if (idx_ != 8) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_PsPoll >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_ctrl_PsPoll(const dot11_ctrl_PsPoll& v) {
-    idx_ = 8;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_Rts _63_Union__1__::get_dot11_ctrl_Rts() const {
-    if (idx_ != 9) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_Rts >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_ctrl_Rts(const dot11_ctrl_Rts& v) {
-    idx_ = 9;
-    value_ = v;
-}
-
-inline
-dot11_data_Data _63_Union__1__::get_dot11_data_Data() const {
-    if (idx_ != 10) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_data_Data >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_data_Data(const dot11_data_Data& v) {
-    idx_ = 10;
-    value_ = v;
-}
-
-inline
-dot11_data_QosData _63_Union__1__::get_dot11_data_QosData() const {
-    if (idx_ != 11) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_data_QosData >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_data_QosData(const dot11_data_QosData& v) {
-    idx_ = 11;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_AssocRequest _63_Union__1__::get_dot11_mgmt_AssocRequest() const {
-    if (idx_ != 12) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_AssocRequest >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_AssocRequest(const dot11_mgmt_AssocRequest& v) {
-    idx_ = 12;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_AssocResponse _63_Union__1__::get_dot11_mgmt_AssocResponse() const {
-    if (idx_ != 13) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_AssocResponse >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_AssocResponse(const dot11_mgmt_AssocResponse& v) {
-    idx_ = 13;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Authentication _63_Union__1__::get_dot11_mgmt_Authentication() const {
-    if (idx_ != 14) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Authentication >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_Authentication(const dot11_mgmt_Authentication& v) {
-    idx_ = 14;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Beacon _63_Union__1__::get_dot11_mgmt_Beacon() const {
-    if (idx_ != 15) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Beacon >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_Beacon(const dot11_mgmt_Beacon& v) {
-    idx_ = 15;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Deauthentication _63_Union__1__::get_dot11_mgmt_Deauthentication() const {
-    if (idx_ != 16) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Deauthentication >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_Deauthentication(const dot11_mgmt_Deauthentication& v) {
-    idx_ = 16;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Disassoc _63_Union__1__::get_dot11_mgmt_Disassoc() const {
-    if (idx_ != 17) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Disassoc >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_Disassoc(const dot11_mgmt_Disassoc& v) {
-    idx_ = 17;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ProbeRequest _63_Union__1__::get_dot11_mgmt_ProbeRequest() const {
-    if (idx_ != 18) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ProbeRequest >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_ProbeRequest(const dot11_mgmt_ProbeRequest& v) {
-    idx_ = 18;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ProbeResponse _63_Union__1__::get_dot11_mgmt_ProbeResponse() const {
-    if (idx_ != 19) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ProbeResponse >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_ProbeResponse(const dot11_mgmt_ProbeResponse& v) {
-    idx_ = 19;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ReassocRequest _63_Union__1__::get_dot11_mgmt_ReassocRequest() const {
-    if (idx_ != 20) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ReassocRequest >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_ReassocRequest(const dot11_mgmt_ReassocRequest& v) {
-    idx_ = 20;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ReassocResponse _63_Union__1__::get_dot11_mgmt_ReassocResponse() const {
-    if (idx_ != 21) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ReassocResponse >(value_);
-}
-
-inline
-void _63_Union__1__::set_dot11_mgmt_ReassocResponse(const dot11_mgmt_ReassocResponse& v) {
-    idx_ = 21;
-    value_ = v;
-}
-
-inline
-Unsupported _63_Union__2__::get_Unsupported() const {
-    if (idx_ != 0) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<Unsupported >(value_);
-}
-
-inline
-void _63_Union__2__::set_Unsupported(const Unsupported& v) {
-    idx_ = 0;
-    value_ = v;
-}
-
-inline
-ethernet2_Ethernet2 _63_Union__2__::get_ethernet2_Ethernet2() const {
+int32_t _63_Union__2__::get_int() const {
     if (idx_ != 1) {
         throw avro::Exception("Invalid type for union");
     }
-    return boost::any_cast<ethernet2_Ethernet2 >(value_);
+    return boost::any_cast<int32_t >(value_);
 }
 
 inline
-void _63_Union__2__::set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v) {
+void _63_Union__2__::set_int(const int32_t& v) {
     idx_ = 1;
-    value_ = v;
-}
-
-inline
-radiotap_Radiotap _63_Union__2__::get_radiotap_Radiotap() const {
-    if (idx_ != 2) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<radiotap_Radiotap >(value_);
-}
-
-inline
-void _63_Union__2__::set_radiotap_Radiotap(const radiotap_Radiotap& v) {
-    idx_ = 2;
-    value_ = v;
-}
-
-inline
-Unsupported _63_Union__3__::get_Unsupported() const {
-    if (idx_ != 0) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<Unsupported >(value_);
-}
-
-inline
-void _63_Union__3__::set_Unsupported(const Unsupported& v) {
-    idx_ = 0;
-    value_ = v;
-}
-
-inline
-boost::array<uint8_t, 6> _63_Union__3__::get_MacAddr() const {
-    if (idx_ != 1) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<boost::array<uint8_t, 6> >(value_);
-}
-
-inline
-void _63_Union__3__::set_MacAddr(const boost::array<uint8_t, 6>& v) {
-    idx_ = 1;
-    value_ = v;
-}
-
-inline
-ethernet2_Ethernet2 _63_Union__3__::get_ethernet2_Ethernet2() const {
-    if (idx_ != 2) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<ethernet2_Ethernet2 >(value_);
-}
-
-inline
-void _63_Union__3__::set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v) {
-    idx_ = 2;
-    value_ = v;
-}
-
-inline
-dot11_Header _63_Union__3__::get_dot11_Header() const {
-    if (idx_ != 3) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_Header >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_Header(const dot11_Header& v) {
-    idx_ = 3;
-    value_ = v;
-}
-
-inline
-dot11_Unsupported _63_Union__3__::get_dot11_Unsupported() const {
-    if (idx_ != 4) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_Unsupported >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_Unsupported(const dot11_Unsupported& v) {
-    idx_ = 4;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_Ack _63_Union__3__::get_dot11_ctrl_Ack() const {
-    if (idx_ != 5) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_Ack >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_ctrl_Ack(const dot11_ctrl_Ack& v) {
-    idx_ = 5;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_BlockAck _63_Union__3__::get_dot11_ctrl_BlockAck() const {
-    if (idx_ != 6) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_BlockAck >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_ctrl_BlockAck(const dot11_ctrl_BlockAck& v) {
-    idx_ = 6;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_BlockAckRequest _63_Union__3__::get_dot11_ctrl_BlockAckRequest() const {
-    if (idx_ != 7) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_BlockAckRequest >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_ctrl_BlockAckRequest(const dot11_ctrl_BlockAckRequest& v) {
-    idx_ = 7;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_CfEnd _63_Union__3__::get_dot11_ctrl_CfEnd() const {
-    if (idx_ != 8) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_CfEnd >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_ctrl_CfEnd(const dot11_ctrl_CfEnd& v) {
-    idx_ = 8;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_EndCfAck _63_Union__3__::get_dot11_ctrl_EndCfAck() const {
-    if (idx_ != 9) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_EndCfAck >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_ctrl_EndCfAck(const dot11_ctrl_EndCfAck& v) {
-    idx_ = 9;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_PsPoll _63_Union__3__::get_dot11_ctrl_PsPoll() const {
-    if (idx_ != 10) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_PsPoll >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_ctrl_PsPoll(const dot11_ctrl_PsPoll& v) {
-    idx_ = 10;
-    value_ = v;
-}
-
-inline
-dot11_ctrl_Rts _63_Union__3__::get_dot11_ctrl_Rts() const {
-    if (idx_ != 11) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_ctrl_Rts >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_ctrl_Rts(const dot11_ctrl_Rts& v) {
-    idx_ = 11;
-    value_ = v;
-}
-
-inline
-dot11_data_Header _63_Union__3__::get_dot11_data_Header() const {
-    if (idx_ != 12) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_data_Header >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_data_Header(const dot11_data_Header& v) {
-    idx_ = 12;
-    value_ = v;
-}
-
-inline
-dot11_data_Data _63_Union__3__::get_dot11_data_Data() const {
-    if (idx_ != 13) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_data_Data >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_data_Data(const dot11_data_Data& v) {
-    idx_ = 13;
-    value_ = v;
-}
-
-inline
-dot11_data_QosData _63_Union__3__::get_dot11_data_QosData() const {
-    if (idx_ != 14) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_data_QosData >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_data_QosData(const dot11_data_QosData& v) {
-    idx_ = 14;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Capability _63_Union__3__::get_dot11_mgmt_Capability() const {
-    if (idx_ != 15) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Capability >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_Capability(const dot11_mgmt_Capability& v) {
-    idx_ = 15;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Header _63_Union__3__::get_dot11_mgmt_Header() const {
-    if (idx_ != 16) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Header >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_Header(const dot11_mgmt_Header& v) {
-    idx_ = 16;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_AssocRequest _63_Union__3__::get_dot11_mgmt_AssocRequest() const {
-    if (idx_ != 17) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_AssocRequest >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_AssocRequest(const dot11_mgmt_AssocRequest& v) {
-    idx_ = 17;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_AssocResponse _63_Union__3__::get_dot11_mgmt_AssocResponse() const {
-    if (idx_ != 18) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_AssocResponse >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_AssocResponse(const dot11_mgmt_AssocResponse& v) {
-    idx_ = 18;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Authentication _63_Union__3__::get_dot11_mgmt_Authentication() const {
-    if (idx_ != 19) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Authentication >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_Authentication(const dot11_mgmt_Authentication& v) {
-    idx_ = 19;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Beacon _63_Union__3__::get_dot11_mgmt_Beacon() const {
-    if (idx_ != 20) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Beacon >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_Beacon(const dot11_mgmt_Beacon& v) {
-    idx_ = 20;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Deauthentication _63_Union__3__::get_dot11_mgmt_Deauthentication() const {
-    if (idx_ != 21) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Deauthentication >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_Deauthentication(const dot11_mgmt_Deauthentication& v) {
-    idx_ = 21;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_Disassoc _63_Union__3__::get_dot11_mgmt_Disassoc() const {
-    if (idx_ != 22) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_Disassoc >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_Disassoc(const dot11_mgmt_Disassoc& v) {
-    idx_ = 22;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ProbeRequest _63_Union__3__::get_dot11_mgmt_ProbeRequest() const {
-    if (idx_ != 23) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ProbeRequest >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_ProbeRequest(const dot11_mgmt_ProbeRequest& v) {
-    idx_ = 23;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ProbeResponse _63_Union__3__::get_dot11_mgmt_ProbeResponse() const {
-    if (idx_ != 24) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ProbeResponse >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_ProbeResponse(const dot11_mgmt_ProbeResponse& v) {
-    idx_ = 24;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ReassocRequest _63_Union__3__::get_dot11_mgmt_ReassocRequest() const {
-    if (idx_ != 25) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ReassocRequest >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_ReassocRequest(const dot11_mgmt_ReassocRequest& v) {
-    idx_ = 25;
-    value_ = v;
-}
-
-inline
-dot11_mgmt_ReassocResponse _63_Union__3__::get_dot11_mgmt_ReassocResponse() const {
-    if (idx_ != 26) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<dot11_mgmt_ReassocResponse >(value_);
-}
-
-inline
-void _63_Union__3__::set_dot11_mgmt_ReassocResponse(const dot11_mgmt_ReassocResponse& v) {
-    idx_ = 26;
-    value_ = v;
-}
-
-inline
-radiotap_Flag _63_Union__3__::get_radiotap_Flag() const {
-    if (idx_ != 27) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<radiotap_Flag >(value_);
-}
-
-inline
-void _63_Union__3__::set_radiotap_Flag(const radiotap_Flag& v) {
-    idx_ = 27;
-    value_ = v;
-}
-
-inline
-radiotap_ChannelType _63_Union__3__::get_radiotap_ChannelType() const {
-    if (idx_ != 28) {
-        throw avro::Exception("Invalid type for union");
-    }
-    return boost::any_cast<radiotap_ChannelType >(value_);
-}
-
-inline
-void _63_Union__3__::set_radiotap_ChannelType(const radiotap_ChannelType& v) {
-    idx_ = 28;
     value_ = v;
 }
 
 inline
 radiotap_Channel _63_Union__3__::get_radiotap_Channel() const {
-    if (idx_ != 29) {
+    if (idx_ != 1) {
         throw avro::Exception("Invalid type for union");
     }
     return boost::any_cast<radiotap_Channel >(value_);
@@ -1332,12 +675,768 @@ radiotap_Channel _63_Union__3__::get_radiotap_Channel() const {
 
 inline
 void _63_Union__3__::set_radiotap_Channel(const radiotap_Channel& v) {
+    idx_ = 1;
+    value_ = v;
+}
+
+inline
+Unsupported _63_Union__4__::get_Unsupported() const {
+    if (idx_ != 1) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<Unsupported >(value_);
+}
+
+inline
+void _63_Union__4__::set_Unsupported(const Unsupported& v) {
+    idx_ = 1;
+    value_ = v;
+}
+
+inline
+dot11_Unsupported _63_Union__4__::get_dot11_Unsupported() const {
+    if (idx_ != 2) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_Unsupported >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_Unsupported(const dot11_Unsupported& v) {
+    idx_ = 2;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_Ack _63_Union__4__::get_dot11_ctrl_Ack() const {
+    if (idx_ != 3) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_Ack >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_ctrl_Ack(const dot11_ctrl_Ack& v) {
+    idx_ = 3;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_BlockAck _63_Union__4__::get_dot11_ctrl_BlockAck() const {
+    if (idx_ != 4) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_BlockAck >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_ctrl_BlockAck(const dot11_ctrl_BlockAck& v) {
+    idx_ = 4;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_BlockAckRequest _63_Union__4__::get_dot11_ctrl_BlockAckRequest() const {
+    if (idx_ != 5) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_BlockAckRequest >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_ctrl_BlockAckRequest(const dot11_ctrl_BlockAckRequest& v) {
+    idx_ = 5;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_CfEnd _63_Union__4__::get_dot11_ctrl_CfEnd() const {
+    if (idx_ != 6) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_CfEnd >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_ctrl_CfEnd(const dot11_ctrl_CfEnd& v) {
+    idx_ = 6;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_EndCfAck _63_Union__4__::get_dot11_ctrl_EndCfAck() const {
+    if (idx_ != 7) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_EndCfAck >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_ctrl_EndCfAck(const dot11_ctrl_EndCfAck& v) {
+    idx_ = 7;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_PsPoll _63_Union__4__::get_dot11_ctrl_PsPoll() const {
+    if (idx_ != 8) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_PsPoll >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_ctrl_PsPoll(const dot11_ctrl_PsPoll& v) {
+    idx_ = 8;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_Rts _63_Union__4__::get_dot11_ctrl_Rts() const {
+    if (idx_ != 9) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_Rts >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_ctrl_Rts(const dot11_ctrl_Rts& v) {
+    idx_ = 9;
+    value_ = v;
+}
+
+inline
+dot11_data_Data _63_Union__4__::get_dot11_data_Data() const {
+    if (idx_ != 10) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_data_Data >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_data_Data(const dot11_data_Data& v) {
+    idx_ = 10;
+    value_ = v;
+}
+
+inline
+dot11_data_QosData _63_Union__4__::get_dot11_data_QosData() const {
+    if (idx_ != 11) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_data_QosData >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_data_QosData(const dot11_data_QosData& v) {
+    idx_ = 11;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_AssocRequest _63_Union__4__::get_dot11_mgmt_AssocRequest() const {
+    if (idx_ != 12) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_AssocRequest >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_AssocRequest(const dot11_mgmt_AssocRequest& v) {
+    idx_ = 12;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_AssocResponse _63_Union__4__::get_dot11_mgmt_AssocResponse() const {
+    if (idx_ != 13) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_AssocResponse >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_AssocResponse(const dot11_mgmt_AssocResponse& v) {
+    idx_ = 13;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Authentication _63_Union__4__::get_dot11_mgmt_Authentication() const {
+    if (idx_ != 14) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Authentication >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_Authentication(const dot11_mgmt_Authentication& v) {
+    idx_ = 14;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Beacon _63_Union__4__::get_dot11_mgmt_Beacon() const {
+    if (idx_ != 15) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Beacon >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_Beacon(const dot11_mgmt_Beacon& v) {
+    idx_ = 15;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Deauthentication _63_Union__4__::get_dot11_mgmt_Deauthentication() const {
+    if (idx_ != 16) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Deauthentication >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_Deauthentication(const dot11_mgmt_Deauthentication& v) {
+    idx_ = 16;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Disassoc _63_Union__4__::get_dot11_mgmt_Disassoc() const {
+    if (idx_ != 17) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Disassoc >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_Disassoc(const dot11_mgmt_Disassoc& v) {
+    idx_ = 17;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ProbeRequest _63_Union__4__::get_dot11_mgmt_ProbeRequest() const {
+    if (idx_ != 18) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ProbeRequest >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_ProbeRequest(const dot11_mgmt_ProbeRequest& v) {
+    idx_ = 18;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ProbeResponse _63_Union__4__::get_dot11_mgmt_ProbeResponse() const {
+    if (idx_ != 19) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ProbeResponse >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_ProbeResponse(const dot11_mgmt_ProbeResponse& v) {
+    idx_ = 19;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ReassocRequest _63_Union__4__::get_dot11_mgmt_ReassocRequest() const {
+    if (idx_ != 20) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ReassocRequest >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_ReassocRequest(const dot11_mgmt_ReassocRequest& v) {
+    idx_ = 20;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ReassocResponse _63_Union__4__::get_dot11_mgmt_ReassocResponse() const {
+    if (idx_ != 21) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ReassocResponse >(value_);
+}
+
+inline
+void _63_Union__4__::set_dot11_mgmt_ReassocResponse(const dot11_mgmt_ReassocResponse& v) {
+    idx_ = 21;
+    value_ = v;
+}
+
+inline
+Unsupported _63_Union__5__::get_Unsupported() const {
+    if (idx_ != 0) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<Unsupported >(value_);
+}
+
+inline
+void _63_Union__5__::set_Unsupported(const Unsupported& v) {
+    idx_ = 0;
+    value_ = v;
+}
+
+inline
+ethernet2_Ethernet2 _63_Union__5__::get_ethernet2_Ethernet2() const {
+    if (idx_ != 1) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<ethernet2_Ethernet2 >(value_);
+}
+
+inline
+void _63_Union__5__::set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v) {
+    idx_ = 1;
+    value_ = v;
+}
+
+inline
+radiotap_Radiotap _63_Union__5__::get_radiotap_Radiotap() const {
+    if (idx_ != 2) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<radiotap_Radiotap >(value_);
+}
+
+inline
+void _63_Union__5__::set_radiotap_Radiotap(const radiotap_Radiotap& v) {
+    idx_ = 2;
+    value_ = v;
+}
+
+inline
+Unsupported _63_Union__6__::get_Unsupported() const {
+    if (idx_ != 0) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<Unsupported >(value_);
+}
+
+inline
+void _63_Union__6__::set_Unsupported(const Unsupported& v) {
+    idx_ = 0;
+    value_ = v;
+}
+
+inline
+boost::array<uint8_t, 6> _63_Union__6__::get_MacAddr() const {
+    if (idx_ != 1) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<boost::array<uint8_t, 6> >(value_);
+}
+
+inline
+void _63_Union__6__::set_MacAddr(const boost::array<uint8_t, 6>& v) {
+    idx_ = 1;
+    value_ = v;
+}
+
+inline
+ethernet2_Ethernet2 _63_Union__6__::get_ethernet2_Ethernet2() const {
+    if (idx_ != 2) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<ethernet2_Ethernet2 >(value_);
+}
+
+inline
+void _63_Union__6__::set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v) {
+    idx_ = 2;
+    value_ = v;
+}
+
+inline
+dot11_Header _63_Union__6__::get_dot11_Header() const {
+    if (idx_ != 3) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_Header >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_Header(const dot11_Header& v) {
+    idx_ = 3;
+    value_ = v;
+}
+
+inline
+dot11_Unsupported _63_Union__6__::get_dot11_Unsupported() const {
+    if (idx_ != 4) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_Unsupported >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_Unsupported(const dot11_Unsupported& v) {
+    idx_ = 4;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_Ack _63_Union__6__::get_dot11_ctrl_Ack() const {
+    if (idx_ != 5) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_Ack >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_ctrl_Ack(const dot11_ctrl_Ack& v) {
+    idx_ = 5;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_BlockAck _63_Union__6__::get_dot11_ctrl_BlockAck() const {
+    if (idx_ != 6) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_BlockAck >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_ctrl_BlockAck(const dot11_ctrl_BlockAck& v) {
+    idx_ = 6;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_BlockAckRequest _63_Union__6__::get_dot11_ctrl_BlockAckRequest() const {
+    if (idx_ != 7) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_BlockAckRequest >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_ctrl_BlockAckRequest(const dot11_ctrl_BlockAckRequest& v) {
+    idx_ = 7;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_CfEnd _63_Union__6__::get_dot11_ctrl_CfEnd() const {
+    if (idx_ != 8) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_CfEnd >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_ctrl_CfEnd(const dot11_ctrl_CfEnd& v) {
+    idx_ = 8;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_EndCfAck _63_Union__6__::get_dot11_ctrl_EndCfAck() const {
+    if (idx_ != 9) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_EndCfAck >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_ctrl_EndCfAck(const dot11_ctrl_EndCfAck& v) {
+    idx_ = 9;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_PsPoll _63_Union__6__::get_dot11_ctrl_PsPoll() const {
+    if (idx_ != 10) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_PsPoll >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_ctrl_PsPoll(const dot11_ctrl_PsPoll& v) {
+    idx_ = 10;
+    value_ = v;
+}
+
+inline
+dot11_ctrl_Rts _63_Union__6__::get_dot11_ctrl_Rts() const {
+    if (idx_ != 11) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_ctrl_Rts >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_ctrl_Rts(const dot11_ctrl_Rts& v) {
+    idx_ = 11;
+    value_ = v;
+}
+
+inline
+dot11_data_Header _63_Union__6__::get_dot11_data_Header() const {
+    if (idx_ != 12) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_data_Header >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_data_Header(const dot11_data_Header& v) {
+    idx_ = 12;
+    value_ = v;
+}
+
+inline
+dot11_data_Data _63_Union__6__::get_dot11_data_Data() const {
+    if (idx_ != 13) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_data_Data >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_data_Data(const dot11_data_Data& v) {
+    idx_ = 13;
+    value_ = v;
+}
+
+inline
+dot11_data_QosData _63_Union__6__::get_dot11_data_QosData() const {
+    if (idx_ != 14) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_data_QosData >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_data_QosData(const dot11_data_QosData& v) {
+    idx_ = 14;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Capability _63_Union__6__::get_dot11_mgmt_Capability() const {
+    if (idx_ != 15) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Capability >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_Capability(const dot11_mgmt_Capability& v) {
+    idx_ = 15;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Header _63_Union__6__::get_dot11_mgmt_Header() const {
+    if (idx_ != 16) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Header >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_Header(const dot11_mgmt_Header& v) {
+    idx_ = 16;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_AssocRequest _63_Union__6__::get_dot11_mgmt_AssocRequest() const {
+    if (idx_ != 17) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_AssocRequest >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_AssocRequest(const dot11_mgmt_AssocRequest& v) {
+    idx_ = 17;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_AssocResponse _63_Union__6__::get_dot11_mgmt_AssocResponse() const {
+    if (idx_ != 18) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_AssocResponse >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_AssocResponse(const dot11_mgmt_AssocResponse& v) {
+    idx_ = 18;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Authentication _63_Union__6__::get_dot11_mgmt_Authentication() const {
+    if (idx_ != 19) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Authentication >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_Authentication(const dot11_mgmt_Authentication& v) {
+    idx_ = 19;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Beacon _63_Union__6__::get_dot11_mgmt_Beacon() const {
+    if (idx_ != 20) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Beacon >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_Beacon(const dot11_mgmt_Beacon& v) {
+    idx_ = 20;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Deauthentication _63_Union__6__::get_dot11_mgmt_Deauthentication() const {
+    if (idx_ != 21) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Deauthentication >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_Deauthentication(const dot11_mgmt_Deauthentication& v) {
+    idx_ = 21;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_Disassoc _63_Union__6__::get_dot11_mgmt_Disassoc() const {
+    if (idx_ != 22) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_Disassoc >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_Disassoc(const dot11_mgmt_Disassoc& v) {
+    idx_ = 22;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ProbeRequest _63_Union__6__::get_dot11_mgmt_ProbeRequest() const {
+    if (idx_ != 23) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ProbeRequest >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_ProbeRequest(const dot11_mgmt_ProbeRequest& v) {
+    idx_ = 23;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ProbeResponse _63_Union__6__::get_dot11_mgmt_ProbeResponse() const {
+    if (idx_ != 24) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ProbeResponse >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_ProbeResponse(const dot11_mgmt_ProbeResponse& v) {
+    idx_ = 24;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ReassocRequest _63_Union__6__::get_dot11_mgmt_ReassocRequest() const {
+    if (idx_ != 25) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ReassocRequest >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_ReassocRequest(const dot11_mgmt_ReassocRequest& v) {
+    idx_ = 25;
+    value_ = v;
+}
+
+inline
+dot11_mgmt_ReassocResponse _63_Union__6__::get_dot11_mgmt_ReassocResponse() const {
+    if (idx_ != 26) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<dot11_mgmt_ReassocResponse >(value_);
+}
+
+inline
+void _63_Union__6__::set_dot11_mgmt_ReassocResponse(const dot11_mgmt_ReassocResponse& v) {
+    idx_ = 26;
+    value_ = v;
+}
+
+inline
+radiotap_Flag _63_Union__6__::get_radiotap_Flag() const {
+    if (idx_ != 27) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<radiotap_Flag >(value_);
+}
+
+inline
+void _63_Union__6__::set_radiotap_Flag(const radiotap_Flag& v) {
+    idx_ = 27;
+    value_ = v;
+}
+
+inline
+radiotap_ChannelType _63_Union__6__::get_radiotap_ChannelType() const {
+    if (idx_ != 28) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<radiotap_ChannelType >(value_);
+}
+
+inline
+void _63_Union__6__::set_radiotap_ChannelType(const radiotap_ChannelType& v) {
+    idx_ = 28;
+    value_ = v;
+}
+
+inline
+radiotap_Channel _63_Union__6__::get_radiotap_Channel() const {
+    if (idx_ != 29) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<radiotap_Channel >(value_);
+}
+
+inline
+void _63_Union__6__::set_radiotap_Channel(const radiotap_Channel& v) {
     idx_ = 29;
     value_ = v;
 }
 
 inline
-radiotap_Radiotap _63_Union__3__::get_radiotap_Radiotap() const {
+radiotap_Radiotap _63_Union__6__::get_radiotap_Radiotap() const {
     if (idx_ != 30) {
         throw avro::Exception("Invalid type for union");
     }
@@ -1345,13 +1444,13 @@ radiotap_Radiotap _63_Union__3__::get_radiotap_Radiotap() const {
 }
 
 inline
-void _63_Union__3__::set_radiotap_Radiotap(const radiotap_Radiotap& v) {
+void _63_Union__6__::set_radiotap_Radiotap(const radiotap_Radiotap& v) {
     idx_ = 30;
     value_ = v;
 }
 
 inline
-Pdu _63_Union__3__::get_Pdu() const {
+Pdu _63_Union__6__::get_Pdu() const {
     if (idx_ != 31) {
         throw avro::Exception("Invalid type for union");
     }
@@ -1359,15 +1458,18 @@ Pdu _63_Union__3__::get_Pdu() const {
 }
 
 inline
-void _63_Union__3__::set_Pdu(const Pdu& v) {
+void _63_Union__6__::set_Pdu(const Pdu& v) {
     idx_ = 31;
     value_ = v;
 }
 
 inline _63_Union__0__::_63_Union__0__() : idx_(0) { }
 inline _63_Union__1__::_63_Union__1__() : idx_(0) { }
-inline _63_Union__2__::_63_Union__2__() : idx_(0), value_(Unsupported()) { }
-inline _63_Union__3__::_63_Union__3__() : idx_(0), value_(Unsupported()) { }
+inline _63_Union__2__::_63_Union__2__() : idx_(0) { }
+inline _63_Union__3__::_63_Union__3__() : idx_(0) { }
+inline _63_Union__4__::_63_Union__4__() : idx_(0) { }
+inline _63_Union__5__::_63_Union__5__() : idx_(0), value_(Unsupported()) { }
+inline _63_Union__6__::_63_Union__6__() : idx_(0), value_(Unsupported()) { }
 }
 namespace avro {
 template<> struct codec_traits<Layer2::Unsupported> {
@@ -2383,11 +2485,104 @@ template<> struct codec_traits<Layer2::_63_Union__0__> {
             e.encodeNull();
             break;
         case 1:
-            avro::encode(e, v.get_radiotap_Channel());
+            avro::encode(e, v.get_long());
             break;
         }
     }
     static void decode(Decoder& d, Layer2::_63_Union__0__& v) {
+        size_t n = d.decodeUnionIndex();
+        if (n >= 2) { throw avro::Exception("Union index too big"); }
+        switch (n) {
+        case 0:
+            d.decodeNull();
+            v.set_null();
+            break;
+        case 1:
+            {
+                int64_t vv;
+                avro::decode(d, vv);
+                v.set_long(vv);
+            }
+            break;
+        }
+    }
+};
+
+template<> struct codec_traits<Layer2::_63_Union__1__> {
+    static void encode(Encoder& e, Layer2::_63_Union__1__ v) {
+        e.encodeUnionIndex(v.idx());
+        switch (v.idx()) {
+        case 0:
+            e.encodeNull();
+            break;
+        case 1:
+            avro::encode(e, v.get_array());
+            break;
+        }
+    }
+    static void decode(Decoder& d, Layer2::_63_Union__1__& v) {
+        size_t n = d.decodeUnionIndex();
+        if (n >= 2) { throw avro::Exception("Union index too big"); }
+        switch (n) {
+        case 0:
+            d.decodeNull();
+            v.set_null();
+            break;
+        case 1:
+            {
+                std::vector<Layer2::radiotap_Flag > vv;
+                avro::decode(d, vv);
+                v.set_array(vv);
+            }
+            break;
+        }
+    }
+};
+
+template<> struct codec_traits<Layer2::_63_Union__2__> {
+    static void encode(Encoder& e, Layer2::_63_Union__2__ v) {
+        e.encodeUnionIndex(v.idx());
+        switch (v.idx()) {
+        case 0:
+            e.encodeNull();
+            break;
+        case 1:
+            avro::encode(e, v.get_int());
+            break;
+        }
+    }
+    static void decode(Decoder& d, Layer2::_63_Union__2__& v) {
+        size_t n = d.decodeUnionIndex();
+        if (n >= 2) { throw avro::Exception("Union index too big"); }
+        switch (n) {
+        case 0:
+            d.decodeNull();
+            v.set_null();
+            break;
+        case 1:
+            {
+                int32_t vv;
+                avro::decode(d, vv);
+                v.set_int(vv);
+            }
+            break;
+        }
+    }
+};
+
+template<> struct codec_traits<Layer2::_63_Union__3__> {
+    static void encode(Encoder& e, Layer2::_63_Union__3__ v) {
+        e.encodeUnionIndex(v.idx());
+        switch (v.idx()) {
+        case 0:
+            e.encodeNull();
+            break;
+        case 1:
+            avro::encode(e, v.get_radiotap_Channel());
+            break;
+        }
+    }
+    static void decode(Decoder& d, Layer2::_63_Union__3__& v) {
         size_t n = d.decodeUnionIndex();
         if (n >= 2) { throw avro::Exception("Union index too big"); }
         switch (n) {
@@ -2406,8 +2601,8 @@ template<> struct codec_traits<Layer2::_63_Union__0__> {
     }
 };
 
-template<> struct codec_traits<Layer2::_63_Union__1__> {
-    static void encode(Encoder& e, Layer2::_63_Union__1__ v) {
+template<> struct codec_traits<Layer2::_63_Union__4__> {
+    static void encode(Encoder& e, Layer2::_63_Union__4__ v) {
         e.encodeUnionIndex(v.idx());
         switch (v.idx()) {
         case 0:
@@ -2478,7 +2673,7 @@ template<> struct codec_traits<Layer2::_63_Union__1__> {
             break;
         }
     }
-    static void decode(Decoder& d, Layer2::_63_Union__1__& v) {
+    static void decode(Decoder& d, Layer2::_63_Union__4__& v) {
         size_t n = d.decodeUnionIndex();
         if (n >= 22) { throw avro::Exception("Union index too big"); }
         switch (n) {
@@ -2681,8 +2876,8 @@ template<> struct codec_traits<Layer2::radiotap_Radiotap> {
     }
 };
 
-template<> struct codec_traits<Layer2::_63_Union__2__> {
-    static void encode(Encoder& e, Layer2::_63_Union__2__ v) {
+template<> struct codec_traits<Layer2::_63_Union__5__> {
+    static void encode(Encoder& e, Layer2::_63_Union__5__ v) {
         e.encodeUnionIndex(v.idx());
         switch (v.idx()) {
         case 0:
@@ -2696,7 +2891,7 @@ template<> struct codec_traits<Layer2::_63_Union__2__> {
             break;
         }
     }
-    static void decode(Decoder& d, Layer2::_63_Union__2__& v) {
+    static void decode(Decoder& d, Layer2::_63_Union__5__& v) {
         size_t n = d.decodeUnionIndex();
         if (n >= 3) { throw avro::Exception("Union index too big"); }
         switch (n) {
@@ -2749,8 +2944,8 @@ template<> struct codec_traits<Layer2::Pdu> {
     }
 };
 
-template<> struct codec_traits<Layer2::_63_Union__3__> {
-    static void encode(Encoder& e, Layer2::_63_Union__3__ v) {
+template<> struct codec_traits<Layer2::_63_Union__6__> {
+    static void encode(Encoder& e, Layer2::_63_Union__6__ v) {
         e.encodeUnionIndex(v.idx());
         switch (v.idx()) {
         case 0:
@@ -2851,7 +3046,7 @@ template<> struct codec_traits<Layer2::_63_Union__3__> {
             break;
         }
     }
-    static void decode(Decoder& d, Layer2::_63_Union__3__& v) {
+    static void decode(Decoder& d, Layer2::_63_Union__6__& v) {
         size_t n = d.decodeUnionIndex();
         if (n >= 32) { throw avro::Exception("Union index too big"); }
         switch (n) {
