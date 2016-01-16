@@ -13,20 +13,6 @@ shopt -s nullglob
 # Dependencies directory.
 dpath="$(cd "$(dirname "${BASH_SOURCE[0]}")/../deps" && pwd)"
 
-# Download dependencies.
-case "$(uname -s)" in
-Darwin)
-  brew install cmake
-  ;;
-Linux)
-  sudo apt-get -qq update
-  sudo apt-get install libpcap-dev libssl-dev cmake libboost-all-dev
-  ;;
-*)
-  echo 'unsupported OS' >&2
-  exit 1
-esac
-
 # Build libtins.
 cd "$dpath/libtins"
 rm -rf build
