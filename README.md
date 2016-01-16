@@ -25,6 +25,8 @@ $ npm install layer2
 Otherwise, you can build both dependencies along with this package by running:
 
 ```bash
-$ git clone git@github.com:mtth/layer2.git
-$ npm run install-local
+$ git clone --recursive git@github.com:mtth/layer2.git
+$ npm run install-all
 ```
+
+In all cases, you will need a compiler with support C++11 support.
