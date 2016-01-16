@@ -1,7 +1,7 @@
 #pragma once
 
 #include "./pdus.hpp"
-#include <avro/lang/c++/api/Encoder.hh>
+#include <avro/Encoder.hh>
 #include <tins/tins.h>
 
 /**

@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Build dependencies.
+#
+# This will also build the `avrogencpp` binary used to compile IDLs into the
+# CPP header.
+
 set -o nounset
 set -o errexit
 set -o pipefail
@@ -34,8 +39,13 @@ make
 cd "$dpath/avro/lang/c++"
 rm -rf build
 # We can't simply run `./build.sh install` because of a deprecated function
-# used in tests. We must first generate the Makefile by running a fake command,
-# then only make the shared library we are interested in.
-./build.sh foo || : # Hack, see above.
+# used in tests. We run the commands manually to only make the shared library
+# we are interested in.
+mkdir build
 cd build
-make avrocpp
+cmake ../ -Wno-dev
+make avrocpp avrogencpp
+# The Avro C++ repository also doesn't respect the usual include directory
+# naming convention, we fix this here.
+mkdir include
+ln -s ../../api include/avro

@@ -4,6 +4,14 @@
 
 'use strict';
 
+/**
+ * Assemble all IDL files and output all defined types to stdout.
+ *
+ * This script is called internally by `compile-idls` to code-generate the CPP
+ * header with all Avro specific types.
+ *
+ */
+
 var avro = require('avsc'),
     path = require('path');
 
@@ -16,7 +24,8 @@ avro.assemble(path.join(dpath, 'idls', 'Pdu.avdl'), function (err, attrs) {
   }
 
   // CPP code-generation doesn't properly handle namespaces. We work around
-  // this by forcing all names in the global namespace.
+  // this by forcing all names in the global namespace (manually namespacing
+  // names with underscores).
   var registry = {};
   var protocol = avro.parse(attrs, {registry: registry});
   Object.keys(registry).forEach(function (name) {

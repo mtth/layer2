@@ -6,9 +6,6 @@ protocol Common {
   /**
    * Common header for all 802.11 frames.
    *
-   * Includes everything but the first address field (to keep it at the same
-   * level as the others).
-   *
    */
   @namespace("")
   record dot11.Header {

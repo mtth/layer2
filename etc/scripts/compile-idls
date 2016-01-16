@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Generate the CPP header file with all Avro specific record.
+#
+# This requires the Avro dependency to have been built first (for example using
+# the `build-deps` script).
+
 set -o nounset
 set -o errexit
 set -o pipefail

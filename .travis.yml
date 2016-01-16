@@ -1,19 +1,17 @@
-language: cpp
+language: node_js
+node_js:
+  - node
+  - iojs
+  - '4'
+  - '3'
+  - '2'
+  - '1.8'
+  - '1.0'
+  - '0.12'
+  - '0.11'
 env:
-  - NODE_VERSION="4.2"
-  - NODE_VERSION="5.3"
-  - NODE_VERSION="5.4"
-os:
-  - linux
-  - osx
+  global:
+    - CPLUS_INCLUDE_PATH="$(pwd)/etc/deps/libtins/include:$(pwd)/etc/deps/avro/lang/c++/build/include:/usr/local/include"
+    - LIBRARY_PATH="$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro/lang/c++/build:/usr/local/lib"
 before_install:
-  - git clone https://github.com/creationix/nvm.git /tmp/.nvm
-  - source /tmp/.nvm/nvm.sh
-  - nvm install $NODE_VERSION
-  - nvm use --delete-prefix $NODE_VERSION
   - ./etc/scripts/build-deps
-  - export LD_LIBRARY_PATH="/usr/local/lib/:$LD_LIBRARY_PATH"
-install:
-  - npm install
-script:
-  - npm test

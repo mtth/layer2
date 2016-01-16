@@ -2,7 +2,7 @@
 
 #include <nan.h>
 #include <tins/tins.h>
-#include <avro/lang/c++/api/Encoder.hh>
+#include <avro/Encoder.hh>
 
 namespace Layer2 {
 
