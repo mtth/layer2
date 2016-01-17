@@ -8,13 +8,12 @@ protocol Common {
    */
   record Unsupported {
     string name;
-    bytes data;
   }
 
   /**
    * MAC address.
    *
    */
-  fixed MacAddr(6);
+  @logicalType("address") fixed MacAddr(6);
 
 }

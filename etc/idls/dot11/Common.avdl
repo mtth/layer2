@@ -9,6 +9,8 @@ protocol Common {
    */
   @namespace("")
   record dot11.Header {
+    int type;
+    int subtype;
     boolean toDs;
     boolean fromDs;
     boolean moreFrag;
@@ -27,8 +29,7 @@ protocol Common {
    *
    */
   record Unsupported {
-    int type;
-    int subtype;
+    Header header;
   }
 
 }

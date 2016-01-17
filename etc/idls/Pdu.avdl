@@ -12,6 +12,8 @@ protocol Pdu {
    *
    */
   record Pdu {
+    int size;
+    @logicalType("timestamp-millis") long timestamp;
     union {
       Unsupported,
       ethernet2.Ethernet2,

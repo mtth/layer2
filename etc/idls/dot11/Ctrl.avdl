@@ -1,6 +1,8 @@
 import idl "../Common.avdl";
 import idl "./Common.avdl";
 
+// TODO: Find a better way to support all the very similar control frames.
+
 @namespace("dot11.ctrl")
 protocol Ctrl {
 

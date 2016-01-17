@@ -103,9 +103,9 @@ public:
     start = std::chrono::high_resolution_clock::now();
 
     // First, check whether we have a backlogged PDU.
-    std::unique_ptr<Tins::PDU> savedPdu(std::move(_wrapper->_pdu));
-    if (savedPdu) {
-      avro::encode(*_wrapper->_encoder, *savedPdu);
+    if (_wrapper->_packet.pdu()) {
+      avro::encode(*_wrapper->_encoder, _wrapper->_packet);
+      delete _wrapper->_packet.release_pdu();
       switch (_stream->getState()) {
       case BufferOutputStream::State::FULL:
         SetErrorMessage("buffer too small");
@@ -117,17 +117,17 @@ public:
     }
 
     while (true) {
-      std::unique_ptr<Tins::PDU> pdu(_wrapper->_sniffer->next_packet());
-      if (!pdu) {
+      Tins::Packet packet(_wrapper->_sniffer->next_packet());
+      if (!packet) {
         return;
       }
       _numPdus++;
-      avro::encode(*_wrapper->_encoder, *pdu);
+      avro::encode(*_wrapper->_encoder, packet);
       switch (_stream->getState()) {
       case BufferOutputStream::State::FULL:
         // There wasn't enough room, we have to save the PDU until the next
         // call (otherwise it will never be transmitted).
-        _wrapper->_pdu = std::move(pdu);
+        _wrapper->_packet = packet;
         --_numPdus;
       case BufferOutputStream::State::ALMOST_FULL:
         return;
