@@ -63,7 +63,7 @@ protocol Radiotap {
       dot11.mgmt.ProbeResponse,
       dot11.mgmt.ReassocRequest,
       dot11.mgmt.ReassocResponse
-    } pdu = null;
+    } frame = null;
   }
 
 }

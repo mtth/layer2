@@ -512,18 +512,18 @@ struct radiotap_Radiotap {
     typedef _63_Union__1__ flags_t;
     typedef _63_Union__2__ rate_t;
     typedef _63_Union__3__ channel_t;
-    typedef _63_Union__4__ pdu_t;
+    typedef _63_Union__4__ frame_t;
     tsft_t tsft;
     flags_t flags;
     rate_t rate;
     channel_t channel;
-    pdu_t pdu;
+    frame_t frame;
     radiotap_Radiotap() :
         tsft(tsft_t()),
         flags(flags_t()),
         rate(rate_t()),
         channel(channel_t()),
-        pdu(pdu_t())
+        frame(frame_t())
         { }
 };
 
@@ -543,14 +543,14 @@ public:
 };
 
 struct Pdu {
-    typedef _63_Union__5__ pdu_t;
+    typedef _63_Union__5__ frame_t;
     int32_t size;
     int64_t timestamp;
-    pdu_t pdu;
+    frame_t frame;
     Pdu() :
         size(int32_t()),
         timestamp(int64_t()),
-        pdu(pdu_t())
+        frame(frame_t())
         { }
 };
 
@@ -2842,7 +2842,7 @@ template<> struct codec_traits<Layer2::radiotap_Radiotap> {
         avro::encode(e, v.flags);
         avro::encode(e, v.rate);
         avro::encode(e, v.channel);
-        avro::encode(e, v.pdu);
+        avro::encode(e, v.frame);
     }
     static void decode(Decoder& d, Layer2::radiotap_Radiotap& v) {
         if (avro::ResolvingDecoder *rd =
@@ -2864,7 +2864,7 @@ template<> struct codec_traits<Layer2::radiotap_Radiotap> {
                     avro::decode(d, v.channel);
                     break;
                 case 4:
-                    avro::decode(d, v.pdu);
+                    avro::decode(d, v.frame);
                     break;
                 default:
                     break;
@@ -2875,7 +2875,7 @@ template<> struct codec_traits<Layer2::radiotap_Radiotap> {
             avro::decode(d, v.flags);
             avro::decode(d, v.rate);
             avro::decode(d, v.channel);
-            avro::decode(d, v.pdu);
+            avro::decode(d, v.frame);
         }
     }
 };
@@ -2928,7 +2928,7 @@ template<> struct codec_traits<Layer2::Pdu> {
     static void encode(Encoder& e, const Layer2::Pdu& v) {
         avro::encode(e, v.size);
         avro::encode(e, v.timestamp);
-        avro::encode(e, v.pdu);
+        avro::encode(e, v.frame);
     }
     static void decode(Decoder& d, Layer2::Pdu& v) {
         if (avro::ResolvingDecoder *rd =
@@ -2944,7 +2944,7 @@ template<> struct codec_traits<Layer2::Pdu> {
                     avro::decode(d, v.timestamp);
                     break;
                 case 2:
-                    avro::decode(d, v.pdu);
+                    avro::decode(d, v.frame);
                     break;
                 default:
                     break;
@@ -2953,7 +2953,7 @@ template<> struct codec_traits<Layer2::Pdu> {
         } else {
             avro::decode(d, v.size);
             avro::decode(d, v.timestamp);
-            avro::decode(d, v.pdu);
+            avro::decode(d, v.frame);
         }
     }
 };

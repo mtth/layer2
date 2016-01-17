@@ -30,13 +30,13 @@ struct codec_traits<Tins::Packet> {
       dst.size = pdu->size();
       switch (pdu->pdu_type()) {
       case Tins::PDU::PDUType::ETHERNET_II:
-        dst.pdu.set_ethernet2_Ethernet2(*Layer2::convert(static_cast<const Tins::EthernetII &>(*pdu)));
+        dst.frame.set_ethernet2_Ethernet2(*Layer2::convert(static_cast<const Tins::EthernetII &>(*pdu)));
         break;
       case Tins::PDU::PDUType::RADIOTAP:
-        dst.pdu.set_radiotap_Radiotap(*Layer2::convert(static_cast<const Tins::RadioTap &>(*pdu)));
+        dst.frame.set_radiotap_Radiotap(*Layer2::convert(static_cast<const Tins::RadioTap &>(*pdu)));
         break;
       default:
-        dst.pdu.set_Unsupported(*Layer2::convert(*pdu));
+        dst.frame.set_Unsupported(*Layer2::convert(*pdu));
       }
     } else {
       dst.size = 0;

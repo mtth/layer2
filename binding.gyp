@@ -5,6 +5,7 @@
       'sources': [
         'src/index.cpp',
         'src/codecs.cpp',
+        'src/utils.cpp',
         'src/wrapper.cpp'
       ],
       'link_settings': {

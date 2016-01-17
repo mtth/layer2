@@ -18,7 +18,7 @@ protocol Pdu {
       Unsupported,
       ethernet2.Ethernet2,
       radiotap.Radiotap
-    } pdu;
+    } frame;
   }
 
 }

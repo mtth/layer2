@@ -352,67 +352,67 @@ std::unique_ptr<Layer2::radiotap_Radiotap> convert(const Tins::RadioTap &src) {
   if (innerPdu) {
     switch (innerPdu->pdu_type()) {
     case Tins::PDU::PDUType::DOT11_ACK:
-      dst->pdu.set_dot11_ctrl_Ack(*Layer2::convert(static_cast<const Tins::Dot11Ack &>(*innerPdu)));
+      dst->frame.set_dot11_ctrl_Ack(*Layer2::convert(static_cast<const Tins::Dot11Ack &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_BLOCK_ACK:
-      dst->pdu.set_dot11_ctrl_BlockAck(*Layer2::convert(static_cast<const Tins::Dot11BlockAck &>(*innerPdu)));
+      dst->frame.set_dot11_ctrl_BlockAck(*Layer2::convert(static_cast<const Tins::Dot11BlockAck &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_BLOCK_ACK_REQ:
-      dst->pdu.set_dot11_ctrl_BlockAckRequest(*Layer2::convert(static_cast<const Tins::Dot11BlockAckRequest &>(*innerPdu)));
+      dst->frame.set_dot11_ctrl_BlockAckRequest(*Layer2::convert(static_cast<const Tins::Dot11BlockAckRequest &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_CF_END:
-      dst->pdu.set_dot11_ctrl_CfEnd(*Layer2::convert(static_cast<const Tins::Dot11CFEnd &>(*innerPdu)));
+      dst->frame.set_dot11_ctrl_CfEnd(*Layer2::convert(static_cast<const Tins::Dot11CFEnd &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_END_CF_ACK:
-      dst->pdu.set_dot11_ctrl_EndCfAck(*Layer2::convert(static_cast<const Tins::Dot11EndCFAck &>(*innerPdu)));
+      dst->frame.set_dot11_ctrl_EndCfAck(*Layer2::convert(static_cast<const Tins::Dot11EndCFAck &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_PS_POLL:
-      dst->pdu.set_dot11_ctrl_PsPoll(*Layer2::convert(static_cast<const Tins::Dot11PSPoll &>(*innerPdu)));
+      dst->frame.set_dot11_ctrl_PsPoll(*Layer2::convert(static_cast<const Tins::Dot11PSPoll &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_RTS:
-      dst->pdu.set_dot11_ctrl_Rts(*Layer2::convert(static_cast<const Tins::Dot11RTS &>(*innerPdu)));
+      dst->frame.set_dot11_ctrl_Rts(*Layer2::convert(static_cast<const Tins::Dot11RTS &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_DATA:
-      dst->pdu.set_dot11_data_Data(*Layer2::convert(static_cast<const Tins::Dot11Data &>(*innerPdu)));
+      dst->frame.set_dot11_data_Data(*Layer2::convert(static_cast<const Tins::Dot11Data &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_QOS_DATA:
-      dst->pdu.set_dot11_data_QosData(*Layer2::convert(static_cast<const Tins::Dot11QoSData &>(*innerPdu)));
+      dst->frame.set_dot11_data_QosData(*Layer2::convert(static_cast<const Tins::Dot11QoSData &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_ASSOC_REQ:
-      dst->pdu.set_dot11_mgmt_AssocRequest(*Layer2::convert(static_cast<const Tins::Dot11AssocRequest &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_AssocRequest(*Layer2::convert(static_cast<const Tins::Dot11AssocRequest &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_ASSOC_RESP:
-      dst->pdu.set_dot11_mgmt_AssocResponse(*Layer2::convert(static_cast<const Tins::Dot11AssocResponse &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_AssocResponse(*Layer2::convert(static_cast<const Tins::Dot11AssocResponse &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_AUTH:
-      dst->pdu.set_dot11_mgmt_Authentication(*Layer2::convert(static_cast<const Tins::Dot11Authentication &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_Authentication(*Layer2::convert(static_cast<const Tins::Dot11Authentication &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_BEACON:
-      dst->pdu.set_dot11_mgmt_Beacon(*Layer2::convert(static_cast<const Tins::Dot11Beacon &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_Beacon(*Layer2::convert(static_cast<const Tins::Dot11Beacon &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_DEAUTH:
-      dst->pdu.set_dot11_mgmt_Deauthentication(*Layer2::convert(static_cast<const Tins::Dot11Deauthentication &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_Deauthentication(*Layer2::convert(static_cast<const Tins::Dot11Deauthentication &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_DIASSOC:
-      dst->pdu.set_dot11_mgmt_Disassoc(*Layer2::convert(static_cast<const Tins::Dot11Disassoc &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_Disassoc(*Layer2::convert(static_cast<const Tins::Dot11Disassoc &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_PROBE_REQ:
-      dst->pdu.set_dot11_mgmt_ProbeRequest(*Layer2::convert(static_cast<const Tins::Dot11ProbeRequest &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_ProbeRequest(*Layer2::convert(static_cast<const Tins::Dot11ProbeRequest &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_PROBE_RESP:
-      dst->pdu.set_dot11_mgmt_ProbeResponse(*Layer2::convert(static_cast<const Tins::Dot11ProbeResponse &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_ProbeResponse(*Layer2::convert(static_cast<const Tins::Dot11ProbeResponse &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_REASSOC_REQ:
-      dst->pdu.set_dot11_mgmt_ReassocRequest(*Layer2::convert(static_cast<const Tins::Dot11ReAssocRequest &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_ReassocRequest(*Layer2::convert(static_cast<const Tins::Dot11ReAssocRequest &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11_REASSOC_RESP:
-      dst->pdu.set_dot11_mgmt_ReassocResponse(*Layer2::convert(static_cast<const Tins::Dot11ReAssocResponse &>(*innerPdu)));
+      dst->frame.set_dot11_mgmt_ReassocResponse(*Layer2::convert(static_cast<const Tins::Dot11ReAssocResponse &>(*innerPdu)));
       break;
     case Tins::PDU::PDUType::DOT11:
-      dst->pdu.set_dot11_Unsupported(*Layer2::convert(static_cast<const Tins::Dot11 &>(*innerPdu)));
+      dst->frame.set_dot11_Unsupported(*Layer2::convert(static_cast<const Tins::Dot11 &>(*innerPdu)));
       break;
     default:
-      dst->pdu.set_Unsupported(*Layer2::convert(*innerPdu));
+      dst->frame.set_Unsupported(*Layer2::convert(*innerPdu));
       ; // This should never happen. Throw an exception here?
     }
   }
