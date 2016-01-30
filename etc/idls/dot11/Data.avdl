@@ -14,13 +14,13 @@ protocol Data {
   }
 
   record Data {
-    dot11.Header header;
-    Header dataHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) dataHeader;
   }
 
   record QosData {
-    dot11.Header header;
-    Header dataHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) dataHeader;
     int qosControl;
   }
 

@@ -29,7 +29,7 @@ protocol Common {
    *
    */
   record Unsupported {
-    Header header;
+    Header @inline(true) header;
   }
 
 }

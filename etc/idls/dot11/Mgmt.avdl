@@ -41,56 +41,56 @@ protocol Mgmt {
   }
 
   record AssocRequest {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
     array<Capability> capabilities;
     int listenInterval;
   }
 
   record AssocResponse {
-    dot11.Header header;
-    dot11.mgmt.Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    dot11.mgmt.Header @inline(true) mgmtHeader;
     array<Capability> capabilities;
     int statusCode; // 0: success, 1: failure (make this an enum?).
     int aid;
   }
 
   record Authentication {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
     int authAlgorithm;
     int authSeqNumber;
     int statusCode;
   }
 
   record Beacon {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
     long timestamp;
     int interval;
     array<Capability> capabilities;
   }
 
   record Deauthentication {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
     int reasonCode;
   }
 
   record Disassoc {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
     int reasonCode;
   }
 
   record ProbeRequest {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
   }
 
   record ProbeResponse {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
     long timestamp;
     int interval;
     array<Capability> capabilities;
@@ -98,16 +98,16 @@ protocol Mgmt {
 
   @namespace("")
   record dot11.mgmt.ReassocRequest {
-    dot11.Header header;
-    dot11.mgmt.Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    dot11.mgmt.Header @inline(true) mgmtHeader;
     array<dot11.mgmt.Capability> capabilities;
     int listenInterval;
     MacAddr currentAp;
   }
 
   record ReassocResponse {
-    dot11.Header header;
-    Header mgmtHeader;
+    dot11.Header @inline(true) header;
+    Header @inline(true) mgmtHeader;
     array<Capability> capabilities;
     int statusCode; // 0: success, 1: failure (make this an enum?).
     int aid;

@@ -6,10 +6,10 @@ var layer2 = require('layer2');
 layer2.createInterfaceSniffer('en0')
   .on('pdu', function (pdu) {
     // Assuming EthernetII frames.
-    var frame = pdu.Ethernet2;
-    var src = frame.srcAddr.toString('hex');
-    var dst = frame.dstAddr.toString('hex');
-    var size = frame.data.length;
+    var frame = pdu.frame['ethernet2.Ethernet2'];
+    var src = frame.srcAddr;
+    var dst = frame.dstAddr;
+    var size = pdu.size;
     console.log(src + ' -> ' + dst + ' [' + size + ']');
   });
 ```

@@ -7,37 +7,37 @@ import idl "./Common.avdl";
 protocol Ctrl {
 
   record Ack {
-    dot11.Header header;
+    dot11.Header @inline(true) header;
   }
 
   record BlockAck {
-    dot11.Header header;
+    dot11.Header @inline(true) header;
     int barControl;
     int startSeq;
     int fragNum;
   }
 
   record BlockAckRequest {
-    dot11.Header header;
+    dot11.Header @inline(true) header;
     int barControl;
     int startSeq;
     int fragNum;
   }
 
   record CfEnd {
-    dot11.Header header;
+    dot11.Header @inline(true) header;
   }
 
   record EndCfAck {
-    dot11.Header header;
+    dot11.Header @inline(true) header;
   }
 
   record PsPoll {
-    dot11.Header header;
+    dot11.Header @inline(true) header;
   }
 
   record Rts {
-    dot11.Header header;
+    dot11.Header @inline(true) header;
   }
 
 }
