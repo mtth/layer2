@@ -50,6 +50,12 @@ private:
   static NAN_METHOD(Empty);
 
   /**
+   * Destructor, to free the underlying capture handle.
+   *
+   */
+  static NAN_METHOD(Destroy);
+
+  /**
    * Prototype method which will take in a buffer and a callback.
    *
    * The buffer will be populated with Avro-encoded PDUs. The callback will

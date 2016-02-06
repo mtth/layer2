@@ -182,6 +182,17 @@ private:
  */
 NAN_METHOD(Wrapper::Empty) {}
 
+/**
+ * Destructor.
+ *
+ * This is required to close the capture handle deterministically.
+ *
+ */
+NAN_METHOD(Wrapper::Destroy) {
+  Wrapper *wrapper = ObjectWrap::Unwrap<Wrapper>(info.This());
+  wrapper->_sniffer.reset();
+}
+
 NAN_METHOD(Wrapper::FromInterface) {
   if (
     info.Length() != 7 ||
@@ -296,6 +307,7 @@ v8::Local<v8::FunctionTemplate> Wrapper::Init() {
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Wrapper::Empty);
   tpl->SetClassName(Nan::New("Wrapper").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  Nan::SetPrototypeMethod(tpl, "destroy", Wrapper::Destroy);
   Nan::SetPrototypeMethod(tpl, "getPdus", Wrapper::GetPdus);
   Nan::SetPrototypeMethod(tpl, "fromInterface", Wrapper::FromInterface);
   Nan::SetPrototypeMethod(tpl, "fromFile", Wrapper::FromFile);
