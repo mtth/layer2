@@ -14,16 +14,16 @@ suite('sniffers', function () {
 
   suite('Sniffer', function () {
 
-    var type;
+    var type; // PDU type, loaded asynchronously.
 
     before(function (done) {
-      utils.loadPduType(function (err, pduType) {
-        type = pduType;
+      utils.loadPduType(function (err, type_) {
+        type = type_;
         done();
       });
     });
 
-    test('single PDU', function (done) {
+    test('eager single PDU', function (done) {
       var val = type.random();
       var w = new Wrapper([val]);
       new sniffers.Sniffer(w)
@@ -32,8 +32,21 @@ suite('sniffers', function () {
           this.destroy();
         })
         .on('end', function () {
+          assert(w.destroyed);
           done();
         });
+    });
+
+    test('delayed single PDU', function (done) {
+      var val = type.random();
+      var w = new Wrapper([val]);
+      var s = new sniffers.Sniffer(w);
+      setImmediate(function () {
+        s.on('pdu', function (pdu) {
+          assert(!pdu.compare(val));
+          done();
+        });
+      });
     });
 
     // Mock wrapper to test sniffer logic.
