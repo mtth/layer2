@@ -4,3 +4,6 @@
 [submodule "etc/deps/libtins"]
 	path = etc/deps/libtins
 	url = https://github.com/mfontanini/libtins.git
+[submodule "doc"]
+	path = doc
+	url = https://github.com/mtth/layer2.wiki.git
