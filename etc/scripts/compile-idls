@@ -16,4 +16,4 @@ dpath="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 "${dpath}/deps/avro/lang/c++/build/avrogencpp" \
   -i <("${dpath}/scripts/assemble-idls") \
   -o "${dpath}/../src/pdus.hpp" \
-  -n Layer2;
+  -n Layer2
