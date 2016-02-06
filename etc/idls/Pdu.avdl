@@ -3,10 +3,6 @@ import idl "./Radiotap.avdl";
 
 protocol Pdu {
 
-  // TODO: Edit CPP code generation tool to support namespaces.
-  // TODO: Explore using an extend/include keyword to avoid repeating common
-  // fields (e.g. 802.11 headers).
-
   /**
    * Outermost PDU.
    *
