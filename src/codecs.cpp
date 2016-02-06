@@ -12,8 +12,8 @@ std::unique_ptr<Layer2::Unsupported> convert(const Tins::PDU &src) {
 
 // Ethernet II.
 
-std::unique_ptr<Layer2::ethernet2_Ethernet2> convert(const Tins::EthernetII &src) {
-  Layer2::ethernet2_Ethernet2 *dst = new Layer2::ethernet2_Ethernet2;
+std::unique_ptr<Layer2::Ethernet2> convert(const Tins::EthernetII &src) {
+  Layer2::Ethernet2 *dst = new Layer2::Ethernet2;
 
   src.src_addr().copy(dst->srcAddr.data());
   src.dst_addr().copy(dst->dstAddr.data());
@@ -24,7 +24,7 @@ std::unique_ptr<Layer2::ethernet2_Ethernet2> convert(const Tins::EthernetII &src
     dst->data = const_cast<Tins::PDU &>(*innerPdu).serialize();
   }
 
-  return std::unique_ptr<Layer2::ethernet2_Ethernet2>(dst);
+  return std::unique_ptr<Layer2::Ethernet2>(dst);
 }
 
 // 802.11.
@@ -274,8 +274,8 @@ std::unique_ptr<Layer2::dot11_Unsupported> convert(const Tins::Dot11 &src) {
 
 // Radiotap.
 
-std::unique_ptr<Layer2::radiotap_Radiotap> convert(const Tins::RadioTap &src) {
-  Layer2::radiotap_Radiotap *dst = new Layer2::radiotap_Radiotap();
+std::unique_ptr<Layer2::Radiotap> convert(const Tins::RadioTap &src) {
+  Layer2::Radiotap *dst = new Layer2::Radiotap();
 
   Tins::RadioTap::PresentFlags present = src.present();
   if (present & Tins::RadioTap::PresentFlags::TSTF) {
@@ -417,7 +417,7 @@ std::unique_ptr<Layer2::radiotap_Radiotap> convert(const Tins::RadioTap &src) {
     }
   }
 
-  return std::unique_ptr<Layer2::radiotap_Radiotap>(dst);
+  return std::unique_ptr<Layer2::Radiotap>(dst);
 }
 
 }

@@ -3,14 +3,12 @@
 ```javascript
 var layer2 = require('layer2');
 
-layer2.createInterfaceSniffer('en0')
+layer2.createInterfaceSniffer('eth0')
   .on('pdu', function (pdu) {
-    // Assuming EthernetII frames.
-    var frame = pdu.frame['ethernet2.Ethernet2'];
+    var frame = pdu.frame.Ethernet2;
     var src = frame.srcAddr;
     var dst = frame.dstAddr;
-    var size = pdu.size;
-    console.log(src + ' -> ' + dst + ' [' + size + ']');
+    console.log(src + ' -> ' + dst + ' [' + pdu.size + ']');
   });
 ```
 

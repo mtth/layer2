@@ -33,7 +33,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "avsc": "^3.3.5",
+    "avsc": "^3.3.9",
     "nan": "^2.2.0"
   },
   "devDependencies": {

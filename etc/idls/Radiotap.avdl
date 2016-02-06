@@ -35,10 +35,10 @@ protocol Radiotap {
   }
 
   @namespace("")
-  record radiotap.Radiotap {
-    union {null, long} tsft;
-    union {null, array<radiotap.Flag>} flags;
-    union {null, int} rate;
+  record Radiotap {
+    union {null, long} tsft = null;
+    union {null, array<radiotap.Flag>} flags = null;
+    union {null, int} rate = null;
     union {null, radiotap.Channel} channel = null;
     union {
       null,

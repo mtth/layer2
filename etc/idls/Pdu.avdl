@@ -16,8 +16,8 @@ protocol Pdu {
     @logicalType("timestamp-millis") long timestamp;
     union {
       Unsupported,
-      ethernet2.Ethernet2,
-      radiotap.Radiotap
+      Ethernet2,
+      Radiotap
     } frame;
   }
 

@@ -35,12 +35,12 @@ struct Unsupported {
         { }
 };
 
-struct ethernet2_Ethernet2 {
+struct Ethernet2 {
     boost::array<uint8_t, 6> srcAddr;
     boost::array<uint8_t, 6> dstAddr;
     int32_t payloadType;
     std::vector<uint8_t> data;
-    ethernet2_Ethernet2() :
+    Ethernet2() :
         srcAddr(boost::array<uint8_t, 6>()),
         dstAddr(boost::array<uint8_t, 6>()),
         payloadType(int32_t()),
@@ -507,7 +507,7 @@ public:
     _63_Union__4__();
 };
 
-struct radiotap_Radiotap {
+struct Radiotap {
     typedef _63_Union__0__ tsft_t;
     typedef _63_Union__1__ flags_t;
     typedef _63_Union__2__ rate_t;
@@ -518,7 +518,7 @@ struct radiotap_Radiotap {
     rate_t rate;
     channel_t channel;
     frame_t frame;
-    radiotap_Radiotap() :
+    Radiotap() :
         tsft(tsft_t()),
         flags(flags_t()),
         rate(rate_t()),
@@ -535,10 +535,10 @@ public:
     size_t idx() const { return idx_; }
     Unsupported get_Unsupported() const;
     void set_Unsupported(const Unsupported& v);
-    ethernet2_Ethernet2 get_ethernet2_Ethernet2() const;
-    void set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v);
-    radiotap_Radiotap get_radiotap_Radiotap() const;
-    void set_radiotap_Radiotap(const radiotap_Radiotap& v);
+    Ethernet2 get_Ethernet2() const;
+    void set_Ethernet2(const Ethernet2& v);
+    Radiotap get_Radiotap() const;
+    void set_Radiotap(const Radiotap& v);
     _63_Union__5__();
 };
 
@@ -564,8 +564,8 @@ public:
     void set_Unsupported(const Unsupported& v);
     boost::array<uint8_t, 6> get_MacAddr() const;
     void set_MacAddr(const boost::array<uint8_t, 6>& v);
-    ethernet2_Ethernet2 get_ethernet2_Ethernet2() const;
-    void set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v);
+    Ethernet2 get_Ethernet2() const;
+    void set_Ethernet2(const Ethernet2& v);
     dot11_Header get_dot11_Header() const;
     void set_dot11_Header(const dot11_Header& v);
     dot11_Unsupported get_dot11_Unsupported() const;
@@ -620,8 +620,8 @@ public:
     void set_radiotap_ChannelType(const radiotap_ChannelType& v);
     radiotap_Channel get_radiotap_Channel() const;
     void set_radiotap_Channel(const radiotap_Channel& v);
-    radiotap_Radiotap get_radiotap_Radiotap() const;
-    void set_radiotap_Radiotap(const radiotap_Radiotap& v);
+    Radiotap get_Radiotap() const;
+    void set_Radiotap(const Radiotap& v);
     Pdu get_Pdu() const;
     void set_Pdu(const Pdu& v);
     _63_Union__6__();
@@ -992,29 +992,29 @@ void _63_Union__5__::set_Unsupported(const Unsupported& v) {
 }
 
 inline
-ethernet2_Ethernet2 _63_Union__5__::get_ethernet2_Ethernet2() const {
+Ethernet2 _63_Union__5__::get_Ethernet2() const {
     if (idx_ != 1) {
         throw avro::Exception("Invalid type for union");
     }
-    return boost::any_cast<ethernet2_Ethernet2 >(value_);
+    return boost::any_cast<Ethernet2 >(value_);
 }
 
 inline
-void _63_Union__5__::set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v) {
+void _63_Union__5__::set_Ethernet2(const Ethernet2& v) {
     idx_ = 1;
     value_ = v;
 }
 
 inline
-radiotap_Radiotap _63_Union__5__::get_radiotap_Radiotap() const {
+Radiotap _63_Union__5__::get_Radiotap() const {
     if (idx_ != 2) {
         throw avro::Exception("Invalid type for union");
     }
-    return boost::any_cast<radiotap_Radiotap >(value_);
+    return boost::any_cast<Radiotap >(value_);
 }
 
 inline
-void _63_Union__5__::set_radiotap_Radiotap(const radiotap_Radiotap& v) {
+void _63_Union__5__::set_Radiotap(const Radiotap& v) {
     idx_ = 2;
     value_ = v;
 }
@@ -1048,15 +1048,15 @@ void _63_Union__6__::set_MacAddr(const boost::array<uint8_t, 6>& v) {
 }
 
 inline
-ethernet2_Ethernet2 _63_Union__6__::get_ethernet2_Ethernet2() const {
+Ethernet2 _63_Union__6__::get_Ethernet2() const {
     if (idx_ != 2) {
         throw avro::Exception("Invalid type for union");
     }
-    return boost::any_cast<ethernet2_Ethernet2 >(value_);
+    return boost::any_cast<Ethernet2 >(value_);
 }
 
 inline
-void _63_Union__6__::set_ethernet2_Ethernet2(const ethernet2_Ethernet2& v) {
+void _63_Union__6__::set_Ethernet2(const Ethernet2& v) {
     idx_ = 2;
     value_ = v;
 }
@@ -1440,15 +1440,15 @@ void _63_Union__6__::set_radiotap_Channel(const radiotap_Channel& v) {
 }
 
 inline
-radiotap_Radiotap _63_Union__6__::get_radiotap_Radiotap() const {
+Radiotap _63_Union__6__::get_Radiotap() const {
     if (idx_ != 30) {
         throw avro::Exception("Invalid type for union");
     }
-    return boost::any_cast<radiotap_Radiotap >(value_);
+    return boost::any_cast<Radiotap >(value_);
 }
 
 inline
-void _63_Union__6__::set_radiotap_Radiotap(const radiotap_Radiotap& v) {
+void _63_Union__6__::set_Radiotap(const Radiotap& v) {
     idx_ = 30;
     value_ = v;
 }
@@ -1500,14 +1500,14 @@ template<> struct codec_traits<Layer2::Unsupported> {
     }
 };
 
-template<> struct codec_traits<Layer2::ethernet2_Ethernet2> {
-    static void encode(Encoder& e, const Layer2::ethernet2_Ethernet2& v) {
+template<> struct codec_traits<Layer2::Ethernet2> {
+    static void encode(Encoder& e, const Layer2::Ethernet2& v) {
         avro::encode(e, v.srcAddr);
         avro::encode(e, v.dstAddr);
         avro::encode(e, v.payloadType);
         avro::encode(e, v.data);
     }
-    static void decode(Decoder& d, Layer2::ethernet2_Ethernet2& v) {
+    static void decode(Decoder& d, Layer2::Ethernet2& v) {
         if (avro::ResolvingDecoder *rd =
             dynamic_cast<avro::ResolvingDecoder *>(&d)) {
             const std::vector<size_t> fo = rd->fieldOrder();
@@ -2836,15 +2836,15 @@ template<> struct codec_traits<Layer2::_63_Union__4__> {
     }
 };
 
-template<> struct codec_traits<Layer2::radiotap_Radiotap> {
-    static void encode(Encoder& e, const Layer2::radiotap_Radiotap& v) {
+template<> struct codec_traits<Layer2::Radiotap> {
+    static void encode(Encoder& e, const Layer2::Radiotap& v) {
         avro::encode(e, v.tsft);
         avro::encode(e, v.flags);
         avro::encode(e, v.rate);
         avro::encode(e, v.channel);
         avro::encode(e, v.frame);
     }
-    static void decode(Decoder& d, Layer2::radiotap_Radiotap& v) {
+    static void decode(Decoder& d, Layer2::Radiotap& v) {
         if (avro::ResolvingDecoder *rd =
             dynamic_cast<avro::ResolvingDecoder *>(&d)) {
             const std::vector<size_t> fo = rd->fieldOrder();
@@ -2888,10 +2888,10 @@ template<> struct codec_traits<Layer2::_63_Union__5__> {
             avro::encode(e, v.get_Unsupported());
             break;
         case 1:
-            avro::encode(e, v.get_ethernet2_Ethernet2());
+            avro::encode(e, v.get_Ethernet2());
             break;
         case 2:
-            avro::encode(e, v.get_radiotap_Radiotap());
+            avro::encode(e, v.get_Radiotap());
             break;
         }
     }
@@ -2908,16 +2908,16 @@ template<> struct codec_traits<Layer2::_63_Union__5__> {
             break;
         case 1:
             {
-                Layer2::ethernet2_Ethernet2 vv;
+                Layer2::Ethernet2 vv;
                 avro::decode(d, vv);
-                v.set_ethernet2_Ethernet2(vv);
+                v.set_Ethernet2(vv);
             }
             break;
         case 2:
             {
-                Layer2::radiotap_Radiotap vv;
+                Layer2::Radiotap vv;
                 avro::decode(d, vv);
-                v.set_radiotap_Radiotap(vv);
+                v.set_Radiotap(vv);
             }
             break;
         }
@@ -2969,7 +2969,7 @@ template<> struct codec_traits<Layer2::_63_Union__6__> {
             avro::encode(e, v.get_MacAddr());
             break;
         case 2:
-            avro::encode(e, v.get_ethernet2_Ethernet2());
+            avro::encode(e, v.get_Ethernet2());
             break;
         case 3:
             avro::encode(e, v.get_dot11_Header());
@@ -3053,7 +3053,7 @@ template<> struct codec_traits<Layer2::_63_Union__6__> {
             avro::encode(e, v.get_radiotap_Channel());
             break;
         case 30:
-            avro::encode(e, v.get_radiotap_Radiotap());
+            avro::encode(e, v.get_Radiotap());
             break;
         case 31:
             avro::encode(e, v.get_Pdu());
@@ -3080,9 +3080,9 @@ template<> struct codec_traits<Layer2::_63_Union__6__> {
             break;
         case 2:
             {
-                Layer2::ethernet2_Ethernet2 vv;
+                Layer2::Ethernet2 vv;
                 avro::decode(d, vv);
-                v.set_ethernet2_Ethernet2(vv);
+                v.set_Ethernet2(vv);
             }
             break;
         case 3:
@@ -3276,9 +3276,9 @@ template<> struct codec_traits<Layer2::_63_Union__6__> {
             break;
         case 30:
             {
-                Layer2::radiotap_Radiotap vv;
+                Layer2::Radiotap vv;
                 avro::decode(d, vv);
-                v.set_radiotap_Radiotap(vv);
+                v.set_Radiotap(vv);
             }
             break;
         case 31:

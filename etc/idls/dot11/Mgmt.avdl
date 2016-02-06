@@ -30,11 +30,10 @@ protocol Mgmt {
    * as the others).
    *
    */
-  @namespace("")
-  record dot11.mgmt.Header {
-    MacAddr addr2;
-    MacAddr addr3;
-    MacAddr addr4;
+  record Header {
+    .MacAddr addr2;
+    .MacAddr addr3;
+    .MacAddr addr4;
     int fragNum;
     int seqNum;
     // TODO: Add more (e.g. SSID), though tin's API currently makes this difficult.
@@ -96,13 +95,12 @@ protocol Mgmt {
     array<Capability> capabilities;
   }
 
-  @namespace("")
-  record dot11.mgmt.ReassocRequest {
+  record ReassocRequest {
     dot11.Header @inline(true) header;
-    dot11.mgmt.Header @inline(true) mgmtHeader;
-    array<dot11.mgmt.Capability> capabilities;
+    Header @inline(true) mgmtHeader;
+    array<Capability> capabilities;
     int listenInterval;
-    MacAddr currentAp;
+    .MacAddr currentAp;
   }
 
   record ReassocResponse {
