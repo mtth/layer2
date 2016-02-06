@@ -32,8 +32,6 @@ std::unique_ptr<Layer2::Ethernet2> convert(const Tins::EthernetII &src) {
 // A few helpers first for the nested headers.
 
 void populateDot11Header(Layer2::dot11_Header &dst, const Tins::Dot11 &src) {
-  dst.type = src.type();
-  dst.subtype = src.subtype();
   dst.toDs = src.to_ds();
   dst.fromDs = src.from_ds();
   dst.moreFrag = src.more_frag();
@@ -269,6 +267,8 @@ std::unique_ptr<Layer2::dot11_mgmt_ReassocResponse> convert(const Tins::Dot11ReA
 std::unique_ptr<Layer2::dot11_Unsupported> convert(const Tins::Dot11 &src) {
   Layer2::dot11_Unsupported *dst = new Layer2::dot11_Unsupported;
   populateDot11Header(dst->header, src);
+  dst->type = src.type();
+  dst->subtype = src.subtype();
   return std::unique_ptr<Layer2::dot11_Unsupported>(dst);
 }
 

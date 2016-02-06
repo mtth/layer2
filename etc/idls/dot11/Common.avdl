@@ -8,8 +8,6 @@ protocol Common {
    *
    */
   record Header {
-    int type;
-    int subtype;
     boolean toDs;
     boolean fromDs;
     boolean moreFrag;
@@ -29,6 +27,8 @@ protocol Common {
    */
   record Unsupported {
     Header @inline(true) header;
+    int type;
+    int subtype;
   }
 
 }

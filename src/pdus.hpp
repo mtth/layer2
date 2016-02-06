@@ -49,8 +49,6 @@ struct Ethernet2 {
 };
 
 struct dot11_Header {
-    int32_t type;
-    int32_t subtype;
     bool toDs;
     bool fromDs;
     bool moreFrag;
@@ -61,8 +59,6 @@ struct dot11_Header {
     int32_t durationId;
     boost::array<uint8_t, 6> addr1;
     dot11_Header() :
-        type(int32_t()),
-        subtype(int32_t()),
         toDs(bool()),
         fromDs(bool()),
         moreFrag(bool()),
@@ -77,8 +73,12 @@ struct dot11_Header {
 
 struct dot11_Unsupported {
     dot11_Header header;
+    int32_t type;
+    int32_t subtype;
     dot11_Unsupported() :
-        header(dot11_Header())
+        header(dot11_Header()),
+        type(int32_t()),
+        subtype(int32_t())
         { }
 };
 
@@ -1541,8 +1541,6 @@ template<> struct codec_traits<Layer2::Ethernet2> {
 
 template<> struct codec_traits<Layer2::dot11_Header> {
     static void encode(Encoder& e, const Layer2::dot11_Header& v) {
-        avro::encode(e, v.type);
-        avro::encode(e, v.subtype);
         avro::encode(e, v.toDs);
         avro::encode(e, v.fromDs);
         avro::encode(e, v.moreFrag);
@@ -1561,36 +1559,30 @@ template<> struct codec_traits<Layer2::dot11_Header> {
                 it != fo.end(); ++it) {
                 switch (*it) {
                 case 0:
-                    avro::decode(d, v.type);
-                    break;
-                case 1:
-                    avro::decode(d, v.subtype);
-                    break;
-                case 2:
                     avro::decode(d, v.toDs);
                     break;
-                case 3:
+                case 1:
                     avro::decode(d, v.fromDs);
                     break;
-                case 4:
+                case 2:
                     avro::decode(d, v.moreFrag);
                     break;
-                case 5:
+                case 3:
                     avro::decode(d, v.retry);
                     break;
-                case 6:
+                case 4:
                     avro::decode(d, v.powerMgmt);
                     break;
-                case 7:
+                case 5:
                     avro::decode(d, v.wep);
                     break;
-                case 8:
+                case 6:
                     avro::decode(d, v.order);
                     break;
-                case 9:
+                case 7:
                     avro::decode(d, v.durationId);
                     break;
-                case 10:
+                case 8:
                     avro::decode(d, v.addr1);
                     break;
                 default:
@@ -1598,8 +1590,6 @@ template<> struct codec_traits<Layer2::dot11_Header> {
                 }
             }
         } else {
-            avro::decode(d, v.type);
-            avro::decode(d, v.subtype);
             avro::decode(d, v.toDs);
             avro::decode(d, v.fromDs);
             avro::decode(d, v.moreFrag);
@@ -1616,6 +1606,8 @@ template<> struct codec_traits<Layer2::dot11_Header> {
 template<> struct codec_traits<Layer2::dot11_Unsupported> {
     static void encode(Encoder& e, const Layer2::dot11_Unsupported& v) {
         avro::encode(e, v.header);
+        avro::encode(e, v.type);
+        avro::encode(e, v.subtype);
     }
     static void decode(Decoder& d, Layer2::dot11_Unsupported& v) {
         if (avro::ResolvingDecoder *rd =
@@ -1627,12 +1619,20 @@ template<> struct codec_traits<Layer2::dot11_Unsupported> {
                 case 0:
                     avro::decode(d, v.header);
                     break;
+                case 1:
+                    avro::decode(d, v.type);
+                    break;
+                case 2:
+                    avro::decode(d, v.subtype);
+                    break;
                 default:
                     break;
                 }
             }
         } else {
             avro::decode(d, v.header);
+            avro::decode(d, v.type);
+            avro::decode(d, v.subtype);
         }
     }
 };
