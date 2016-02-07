@@ -33,3 +33,8 @@ $ export LD_LIBRARY_PATH="$(pwd)/etc/deps/libtins/build/lib:$(pwd)/etc/deps/avro
 
 Note the last step required to find the libraries at runtime (alternatively you
 could install both dependencies globally).
+
+
+## Documentation
+
++ [API](https://github.com/mtth/layer2/wiki/API)

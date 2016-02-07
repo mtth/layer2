@@ -37,12 +37,12 @@ public:
   BufferOutputStream(uint8_t *data, size_t len, float loadFactor) :
     _data(data),
     _len(len),
-    _hwm(len * loadFactor),
+    _hwm(len *loadFactor),
     _pos(0) {};
 
   ~BufferOutputStream() {};
 
-  virtual bool next(uint8_t** data, size_t* len) {
+  virtual bool next(uint8_t **data, size_t *len) {
     if (_pos < _hwm) {
       *data = _data + _pos;
       *len = _hwm - _pos;
